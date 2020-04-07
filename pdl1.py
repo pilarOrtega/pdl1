@@ -4,8 +4,14 @@ import numpy
 from matplotlib import pyplot as plt
 import pysliderois.tissue as tissue
 
-slidefile1 = "/Users/pilarortega/Desktop/STAGE_ONCOPOLE/slides/NVA_RC.PDL1.V1_18T040165.2B.4963.PDL1.mrxs"
-slide1 = OpenSlide(slidefile1)
+def get_patches(slidepath, outpath, level = 10):
+    """
+    Function that divides the slide in slidepath into level_tiles
+
+    Arguments:
+        - slidepath: str, path to the image to patchify
+        - outpath: str, path to the resulting patches
+        - level: int, level in which image is patchified
 
 image1 = slide1.read_region((0,0), 7, slide1.level_dimensions[7])
 image1 = numpy.array(image1)[:, :, 0:3]
@@ -28,7 +34,7 @@ try:
   print("Directory", PATH, "created")
 except FileExistsError:
   print("Directory", PATH, "already exists")
-  
+
 tiles = deepzoom1.level_tiles[level]
 n=0
 for i in range(tiles[0]):
