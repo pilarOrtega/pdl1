@@ -7,6 +7,8 @@ import sys
 
 def get_patches(slidepath, outpath, level = 10):
     """
+    Function that divides the slide in slidepath into level_tiles
+    
     Arguments:
         - slidepath: str, path to the image to patchify
         - outpath: str, path to the resulting patches
