@@ -2,7 +2,13 @@ import os
 from openslide import OpenSlide, deepzoom
 import numpy
 from matplotlib import pyplot as plt
-import pysliderois.tissue as tissue
+import Pysiderois_Arnaud.pysliderois.tissue as tissue
+import sys
+import cv2
+from PythonSIFT import pysift
+import glob
+from skimage.io import sift
+from sklearn.cluster import MiniBatchKMeans
 
 def get_patches(slidepath, outpath, level = 10):
     """
@@ -35,17 +41,43 @@ def get_patches(slidepath, outpath, level = 10):
       for j in range(tiles[1]):
         tile = slide_dz.get_tile(level,(i,j))
         tile_path = PATH + '/{}_slide1_level{}_{}_{}.jpg'.format(n,level,i,j)
-        tile_bw = tile.convert(mode='L')
-        tile_bw = numpy.array(tile_bw)
-        x = tile_bw.mean()
-        if x < 250:
-          tile.save(tile_path)
-          n = n + 1
-          if n%20 == 0:
-              sys.stdout.write(n)
+        image = numpy.array(tile)[..., :3]
+        mask = tissue.get_tissue_from_rgb(image)
+        if mask.sum() > 0.25 * tile.size[0] * tile.size[1]:
+            tile.save(tile_path)
+            n = n + 1
+            if n%20 == 0:
+              sys.stdout.write(str(n)+" ")
+              sys.stdout.flush()
     print('Total of {} tiles in level {}'.format(n,level))
     return n, PATH
 
+def get_features(image_path, total):
+    n=0
+    des_list = []
+    image_path = image_path + '/*.jpg'
+    print('Obtaining SIFT features from images in ' + image_path + '...')
+    for im in glob.glob(image_path):
+        image = cv2.imread(im, 0)
+        n = n + 1
+        keypoints, descriptors = pysift.computeKeypointsAndDescriptors(image)
+        print('Features obtained from image '+ str(n)+ ' of ' + str(total))
+        des_list.append((im, descriptors))
+        if n%20 == 0:
+          sys.stdout.write(str(n)+" ")
+          sys.stdout.flush()
+    # Stack all the descriptors vertically in a numpy array
+    descriptors = des_list[0][1]
+    for im, descriptor in des_list[1:]:
+        descriptors = np.vstack((descriptors, descriptor))  # Stacking the descriptors
+    return descriptors
+
+
 slidefile1 = "/Users/pilarortega/Desktop/STAGE_ONCOPOLE/slides/NVA_RC.PDL1.V1_18T040165.2B.4963.PDL1.mrxs"
 outpath = "/Users/pilarortega/Desktop/STAGE_ONCOPOLE/patches"
-n = get_patches(slidefile1, outpath, 15)
+n, outpath = get_patches(slidefile1, outpath, 13)
+print("Tiles are saved in " + outpath)
+lista = get_features(outpath, n)
+print("Features obtained. Proceding to KMeans clustering...")
+k = 100
+kmeans = MiniBatchKMeans(n_clusters=k)
