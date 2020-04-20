@@ -24,23 +24,28 @@ level = 15
 path = "/content/drive/My Drive/Slide1/level_{}/".format(level)
 print('Obtaining dense features from images in ' + path + '...')
 
-def get_hist_of_feat(path, nclusters):
+def get_hist_of_feat(path, nclusters, method = 'Dense'):
 
     kmeans = MiniBatchKMeans(n_clusters = nclusters)
     #This for loop passes the window "patch_shape" to extract individual 8x8x3 patches all along the tiles.
     #The extracted patches are used to fit the kmeans classifier
     patch_shape = (8, 8, 3)
     image_path = path + "*.jpg"
-    for im in tqdm(glob.glob(image_path)):
-        image = imread(im)
-        image = numpy.asarray(image)
-        image = image.astype(float)
-        patches = view_as_windows(image, patch_shape)
-        plines = patches.shape[0]
-        pcols = patches.shape[1]
-        patches_reshaped = patches.reshape(plines, pcols, patch_shape[0] * patch_shape[1] * patch_shape[2])
-        patches_reshaped = patches_reshaped.reshape(plines * pcols, patch_shape[0] * patch_shape[1] * patch_shape[2])
-        kmeans.partial_fit(patches_reshaped)
+
+    if method == 'Dense':
+        for im in tqdm(glob.glob(image_path)):
+            image = imread(im)
+            image = numpy.asarray(image)
+            image = image.astype(float)
+            patches = view_as_windows(image, patch_shape)
+            plines = patches.shape[0]
+            pcols = patches.shape[1]
+            patches_reshaped = patches.reshape(plines, pcols, patch_shape[0] * patch_shape[1] * patch_shape[2])
+            patches_reshaped = patches_reshaped.reshape(plines * pcols, patch_shape[0] * patch_shape[1] * patch_shape[2])
+            kmeans.partial_fit(patches_reshaped)
+
+    if method == 'Daisy':
+        
 
     #This loop gets again the features of each tile and gets a list of the histograms of each individual tile
     features = []
@@ -58,7 +63,6 @@ def get_hist_of_feat(path, nclusters):
         features.append(histogram[0])
 
     return features
-
 
 def image_cluster(features, path, images_paths):
     """
