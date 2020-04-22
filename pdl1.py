@@ -22,6 +22,22 @@ from skimage.color import rgb2grey
 from skimage.feature import daisy
 import detect_dab
 import pickle
+import csv
+
+# Importing Keras libraries
+from keras.utils import np_utils
+from keras.applications import VGG16
+from keras.applications import imagenet_utils
+
+######################## THINGS TO IMPROVE ####################################
+# Save path, not images
+# Display preview clusters
+# Improve feature extraction Dense and Daisy
+# Try different clustering methods (Kmeans, DBSCAN)
+# Try different feature extraction method
+# Better screen display
+# Results
+
 
 ###############################################################################
 #
@@ -49,7 +65,7 @@ def get_patches(slidepath, outpath, level = 10, tissue_ratio = 0.25, size = 256)
     #Opens the slide with OpenSlide
     slide = OpenSlide(slidepath)
     slide_dz = deepzoom.DeepZoomGenerator(slide, tile_size = (size - 2), overlap = 1)
-    PATH = outpath + "/level_{}".format(level)
+    PATH = os.path.join(outpath, "level_{}".format(level))
 
     #Makes directory to store the patches
     try:
@@ -72,29 +88,26 @@ def get_patches(slidepath, outpath, level = 10, tissue_ratio = 0.25, size = 256)
     for i in tqdm(range(tiles[0])):
       for j in range(tiles[1]):
         tile = slide_dz.get_tile(level,(i,j))
-        tile_path = PATH + '/{}_slide1_level{}_{}_{}.jpg'.format(n,level,i,j)
+        tile_path = os.path.join(PATH, '{}_slide1_level{}_{}_{}.jpg'.format(n,level,i,j))
         image = numpy.array(tile)[..., :3]
         mask = tissue.get_tissue_from_rgb(image)
         if mask.sum() > tissue_ratio * tile.size[0] * tile.size[1]:
             tile.save(tile_path)
             n = n + 1
     print('Total of {} tiles in level {}'.format(n,level))
+
     return n, PATH
 
-def get_features_SIFT(image_path, total):
+def get_features_SIFT(path, total):
     n=0
     des_list = []
-    image_path = image_path + '/*.jpg'
-    print('Obtaining SIFT features from images in ' + image_path + '...')
+    image_path = os.path.join(path, '*.jpg')
+    print('Obtaining SIFT features from images in ' + path + '...')
     for im in tqdm(glob.glob(image_path)):
         image = cv2.imread(im, 0)
         n = n + 1
         keypoints, descriptors = pysift.computeKeypointsAndDescriptors(image)
-        #print('Features obtained from image '+ str(n)+ ' of ' + str(total))
         des_list.append((im, descriptors))
-        #if n%20 == 0:
-          #sys.stdout.write(str(n)+" ")
-          #sys.stdout.flush()
     # Stack all the descriptors vertically in a numpy array
     descriptors = des_list[0][1]
     for im, descriptor in des_list[1:]:
@@ -115,13 +128,14 @@ def get_features(path, nclusters = 256, method = 'Dense'):
     kmeans = MiniBatchKMeans(n_clusters = nclusters)
     #This for loop passes the window "patch_shape" to extract individual 8x8x3 patches all along the tiles.
     #The extracted patches are used to fit the kmeans classifier
-    image_path = path + "/*.jpg"
+    image_path = os.path.join(path, "*.jpg")
     features = []
-    image_list = []
+    #image_list = []
 
     if method == 'Dense':
         print('Extracting dense features from images in '+ path)
         patch_shape = (8, 8, 3)
+
         for im in tqdm(glob.glob(image_path)):
             image = imread(im)
             image = numpy.asarray(image)
@@ -145,12 +159,12 @@ def get_features(path, nclusters = 256, method = 'Dense'):
             patches_reshaped = patches_reshaped.reshape(plines * pcols, patch_shape[0] * patch_shape[1] * patch_shape[2])
             result = kmeans.predict(patches_reshaped)
             histogram = numpy.histogram(result, bins = nclusters - 1)
-            #features.append((im[len(path):], histogram[0]))
-            features.append(histogram[0])
-            image_list.append(im[len(path):])
+            features.append((os.path.basename(im), histogram[0]))
+            #features.append(histogram[0])
+            #image_list.append(im[len(path):])
 
-        #return features
-        return features, image_list
+        return features
+        #return features, image_list
 
     elif method == 'Daisy':
         print('Extracting Daisy features from images in '+ path)
@@ -181,32 +195,59 @@ def get_features(path, nclusters = 256, method = 'Dense'):
             daisyzy_reshaped = daisyzy.reshape(p * q, r)
             result = kmeans.predict(daisyzy_reshaped)
             histogram = numpy.histogram(result, bins = nclusters - 1)
-            features.append(histogram[0])
-            image_list.append(im[len(path):])
+            features.append((os.path.basename(im), histogram[0]))
+            #features.append(histogram[0])
+            #image_list.append(im[len(path):])
 
-        return features, image_list
+        return features
 
     else:
         print('Method not valid')
         return
 
+def get_features_CNN(path, model = 'VGG16'):
+
+    if model == 'VGG16':
+        print('Loading network...')
+        model = VGG16(weights = 'imagenet', include_top = False)
+        model.summary()
+
+        batch = []
+        for im in tqdm(glob.glob(image_path)):
+            image = imread(im)
+            image = numpy.asarray(image)
+            image = imagenet_utils.preprocess_input(image)
+            batch.append(image)
+            image_list.append(os.path.basename(im))
+
+        batch = numpy.array(batch)
+        features = model.predict(batch, batch_size=32)
+        features_flatten = features.reshape((features.shape[0], features.shape[1] * features.shape[2] * features.shape[3]))
+
+        return features_flatten, image_list
+
 def divide_dab(path, positive, negative):
-    for im in tqdm(glob.glob(path + '/*.jpg')):
+
+    image_path = os.path.join(path, "*.jpg")
+
+    for im in tqdm(glob.glob(image_path):
         image = imread(im)
         if detect_dab.detect_dab(image):
-            im_name = positive + im[len(path):]
+            im_name = os.path.join(positive, os.path.basename(im))
             imsave(im_name, image)
         else:
-            im_name = negative + im[len(path):]
+            im_name = os.path.join(negative, os.path.basename(im))
+            #im_name = negative + im[len(path):]
             imsave(im_name, image)
     print('Division in path '+ path + ' completed.')
 
-def image_cluster(features, path, image_list, method = 'Kmeans'):
+def image_cluster(features, path, method = 'Kmeans'):
     """
     features: array, size nxm
     path: str, address to save the images
     images_paths: list, len n
     """
+    features, image_list = feature_list_division(features)
 
     if method == 'Kmeans':
         cls = MiniBatchKMeans(n_clusters=2)
@@ -216,7 +257,7 @@ def image_cluster(features, path, image_list, method = 'Kmeans'):
         print('Method not valid')
 
     #Cluster_1
-    path_1 = path + "/1"
+    path_1 = os.path.join(path, "1")
     try:
         os.mkdir(path_1)
         print("Directory", path_1, "created")
@@ -224,7 +265,7 @@ def image_cluster(features, path, image_list, method = 'Kmeans'):
         print("Directory", path_1, "already exists")
 
     #Cluster_0
-    path_0 = path + "/0"
+    path_0 = os.path.join(path, "0")
     try:
         os.mkdir(path_0)
         print("Directory", path_0, "created")
@@ -232,28 +273,77 @@ def image_cluster(features, path, image_list, method = 'Kmeans'):
         print("Directory", path_0, "already exists")
 
     features_1 = []
-    list_1 = []
+    #list_1 = []
     features_0 = []
-    list_0 = []
+    #list_0 = []
 
-    images_paths = glob.glob(path + '/*.jpg')
-    for im in tqdm(images_paths):
+    images_path = os.path.join(path, '*.jpg')
+
+    for im in tqdm(glob.glob(images_path):
         #Gets the index of the image
-        index = image_list.index(im[len(path):])
+        image_name = os.path.basename(im)
+        index = image_list.index(image_name)
         image = imread(im)
         if labels[index] == 1:
-            tile_path = path_1 + im[len(path):]
+            tile_path = os.path.join(path_1, image_name)
             imsave(tile_path, image)
-            features_1.append(features[index])
-            list_1.append(im[len(path):])
+            features_1.append(image_name, features[index]))
+            #features_1.append(features[index])
+            #list_1.append(im[len(path):])
         if labels[index] == 0:
-            tile_path = path_0 + im[len(path):]
+            tile_path = os.path.join(path_0, image_name)
             imsave(tile_path, image)
-            features_0.append(features[index])
-            list_0.append(im[len(path):])
+            features_0.append(image_name, features[index]))
+            #features_0.append(features[index])
+            #list_0.append(im[len(path):])
 
-    return features_1, features_0, list_1, list_0, path_1, path_0
+    #Save image_list to .txt file
+    # with open(path_0 + '/image_list.p', 'wb') as f:
+    #     pickle.dump(list_0, f)
+    # with open(path_1 + '/image_list.p', 'wb') as f:
+    #     pickle.dump(list_1, f)
+    #
+    # with open(path_0 + '/image_list.txt', "w") as output:
+    #     output.write(str(list_0))
+    # with open(path_1 + '/image_list.txt', "w") as output:
+    #     output.write(str(list_1))
 
+    return features_1, features_0, path_1, path_0
+
+def feature_list_division(list_features):
+    """
+    Gets a list with elements ('image_name', 'array of features') and returns a
+    numpy array with the features and a separate list with the image_names
+    """
+
+    features = []
+    image_list = []
+    for i in range(len(list_features)):
+        image_list.append(list_features[i][0])
+        features.append(list_features[i][1])
+    features = numpy.array(features)
+
+    return features, image_list
+
+def write_in_csv(images, features = ''):
+
+    folder = os.path.basename(images) + '.csv'
+    csv_file_path = os.path.join(images, folder)
+    csv_columns = ["Slidename"]
+    csv_columns.append('Number')
+    csv_columns.append('X')
+    csv_columns.append('Y')
+
+    with open(csv_file_path, 'w') as csv_file:
+        writer = csv.DictWriter(csv_file, csv_columns)
+        writer.writeheader()
+        image_paths = os.path.join(images, '*.jpg')
+        for im in glob.glob(image_paths):
+            image = os.path.basename(im)
+            data = image.split('.')[0]
+            data = data.split('_')
+            row = {'Slidename': data[1], 'Number': data[0], 'X': data[3], 'Y': data[4]}
+            writer.writerow(row)
 ###############################################################################
 #
 # MAIN
@@ -293,8 +383,8 @@ if __name__ == "__main__":
         if args.flag == 1:
             outpath = args.path_1
         #Classifies patches between presence or not
-        positive = outpath + "/positive"
-        negative = outpath + "/negative"
+        positive = os.path.join(outpath, "positive")
+        negative = os.path.join(outpath, "negative")
         try:
             os.mkdir(positive)
             print("Directory", positive, "created")
@@ -315,14 +405,24 @@ if __name__ == "__main__":
         ### Quizá sea mejor dejar features y imagelist como una lista de dos columnas
         if args.flag == 2:
             positive = args.positive
-        features, image_list = get_features(positive, nclusters = 256, method = args.feature_method)
-        feat_file = positive + '/features.txt'
-        il_file = positive + '/image_list.txt'
+
+        if args.feature_method == 'Dense':
+            features = get_features(positive, nclusters = 256, method = args.feature_method)
+
+        if args.feature_method == 'Daisy':
+            features = get_features(positive, nclusters = 256, method = args.feature_method)
+
+        if args.feature_method == 'CNN':
+            features = get_features_CNN(positive)
+
+        #feat, imag_list = feature_list_division(features)
+        feat_file = os.path.join(positive, 'features.txt')
+        #il_file = os.path.join(positive, 'image_list.txt')
         with open(feat_file, "wb") as f:
             pickle.dump(features, f)
 
-        with open(il_file, "wb") as f:
-            pickle.dump(image_list, f)
+        #with open(il_file, "wb") as f:
+        #    pickle.dump(image_list, f)
 
         flag == 3
 
@@ -331,40 +431,27 @@ if __name__ == "__main__":
             with open(args.feat_file, "rb") as f:
                 features = pickle.load(f)
 
-            with open(args.il_file, "rb") as f:
-                image_list = pickle.load(f)
+            #with open(args.il_file, "rb") as f:
+            #    image_list = pickle.load(f)
 
             print('Features and image_list loaded')
             positive = args.positive
 
-        features = numpy.array(features)
+        #features = numpy.array(features)
 
         param = []
-        param.append((features, positive, image_list))
+        param.append((features, positive))
         n = args.n_division
         k = 0
 
         for i in range(n):
-            for j in tqdm(range(2**i)):
+            for j in range(2**i):
                 index = j + 2**i - 1
                 features = param[index][0]
                 path = param[index][1]
-                list = param[index][2]
-                f1, f0, l1, l0, p1, p0 = image_cluster(features, path, list)
-                param.append((f1, p1, l1))
-                param.append((f0, p0, l0))
+                #list = param[index][2]
+                f1, f0, p1, p0 = image_cluster(features, path)
+                param.append((f1, p1))
+                param.append((f0, p0))
                 print('Folder '+ path + ' succesfully divided into ' + p1 + ' and ' + p0)
-
-        # f1 = numpy.array(f1)
-        # f0 = numpy.array(f0)
-        # f11, f10, l11, l10, p11, p10 = image_cluster(f1, p1, l1)
-        # f01, f00, l01, l00, p01, p00 = image_cluster(f0, p0, l0)
-        #
-        # f11 = numpy.array(f11)
-        # f10 = numpy.array(f10)
-        # f01 = numpy.array(f01)
-        # f00 = numpy.array(f00)
-        # f111, f110, l111, l110, p111, p110 = image_cluster(f11, p11, l11)
-        # f101, f100, l101, l100, p101, p100 = image_cluster(f10, p10, l10)
-        # f011, f010, l011, l010, p011, p010 = image_cluster(f01, p01, l01)
-        # f001, f000, l001, l000, p001, p000 = image_cluster(f00, p00, l00)
+                print()
