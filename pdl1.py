@@ -422,6 +422,7 @@ if __name__ == "__main__":
             writer.writeheader()
             for im in final_imag_list:
                 index = final_imag_list.index(im)
+                im = os.path.basename(im)
                 data = im.split('.')[0]
                 data = data.split('_')
                 row = {'Slidename': data[1],'Number': data[0],'X': data[3],'Y': data[4]}
