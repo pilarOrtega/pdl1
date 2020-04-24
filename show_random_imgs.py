@@ -12,11 +12,15 @@ def show_random_imgs(images, x, y, figsize = (10, 10)):
     im = glob.glob(image_paths)
     print('Number of images ' + str(len(im)))
     ax = axes.ravel()
-    for i in range(n):
-        k = randint(0,len(im)-1)
-        image = imread(im[k])
-        ax[i].imshow(image)
-        #ax[i].set_title(os.path.basename(im[k]).split('_')[0], fontsize = 'xx-small')
+    if len(im) <= n:
+        for i in range(len(im)):
+            image = imread(im[i])
+            ax[i].imshow(image)
+    else:
+        for i in range(n):
+            k = randint(0,len(im)-1)
+            image = imread(im[k])
+            ax[i].imshow(image)
     fig.tight_layout()
     plt.show()
 
