@@ -23,6 +23,7 @@ from skimage.feature import daisy
 import detect_dab
 import pickle
 import csv
+import class_to_cluster
 
 # Importing Keras libraries
 from keras.utils import np_utils
@@ -30,7 +31,7 @@ from keras.applications import VGG16
 from keras.applications import imagenet_utils
 
 ######################## THINGS TO IMPROVE ####################################
-# Save path, not images
+# Save path, not images V
 # Display preview clusters
 # Improve feature extraction Dense and Daisy
 # Try different clustering methods (Kmeans, DBSCAN)
@@ -304,8 +305,8 @@ if __name__ == "__main__":
 
     #Manage parameters
     parser = argparse.ArgumentParser(description='Script that divides a WSI in individual patches and classifies the resulting tiles in similarity groups. PRUEBA CSV')
-    parser.add_argument('-S', '--Slide', type = str, required = True, help = 'path to slide')
-    parser.add_argument('--outpath', type = str, required = True, help = 'path to outfolder')
+    parser.add_argument('-S', '--Slide', type = str, help = 'path to slide')
+    parser.add_argument('--outpath', type = str, help = 'path to outfolder')
     parser.add_argument('-n', '--n_division', type = int, default = 4, help = 'number of divisions [Default: %(default)s]')
     parser.add_argument('-l', '--level', type = int, default = 13,  help = 'division level of slide [Default: %(default)s]')
     parser.add_argument('--tissue_ratio', type = float, default = 0.25, help = 'tissue ratio per patch [Default: %(default)s]')
@@ -314,7 +315,6 @@ if __name__ == "__main__":
     parser.add_argument('--flag', type = int, default = 0, help = 'step of the process, from 1 to 5')
     group_f1 = parser.add_argument_group('Flag 1')
     group_f1.add_argument('-p', '--path_1', type = str, help = 'path to the folder with the patches')
-    #group_f1.add_argument('-pos', '--path_pos', type = str, metavar = '', help = 'path to positive folder')
     group_f2 = parser.add_argument_group('Flag 2')
     group_f2.add_argument('--positive', type = str, help = 'path to positives')
     group_f3 = parser.add_argument_group('Flag 3')
@@ -373,10 +373,10 @@ if __name__ == "__main__":
 
         param = []
         param.append(features)
-        n = args.n_division
+        n_division = args.n_division
         k = 0
 
-        for i in range(n):
+        for i in range(n_division):
             n_level = i + 2
             for j in range(2**i):
                 index = j + 2**i - 1
@@ -432,18 +432,25 @@ if __name__ == "__main__":
 
 
         #Save images to clusters
-        #Cluster_names
         clusters = os.path.join(outpath, 'clusters')
+        outpath_images = os.path.join(outpath, '*.jpg')
         try:
             os.mkdir(clusters)
             print("Directory", clusters, "created")
         except FileExistsError:
             print("Directory", clusters, "already exists")
 
-        for i in range(2**n):
+        for i in range(2**n_division):
             dir = os.path.join(clusters, '{}'.format(i))
             try:
                 os.mkdir(dir)
                 print('Directory', dir, 'created')
             except FileExistsError:
                 print('Directory', dir, 'already exists')
+            list_ref_images = class_to_cluster.class_to_cluster(classifier, n_division, i)
+            list_images = glob.glob(outpath_images)
+            for im_ref in list_ref_images:
+                image_name = os.path.basename(list_images[im_ref])
+                image = imread(list_images[im_ref])
+                image_path = os.path.join(dir, image_name)
+                imsave(image_path, image)
