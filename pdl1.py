@@ -303,6 +303,18 @@ def feature_list_division(list_features):
 
     return features, image_list
 
+
+def pickle_save(file, path, name):
+    file_path = os.path.join(path, name)
+    with open(file_path, "wb") as f:
+        pickle.dump(file, f)
+
+
+def pickle_load(file_name):
+    with open(file_name, "rb") as f:
+        file = pickle.load(f)
+    return file
+
 ###############################################################################
 #
 # MAIN
@@ -320,14 +332,13 @@ if __name__ == "__main__":
     parser.add_argument('-l', '--level', type=int, default=13,  help='division level of slide [Default: %(default)s]')
     parser.add_argument('--tissue_ratio', type=float, default=0.25, help='tissue ratio per patch [Default: %(default)s]')
     parser.add_argument('--tile_size', type=int, default=256, help='tile heigth and width in pixels [Default: %(default)s]')
-    parser.add_argument('-f', '--feature_method', type=str, default='Dense', help='features extracted from individual patches [Default: %(default)s]')
+    parser.add_argument('--feature_method', type=str, default='Dense', help='features extracted from individual patches [Default: %(default)s]')
     parser.add_argument('--flag', type=int, default=0, help='step of the process, from 1 to 5')
     group_f1 = parser.add_argument_group('Flag 1')
-    group_f1.add_argument('-p', '--path_1', type=str, help='path to the folder with the patches')
+    group_f1.add_argument('--path_1', type=str, help='path to the folder with the patches')
     group_f2 = parser.add_argument_group('Flag 2')
-    group_f2.add_argument('--positive',
-                          type=str,
-                          help='path to positives')
+    group_f2.add_argument('--list_positive', type=str, help='path to list_positive.p')
+    group_f2.add_argument('--classifier', type=str, help='path to classifier.p')
     group_f3 = parser.add_argument_group('Flag 3')
     group_f3.add_argument('--feat_file', type=str, help='path to feat_file.txt')
 
@@ -350,14 +361,17 @@ if __name__ == "__main__":
         classifier = numpy.zeros((n, n_columns))
         classifier = classifier.astype(int)
         classifier, list_positive, list_negative = divide_dab(outpath, classifier)
-
         flag = 2
 
-    if flag < 3:
-        # Extract features from positive images
+        pickle_save(classifier, outpath, 'classifier.p')
+        pickle_save(list_positive, outpath, 'list_positive.p')
 
+    if flag < 3:
         if args.flag == 2:
-            positive = args.positive
+            classifier = pickle_load(args.classifier)
+            list_postive = pickle_load(args.list_positive)
+
+        # Extract features from positive images
 
         if args.feature_method == 'Dense':
             features = get_features(list_positive, nclusters=256, method=args.feature_method)
@@ -368,19 +382,14 @@ if __name__ == "__main__":
         if args.feature_method == 'CNN':
             features = get_features_CNN(list_positive)
 
-        feat_file = os.path.join(outpath, 'features.txt')
-
-        with open(feat_file, "wb") as f:
-            pickle.dump(features, f)
+        pickle_save(features, outpath, 'features.txt')
 
         flag == 3
 
     if flag < 4:
         if args.flag == 3:
-            with open(args.feat_file, "rb") as f:
-                features = pickle.load(f)
-
-            print('Features and image_list loaded')
+            features = pickle_load(args.feat_file)
+            classifier = pickle_load(args.classifier)
 
         param = []
         param.append(features)
@@ -398,6 +407,8 @@ if __name__ == "__main__":
                 number_divisions = 2**i
                 print('Division completed - division {} out of {} in level {}'.format(j, number_divisions, i))
                 print()
+
+        pickle_save(classifier, outpath, 'classifier.p')
 
         # Save to csvfile
 
