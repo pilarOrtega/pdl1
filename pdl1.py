@@ -30,7 +30,8 @@ from keras.utils import np_utils
 from keras.applications import VGG16
 from keras.applications import imagenet_utils
 
-######################## THINGS TO IMPROVE ####################################
+###############################################################################
+# THINGS TO IMPROVE #
 # Save path, not images V
 # Display preview clusters
 # Improve feature extraction Dense and Daisy
@@ -38,7 +39,7 @@ from keras.applications import imagenet_utils
 # Try different feature extraction method
 # Better screen display
 # Results
-
+###############################################################################
 
 ###############################################################################
 #
@@ -46,7 +47,8 @@ from keras.applications import imagenet_utils
 #
 ###############################################################################
 
-def get_patches(slidepath, outpath, level = 10, tissue_ratio = 0.25, size = 256):
+
+def get_patches(slidepath, outpath, level=10, tissue_ratio=0.25, size=256):
     """
     Function that divides a slide into patches with different resolution
 
@@ -63,19 +65,19 @@ def get_patches(slidepath, outpath, level = 10, tissue_ratio = 0.25, size = 256)
 
     """
 
-    #Opens the slide with OpenSlide
+    # Opens the slide with OpenSlide
     slide = OpenSlide(slidepath)
-    slide_dz = deepzoom.DeepZoomGenerator(slide, tile_size = (size - 2), overlap = 1)
+    slide_dz = deepzoom.DeepZoomGenerator(slide, tile_size=(size - 2), overlap=1)
     PATH = os.path.join(outpath, "level_{}".format(level))
 
-    #Makes directory to store the patches
+    # Makes directory to store the patches
     try:
         os.mkdir(PATH)
         print("Directory", PATH, "created")
     except FileExistsError:
         print("Directory", PATH, "already exists")
 
-    #Asures that the chosen level is valid
+    # Asures that the chosen level is valid
     if level < slide_dz.level_count:
         tiles = slide_dz.level_tiles[level]
         print('Level {} : {} tiles (empty tiles included)'.format(level, slide_dz.level_tiles[level][0]*slide_dz.level_tiles[level][1]))
@@ -84,25 +86,26 @@ def get_patches(slidepath, outpath, level = 10, tissue_ratio = 0.25, size = 256)
         print('Invalid level')
         return
 
-    #Saves tiles if detects tissue presence higher than tissue_ratio
-    n=0
-    print("Saving tiles image "+ slidepath + "...")
+    # Saves tiles if detects tissue presence higher than tissue_ratio
+    n = 0
+    print("Saving tiles image " + slidepath + "...")
     for i in tqdm(range(tiles[0])):
-      for j in range(tiles[1]):
-        tile = slide_dz.get_tile(level,(i,j))
-        tile_path = os.path.join(PATH, '{}_slide1_level{}_{}_{}.jpg'.format(n,level,i,j))
-        image = numpy.array(tile)[..., :3]
-        mask = tissue.get_tissue_from_rgb(image)
-        if mask.sum() > tissue_ratio * tile.size[0] * tile.size[1]:
-            tile.save(tile_path)
-            n = n + 1
-    print('Total of {} tiles in level {}'.format(n,level))
+        for j in range(tiles[1]):
+            tile = slide_dz.get_tile(level, (i, j))
+            tile_path = os.path.join(PATH, '{}_slide1_level{}_{}_{}.jpg'.format(n, level, i, j))
+            image = numpy.array(tile)[..., :3]
+            mask = tissue.get_tissue_from_rgb(image)
+            if mask.sum() > tissue_ratio * tile.size[0] * tile.size[1]:
+                tile.save(tile_path)
+                n = n + 1
+    print('Total of {} tiles in level {}'.format(n, level))
     print()
 
     return n, PATH
 
+
 def get_features_SIFT(path, total):
-    n=0
+    n = 0
     des_list = []
     image_path = os.path.join(path, '*.jpg')
     print('Obtaining SIFT features from images in ' + path + '...')
@@ -117,7 +120,8 @@ def get_features_SIFT(path, total):
         descriptors = np.vstack((descriptors, descriptor))  # Stacking the descriptors
     return descriptors
 
-def get_features(image_list, nclusters = 256, method = 'Dense'):
+
+def get_features(image_list, nclusters=256, method='Dense'):
 
     """
     Gets the histogram of features of the given set of images. It obtains the
@@ -128,12 +132,12 @@ def get_features(image_list, nclusters = 256, method = 'Dense'):
         - nclusters: int, number of visual words in which the features are clustered
         - method: str, Dense or Daisy
     """
-    kmeans = MiniBatchKMeans(n_clusters = nclusters)
-    #This for loop passes the window "patch_shape" to extract individual 8x8x3 patches all along the tiles.
-    #The extracted patches are used to fit the kmeans classifier
+    kmeans = MiniBatchKMeans(n_clusters=nclusters)
+    # This for loop passes the window "patch_shape" to extract individual 8x8x3 patches all along the tiles.
+    # The extracted patches are used to fit the kmeans classifier
     features = []
     image_list_path = os.path.dirname(image_list[0])
-    print('Extracting dense features from images in '+ image_list_path)
+    print('Extracting dense features from images in ' + image_list_path)
 
     if method == 'Dense':
         patch_shape = (8, 8, 3)
@@ -149,7 +153,7 @@ def get_features(image_list, nclusters = 256, method = 'Dense'):
             patches_reshaped = patches_reshaped.reshape(plines * pcols, patch_shape[0] * patch_shape[1] * patch_shape[2])
             kmeans.partial_fit(patches_reshaped)
 
-        #This loop gets again the features of each tile and gets a list of the histograms of each individual tile
+        # This loop gets again the features of each tile and gets a list of the histograms of each individual tile
         for im in tqdm(image_list):
             image = imread(im)
             image = numpy.asarray(image)
@@ -160,7 +164,7 @@ def get_features(image_list, nclusters = 256, method = 'Dense'):
             patches_reshaped = patches.reshape(plines, pcols, patch_shape[0] * patch_shape[1] * patch_shape[2])
             patches_reshaped = patches_reshaped.reshape(plines * pcols, patch_shape[0] * patch_shape[1] * patch_shape[2])
             result = kmeans.predict(patches_reshaped)
-            histogram = numpy.histogram(result, bins = nclusters - 1)
+            histogram = numpy.histogram(result, bins=nclusters - 1)
             features.append((im, histogram[0]))
 
         return features
@@ -192,7 +196,7 @@ def get_features(image_list, nclusters = 256, method = 'Dense'):
             r = daisyzy.shape[2]
             daisyzy_reshaped = daisyzy.reshape(p * q, r)
             result = kmeans.predict(daisyzy_reshaped)
-            histogram = numpy.histogram(result, bins = nclusters - 1)
+            histogram = numpy.histogram(result, bins=nclusters - 1)
             features.append((im, histogram[0]))
 
         return features
@@ -201,11 +205,12 @@ def get_features(image_list, nclusters = 256, method = 'Dense'):
         print('Method not valid')
         return
 
-def get_features_CNN(image_list, model = 'VGG16'):
+
+def get_features_CNN(image_list, model='VGG16'):
 
     if model == 'VGG16':
         print('Loading network...')
-        model = VGG16(weights = 'imagenet', include_top = False)
+        model = VGG16(weights='imagenet', include_top=False)
         model.summary()
 
         batch = []
@@ -224,6 +229,7 @@ def get_features_CNN(image_list, model = 'VGG16'):
             features.append(os.path.basename(image_list[i]), features_flatten[i])
 
         return features
+
 
 def divide_dab(path, classifier):
 
@@ -245,11 +251,12 @@ def divide_dab(path, classifier):
             classifier[number][1] = 0
             image_negative.append(im)
 
-    print('Division in path '+ path + ' completed.')
+    print('Division in path ' + path + ' completed.')
 
     return classifier, image_positive, image_negative
 
-def image_cluster(features, classifier, n, method = 'Kmeans'):
+
+def image_cluster(features, classifier, n, method='Kmeans'):
     """
     """
     features, image_list = feature_list_division(features)
@@ -265,7 +272,7 @@ def image_cluster(features, classifier, n, method = 'Kmeans'):
     features_0 = []
 
     for im in tqdm(image_list):
-        #Gets the index of the image
+        # Gets the index of the image
         index = image_list.index(im)
         image_name = os.path.basename(im)
         number = image_name.split('_')
@@ -279,6 +286,7 @@ def image_cluster(features, classifier, n, method = 'Kmeans'):
             features_0.append((im, features[index]))
 
     return classifier, features_1, features_0
+
 
 def feature_list_division(list_features):
     """
@@ -301,29 +309,32 @@ def feature_list_division(list_features):
 #
 ###############################################################################
 
+
 if __name__ == "__main__":
 
-    #Manage parameters
+    # Manage parameters
     parser = argparse.ArgumentParser(description='Script that divides a WSI in individual patches and classifies the resulting tiles in similarity groups. PRUEBA CSV')
-    parser.add_argument('-S', '--Slide', type = str, help = 'path to slide')
-    parser.add_argument('--outpath', type = str, help = 'path to outfolder')
-    parser.add_argument('-n', '--n_division', type = int, default = 4, help = 'number of divisions [Default: %(default)s]')
-    parser.add_argument('-l', '--level', type = int, default = 13,  help = 'division level of slide [Default: %(default)s]')
-    parser.add_argument('--tissue_ratio', type = float, default = 0.25, help = 'tissue ratio per patch [Default: %(default)s]')
-    parser.add_argument('--tile_size', type = int, default = 256, help = 'tile heigth and width in pixels [Default: %(default)s]')
-    parser.add_argument('-f', '--feature_method', type = str, default = 'Dense', help = 'features extracted from individual patches [Default: %(default)s]')
-    parser.add_argument('--flag', type = int, default = 0, help = 'step of the process, from 1 to 5')
+    parser.add_argument('-S', '--Slide', type=str, help='path to slide')
+    parser.add_argument('--outpath', type=str, help='path to outfolder')
+    parser.add_argument('-n', '--n_division', type=int, default=4, help='number of divisions [Default: %(default)s]')
+    parser.add_argument('-l', '--level', type=int, default=13,  help='division level of slide [Default: %(default)s]')
+    parser.add_argument('--tissue_ratio', type=float, default=0.25, help='tissue ratio per patch [Default: %(default)s]')
+    parser.add_argument('--tile_size', type=int, default=256, help='tile heigth and width in pixels [Default: %(default)s]')
+    parser.add_argument('-f', '--feature_method', type=str, default='Dense', help='features extracted from individual patches [Default: %(default)s]')
+    parser.add_argument('--flag', type=int, default=0, help='step of the process, from 1 to 5')
     group_f1 = parser.add_argument_group('Flag 1')
-    group_f1.add_argument('-p', '--path_1', type = str, help = 'path to the folder with the patches')
+    group_f1.add_argument('-p', '--path_1', type=str, help='path to the folder with the patches')
     group_f2 = parser.add_argument_group('Flag 2')
-    group_f2.add_argument('--positive', type = str, help = 'path to positives')
+    group_f2.add_argument('--positive',
+                          type=str,
+                          help='path to positives')
     group_f3 = parser.add_argument_group('Flag 3')
-    group_f3.add_argument('--feat_file', type = str, help = 'path to feat_file.txt')
+    group_f3.add_argument('--feat_file', type=str, help='path to feat_file.txt')
 
     args = parser.parse_args()
 
     flag = args.flag
-    #Gets patches from initial slide
+    # Gets patches from initial slide
     if flag < 1:
         n, outpath = get_patches(args.Slide, args.outpath, args.level, args.tissue_ratio, args.tile_size)
         flag = 1
@@ -343,16 +354,16 @@ if __name__ == "__main__":
         flag = 2
 
     if flag < 3:
-        #Extract features from positive images
+        # Extract features from positive images
 
         if args.flag == 2:
             positive = args.positive
 
         if args.feature_method == 'Dense':
-            features = get_features(list_positive, nclusters = 256, method = args.feature_method)
+            features = get_features(list_positive, nclusters=256, method=args.feature_method)
 
         if args.feature_method == 'Daisy':
-            features = get_features(list_positive, nclusters = 256, method = args.feature_method)
+            features = get_features(list_positive, nclusters=256, method=args.feature_method)
 
         if args.feature_method == 'CNN':
             features = get_features_CNN(list_positive)
@@ -388,7 +399,7 @@ if __name__ == "__main__":
                 print('Division completed - division {} out of {} in level {}'.format(j, number_divisions, i))
                 print()
 
-        #Save to csvfile
+        # Save to csvfile
 
         csv_cluster = 'cluster_division.csv'
         csv_features = 'features.csv'
@@ -403,7 +414,7 @@ if __name__ == "__main__":
             writer.writeheader()
             for i in range(classifier.shape[0]):
                 row = {'Slide_number': classifier[i][0], 'Positive': classifier[i][1]}
-                for j in range(args.n_division) :
+                for j in range(args.n_division):
                     row["Level_{}".format(j)] = classifier[i][j+2]
                 writer.writerow(row)
 
@@ -425,13 +436,12 @@ if __name__ == "__main__":
                 im = os.path.basename(im)
                 data = im.split('.')[0]
                 data = data.split('_')
-                row = {'Slidename': data[1],'Number': data[0],'X': data[3],'Y': data[4]}
+                row = {'Slidename': data[1], 'Number': data[0], 'X': data[3], 'Y': data[4]}
                 for i in range(shape_feat[1]):
                     row['feature_{}'.format(i)] = final_feat[index][i]
                 writer.writerow(row)
 
-
-        #Save images to clusters
+        # Save images to clusters
         clusters = os.path.join(outpath, 'clusters')
         outpath_images = os.path.join(outpath, '*.jpg')
         try:
