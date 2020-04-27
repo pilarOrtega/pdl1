@@ -117,7 +117,7 @@ def get_features_SIFT(path, total):
     # Stack all the descriptors vertically in a numpy array
     descriptors = des_list[0][1]
     for im, descriptor in des_list[1:]:
-        descriptors = np.vstack((descriptors, descriptor))  # Stacking the descriptors
+        descriptors = numpy.vstack((descriptors, descriptor))  # Stacking the descriptors
     return descriptors
 
 
