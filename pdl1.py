@@ -341,6 +341,30 @@ def pickle_load(file_name):
         file = pickle.load(f)
     return file
 
+
+def save_cluster_folder(outpath, classifier, n_division):
+    clusters = os.path.join(outpath, 'clusters')
+    outpath_images = os.path.join(outpath, '*.jpg')
+    try:
+        os.mkdir(clusters)
+        print("Directory", clusters, "created")
+    except FileExistsError:
+        print("Directory", clusters, "already exists")
+
+    for i in range(2**n_division):
+        dir = os.path.join(clusters, '{}'.format(i))
+        try:
+            os.mkdir(dir)
+            print('Directory', dir, 'created')
+        except FileExistsError:
+            print('Directory', dir, 'already exists')
+        list_ref_images = class_to_cluster.class_to_cluster(classifier, n_division, i)
+        list_images = glob.glob(outpath_images)
+        for im_ref in list_ref_images:
+            image_name = os.path.basename(list_images[im_ref])
+            image = imread(list_images[im_ref])
+            image_path = os.path.join(dir, image_name)
+            imsave(image_path, image)
 ###############################################################################
 #
 # MAIN
@@ -396,6 +420,7 @@ if __name__ == "__main__":
         if args.flag == 2:
             classifier = pickle_load(args.classifier)
             list_postive = pickle_load(args.list_positive)
+            outpath = args.outpath
 
         # Extract features from positive images
 
@@ -416,6 +441,7 @@ if __name__ == "__main__":
         if args.flag == 3:
             features = pickle_load(args.feat_file)
             classifier = pickle_load(args.classifier)
+            outpath = args.outpath
 
         param = []
         param.append(features)
@@ -479,25 +505,4 @@ if __name__ == "__main__":
                 writer.writerow(row)
 
         # Save images to clusters
-        clusters = os.path.join(outpath, 'clusters')
-        outpath_images = os.path.join(outpath, '*.jpg')
-        try:
-            os.mkdir(clusters)
-            print("Directory", clusters, "created")
-        except FileExistsError:
-            print("Directory", clusters, "already exists")
-
-        for i in range(2**n_division):
-            dir = os.path.join(clusters, '{}'.format(i))
-            try:
-                os.mkdir(dir)
-                print('Directory', dir, 'created')
-            except FileExistsError:
-                print('Directory', dir, 'already exists')
-            list_ref_images = class_to_cluster.class_to_cluster(classifier, n_division, i)
-            list_images = glob.glob(outpath_images)
-            for im_ref in list_ref_images:
-                image_name = os.path.basename(list_images[im_ref])
-                image = imread(list_images[im_ref])
-                image_path = os.path.join(dir, image_name)
-                imsave(image_path, image)
+        save_cluster_folder(outpath, classifier, n_division)
