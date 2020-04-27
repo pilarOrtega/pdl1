@@ -58,6 +58,7 @@ def get_patches(slidepath, outpath, level=10, tissue_ratio=0.25, size=256):
         - level: int, level in which image is patchified. The bigger the level,
           the higher the number of patches and the resolution of the images.
         - tissue_ratio: float, minimum surface of tissue tile to be considered
+        - size: int, side number of pixels (n pixels size*size)
 
     Returns:
         - n: int, number of patches
@@ -128,9 +129,12 @@ def get_features(image_list, nclusters=256, method='Dense'):
     features by means of a KMeans clustering algorithm.
 
     Arguments:
-        - path: str, address to the folder with the images
+        - image_list: list, image set
         - nclusters: int, number of visual words in which the features are clustered
         - method: str, Dense or Daisy
+
+    Returns:
+        - features: list, contains tuples with image path + histogram of features
     """
     kmeans = MiniBatchKMeans(n_clusters=nclusters)
     # This for loop passes the window "patch_shape" to extract individual 8x8x3 patches all along the tiles.
@@ -207,7 +211,16 @@ def get_features(image_list, nclusters=256, method='Dense'):
 
 
 def get_features_CNN(image_list, model='VGG16'):
+    """
+    Extracts image features using CNN
 
+    Arguments:
+        - image_list: list, image set
+        - model: str, VGG16 or Xception
+
+    Returns:
+        - features: list, contains tuples with image path + histogram of features
+    """
     if model == 'VGG16':
         print('Loading network...')
         model = VGG16(weights='imagenet', include_top=False)
@@ -232,6 +245,17 @@ def get_features_CNN(image_list, model='VGG16'):
 
 
 def divide_dab(path, classifier):
+    """
+    Divides set of images according to the presence of DAB staining
+
+    Arguments:
+        - path: str, path to image folder
+        - classifier: int arr
+
+    Returns:
+        - classifier: int arr
+        - image_positive, image_negative: list
+    """
 
     image_path = os.path.join(path, "*.jpg")
     image_path = glob.glob(image_path)
@@ -260,6 +284,11 @@ def image_cluster(features, classifier, n, method='Kmeans'):
     """
     """
     features, image_list = feature_list_division(features)
+    features_1 = []
+    features_0 = []
+
+    if len(image_list) < 2:
+        return classifier, features_1, features_0
 
     if method == 'Kmeans':
         cls = MiniBatchKMeans(n_clusters=2)
@@ -267,9 +296,6 @@ def image_cluster(features, classifier, n, method='Kmeans'):
 
     else:
         print('Method not valid')
-
-    features_1 = []
-    features_0 = []
 
     for im in tqdm(image_list):
         # Gets the index of the image
