@@ -1,7 +1,6 @@
 __author__ = 'Pilar Ortega Arevalo'
 __copyright__ = 'Copyright (C) 2019 IUCT-O'
 __license__ = 'GNU General Public License'
-__version__ = '1.2.1'
 __status__ = 'prod'
 
 import os
@@ -24,6 +23,7 @@ import detect_dab
 import pickle
 import csv
 import class_to_cluster
+import itertools
 
 # Importing Keras libraries
 from keras.utils import np_utils
@@ -32,9 +32,7 @@ from keras.applications import imagenet_utils
 
 ###############################################################################
 # THINGS TO IMPROVE #
-# Save path, not images V
 # Display preview clusters
-# Improve feature extraction Dense and Daisy
 # Try different clustering methods (Kmeans, DBSCAN)
 # Try different feature extraction method
 # Better screen display
@@ -62,21 +60,15 @@ def get_patches(slidepath, outpath, level=10, tissue_ratio=0.25, size=256):
 
     Returns:
         - n: int, number of patches
-        - outpath: str, folder in which the patches are stored
-
+        - outpath
     """
 
     # Opens the slide with OpenSlide
     slide = OpenSlide(slidepath)
     slide_dz = deepzoom.DeepZoomGenerator(slide, tile_size=(size - 2), overlap=1)
-    PATH = os.path.join(outpath, "level_{}".format(level))
-
-    # Makes directory to store the patches
-    try:
-        os.mkdir(PATH)
-        print("Directory", PATH, "created")
-    except FileExistsError:
-        print("Directory", PATH, "already exists")
+    slidename = os.path.basename(slidepath)
+    slidenumber = slidename.split('.')
+    slidenumber = slidenumber[2]
 
     # Asures that the chosen level is valid
     if level < slide_dz.level_count:
@@ -87,22 +79,29 @@ def get_patches(slidepath, outpath, level=10, tissue_ratio=0.25, size=256):
         print('Invalid level')
         return
 
+    outpath = os.path.join(outpath, slidename)
+    try:
+        os.mkdir(outpath)
+        print("Directory", outpath, "created")
+    except FileExistsError:
+        print("Directory", outpath, "already exists")
+
     # Saves tiles if detects tissue presence higher than tissue_ratio
     n = 0
     print("Saving tiles image " + slidepath + "...")
     for i in tqdm(range(tiles[0])):
         for j in range(tiles[1]):
             tile = slide_dz.get_tile(level, (i, j))
-            tile_path = os.path.join(PATH, '{}_slide1_level{}_{}_{}.jpg'.format(n, level, i, j))
+            tile_path = os.path.join(outpath, '{}-{}-level{}-{}-{}.jpg'.format(slidenumber, n, level, i, j))
             image = numpy.array(tile)[..., :3]
             mask = tissue.get_tissue_from_rgb(image)
             if mask.sum() > tissue_ratio * tile.size[0] * tile.size[1]:
                 tile.save(tile_path)
                 n = n + 1
-    print('Total of {} tiles in level {}'.format(n, level))
+    print('Total of {} tiles in slide {}'.format(n, slidepath))
     print()
 
-    return n, PATH
+    return n, outpath
 
 
 def get_features_SIFT(path, total):
@@ -265,8 +264,8 @@ def divide_dab(path, classifier):
     for im in tqdm(image_path):
         image = imread(im)
         name = os.path.basename(im)
-        number = name.split('_')
-        number = int(number[0])
+        number = name.split('-')
+        number = int(number[1])
         classifier[number][0] = number
         if detect_dab.detect_dab(image):
             classifier[number][1] = 1
@@ -280,15 +279,18 @@ def divide_dab(path, classifier):
     return classifier, image_positive, image_negative
 
 
-def image_cluster(features, classifier, n, method='Kmeans'):
+def image_cluster(features, classifiers, n, method='Kmeans'):
     """
     """
     features, image_list = feature_list_division(features)
+    slide_list = []
+    for x in classifiers:
+        slide_list.append(x[0])
     features_1 = []
     features_0 = []
 
     if len(image_list) < 2:
-        return classifier, features_1, features_0
+        return classifiers, features_1, features_0
 
     if method == 'Kmeans':
         cls = MiniBatchKMeans(n_clusters=2)
@@ -301,17 +303,19 @@ def image_cluster(features, classifier, n, method='Kmeans'):
         # Gets the index of the image
         index = image_list.index(im)
         image_name = os.path.basename(im)
-        number = image_name.split('_')
-        number = int(number[0])
+        number = image_name.split('-')
+        number = int(number[1])
         image = imread(im)
+        slide_path = os.path.dirname(im)
+        index_slide = slide_list.index(os.path.basename(slide_path))
         if labels[index] == 1:
-            classifier[number][n] = 1
+            classifiers[index_slide][2][number][n] = 1
             features_1.append((im, features[index]))
         if labels[index] == 0:
-            classifier[number][n] = 0
+            classifiers[index_slide][2][number][n] = 0
             features_0.append((im, features[index]))
 
-    return classifier, features_1, features_0
+    return classifiers, features_1, features_0
 
 
 def feature_list_division(list_features):
@@ -362,9 +366,11 @@ def save_cluster_folder(outpath, classifier, n_division):
         dir_list.append(dir)
 
     cluster_list = []
+    print()
+    print('Saving images into clusters...')
     for im in tqdm(glob.glob(outpath_images)):
         image_name = os.path.basename(im)
-        number = image_name.split('_')
+        number = image_name.split('-')
         number = int(number[0])
 
         if classifier[number][1] == 0:
@@ -394,7 +400,7 @@ if __name__ == "__main__":
     # Manage parameters
     parser = argparse.ArgumentParser(description='Script that divides a WSI in individual patches and classifies the resulting tiles in similarity groups. PRUEBA CSV')
     parser.add_argument('-S', '--Slide', type=str, help='path to slide')
-    parser.add_argument('--outpath', type=str, help='path to outfolder')
+    parser.add_argument('--outpath', type=str, required='True', help='path to outfolder')
     parser.add_argument('-n', '--n_division', type=int, default=4, help='number of divisions [Default: %(default)s]')
     parser.add_argument('-l', '--level', type=int, default=13,  help='division level of slide [Default: %(default)s]')
     parser.add_argument('--tissue_ratio', type=float, default=0.25, help='tissue ratio per patch [Default: %(default)s]')
@@ -412,30 +418,51 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     flag = args.flag
+    outpath = args.outpath
+    try:
+        os.mkdir(outpath)
+        print("Directory", outpath, "created")
+    except FileExistsError:
+        print("Directory", outpath, "already exists")
+
     # Gets patches from initial slide
     if flag < 1:
-        n, outpath = get_patches(args.Slide, args.outpath, args.level, args.tissue_ratio, args.tile_size)
+        slides = args.Slide
+        slides = os.path.join(slides, '*.mrxs')
+        level = args.level
+
+        n_columns = args.n_division + 2
+        classifiers = []
+        paths_slides = []
+        n = 0
+        for s in glob.glob(slides):
+            n_s, outpath_slide = get_patches(s, outpath, level, args.tissue_ratio, args.tile_size)
+            classifier = numpy.zeros((n_s, n_columns))
+            classifier = classifier.astype(int)
+            classifiers.append((os.path.basename(s), outpath_slide, classifier))
+            n = n + n_s
+
+        pickle_save(classifiers, outpath, 'classifier.p')
+
         flag = 1
 
     if flag < 2:
         if args.flag == 1:
-            outpath = args.path_1
-            outpath_images = os.path.join(outpath, '*.jpg')
-            n = len(glob.glob(outpath_images))
+            classifiers = pickle_load(args.classifier)
 
-        n_columns = args.n_division + 2
-        print('Number of columns: {}. Number of rows: {}'.format(n_columns, n))
-        classifier = numpy.zeros((n, n_columns))
-        classifier = classifier.astype(int)
-        classifier, list_positive, list_negative = divide_dab(outpath, classifier)
+        list_positive = []
+        for i in range(len(classifiers)):
+            classifier, list_positive_x, list_negative_x = divide_dab(classifiers[i][1], classifiers[i][2])
+            classifiers[i] = (classifiers[i][0], classifiers[i][1], classifier)
+            list_positive += list_positive_x
         flag = 2
 
-        pickle_save(classifier, outpath, 'classifier.p')
+        pickle_save(classifiers, outpath, 'classifier.p')
         pickle_save(list_positive, outpath, 'list_positive.p')
 
     if flag < 3:
         if args.flag == 2:
-            classifier = pickle_load(args.classifier)
+            classifiers = pickle_load(args.classifier)
             list_postive = pickle_load(args.list_positive)
             outpath = args.outpath
 
@@ -450,14 +477,14 @@ if __name__ == "__main__":
         if args.feature_method == 'CNN':
             features = get_features_CNN(list_positive)
 
-        pickle_save(features, outpath, 'features.txt')
+        pickle_save(features, outpath, 'features.p')
 
         flag == 3
 
     if flag < 4:
         if args.flag == 3:
             features = pickle_load(args.feat_file)
-            classifier = pickle_load(args.classifier)
+            classifiers = pickle_load(args.classifier)
             outpath = args.outpath
 
         param = []
@@ -470,33 +497,35 @@ if __name__ == "__main__":
             for j in range(2**i):
                 index = j + 2**i - 1
                 curr_features = param[index]
-                classifier, f1, f0 = image_cluster(curr_features, classifier, n_level)
+                classifiers, f1, f0 = image_cluster(curr_features, classifiers, n_level)
                 param.append(f1)
                 param.append(f0)
                 number_divisions = 2**i
                 print('Division completed - division {} out of {} in level {}'.format(j, number_divisions, i))
                 print()
 
-        pickle_save(classifier, outpath, 'classifier.p')
+        pickle_save(classifiers, outpath, 'classifiers.p')
 
         # Save to csvfile
 
-        csv_cluster = 'cluster_division.csv'
-        csv_features = 'features.csv'
-        csv_file_path_cluster = os.path.join(outpath, csv_cluster)
-        csv_columns = ["Slide_number"]
-        csv_columns.append('Positive')
-        for i in range(args.n_division):
-            csv_columns.append('Level_{}'.format(i))
+        for x in classifiers:
+            csv_cluster = 'cluster_division_{}.csv'.format(x[0])
+            classifier = x[2]
+            csv_features = 'features.csv'
+            csv_file_path_cluster = os.path.join(outpath, csv_cluster)
+            csv_columns = ["Patch_number"]
+            csv_columns.append('Positive')
+            for i in range(args.n_division):
+                csv_columns.append('Level_{}'.format(i))
 
-        with open(csv_file_path_cluster, 'w') as csv_file:
-            writer = csv.DictWriter(csv_file, csv_columns)
-            writer.writeheader()
-            for i in range(classifier.shape[0]):
-                row = {'Slide_number': classifier[i][0], 'Positive': classifier[i][1]}
-                for j in range(args.n_division):
-                    row["Level_{}".format(j)] = classifier[i][j+2]
-                writer.writerow(row)
+            with open(csv_file_path_cluster, 'w') as csv_file:
+                writer = csv.DictWriter(csv_file, csv_columns)
+                writer.writeheader()
+                for i in range(classifier.shape[0]):
+                    row = {'Patch_number': classifier[i][0], 'Positive': classifier[i][1]}
+                    for j in range(args.n_division):
+                        row["Level_{}".format(j)] = classifier[i][j+2]
+                    writer.writerow(row)
 
         csv_file_path_features = os.path.join(outpath, csv_features)
         final_feat, final_imag_list = feature_list_division(features)
@@ -515,11 +544,11 @@ if __name__ == "__main__":
                 index = final_imag_list.index(im)
                 im = os.path.basename(im)
                 data = im.split('.')[0]
-                data = data.split('_')
-                row = {'Slidename': data[1], 'Number': data[0], 'X': data[3], 'Y': data[4]}
+                data = data.split('-')
+                row = {'Slidename': data[0], 'Number': data[1], 'X': data[3], 'Y': data[4]}
                 for i in range(shape_feat[1]):
                     row['feature_{}'.format(i)] = final_feat[index][i]
                 writer.writerow(row)
 
         # Save images to clusters
-        save_cluster_folder(outpath, classifier, n_division)
+        #save_cluster_folder(outpath, classifier, n_division)
