@@ -351,6 +351,7 @@ def save_cluster_folder(outpath, classifier, n_division):
     except FileExistsError:
         print("Directory", clusters, "already exists")
 
+    dir_list = []
     for i in range(2**n_division):
         dir = os.path.join(clusters, '{}'.format(i))
         try:
@@ -358,13 +359,29 @@ def save_cluster_folder(outpath, classifier, n_division):
             print('Directory', dir, 'created')
         except FileExistsError:
             print('Directory', dir, 'already exists')
-        list_ref_images = class_to_cluster.class_to_cluster(classifier, n_division, i)
-        list_images = glob.glob(outpath_images)
-        for im_ref in list_ref_images:
-            image_name = os.path.basename(list_images[im_ref])
-            image = imread(list_images[im_ref])
-            image_path = os.path.join(dir, image_name)
-            imsave(image_path, image)
+        dir_list.append(dir)
+
+    cluster_list = []
+    for im in tqdm(glob.glob(outpath_images)):
+        image_name = os.path.basename(im)
+        number = image_name.split('_')
+        number = int(number[0])
+
+        if classifier[number][1] == 0:
+            continue
+
+        cluster = 0
+        for j in range(n_division):
+            exp = n_division - j - 1
+            cluster = cluster + classifier[number][j+2] * (2**exp)
+        cluster_list.append((im, cluster))
+
+    for x in cluster_list:
+        index = x[1]
+        image_name = os.path.basename(x[0])
+        image = imread(x[0])
+        image_path = os.path.join(dir_list[index], image_name)
+        imsave(image_path, image)
 ###############################################################################
 #
 # MAIN
