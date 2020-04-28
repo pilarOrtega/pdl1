@@ -27,7 +27,7 @@ import itertools
 
 # Importing Keras libraries
 from keras.utils import np_utils
-from keras.applications import VGG16
+from keras.applications import VGG16, Xception
 from keras.applications import imagenet_utils
 
 ###############################################################################
@@ -225,22 +225,27 @@ def get_features_CNN(image_list, model='VGG16'):
         model = VGG16(weights='imagenet', include_top=False)
         model.summary()
 
-        batch = []
-        for im in tqdm(image_list):
-            image = imread(im)
-            image = numpy.asarray(image)
-            image = imagenet_utils.preprocess_input(image)
-            batch.append(image)
+    if model == 'Xception':
+        print('Loading network...')
+        model = Xception(weights='imagenet', include_top=False)
+        model.summary()
 
-        batch = numpy.array(batch)
-        features = model.predict(batch, batch_size=32)
-        features_flatten = features.reshape((features.shape[0], features.shape[1] * features.shape[2] * features.shape[3]))
+    batch = []
+    for im in tqdm(image_list):
+        image = imread(im)
+        image = numpy.asarray(image)
+        image = imagenet_utils.preprocess_input(image)
+        batch.append(image)
 
-        features = []
-        for i in range(len(features_flatten)):
-            features.append(os.path.basename(image_list[i]), features_flatten[i])
+    batch = numpy.array(batch)
+    features = model.predict(batch, batch_size=32)
+    features_flatten = features.reshape((features.shape[0], features.shape[1] * features.shape[2] * features.shape[3]))
 
-        return features
+    features = []
+    for i in range(len(features_flatten)):
+        features.append(os.path.basename(image_list[i]), features_flatten[i])
+
+    return features
 
 
 def divide_dab(path, classifier):
@@ -356,7 +361,7 @@ def pickle_load(file_name):
 if __name__ == "__main__":
 
     # Manage parameters
-    parser = argparse.ArgumentParser(description='Script that divides a WSI in individual patches and classifies the resulting tiles in similarity groups. PRUEBA CSV')
+    parser = argparse.ArgumentParser(description='Script that divides a WSI in individual patches and classifies the resulting tiles in similarity groups.')
     parser.add_argument('-S', '--Slide', type=str, help='path to slide')
     parser.add_argument('--outpath', type=str, required='True', help='path to outfolder')
     parser.add_argument('-n', '--n_division', type=int, default=4, help='number of divisions [Default: %(default)s]')
@@ -377,6 +382,14 @@ if __name__ == "__main__":
 
     flag = args.flag
     outpath = args.outpath
+    feature_method = args.feature_method
+    tile_size = args.tile_size
+
+    if feature_method == 'VGG16':
+        tile_size = 224
+    if feature_method == 'Xception':
+        tile_size = 299
+
     try:
         os.mkdir(outpath)
         print("Directory", outpath, "created")
@@ -394,7 +407,7 @@ if __name__ == "__main__":
         paths_slides = []
         n = 0
         for s in glob.glob(slides):
-            n_s, outpath_slide = get_patches(s, outpath, level, args.tissue_ratio, args.tile_size)
+            n_s, outpath_slide = get_patches(s, outpath, level, args.tissue_ratio, tile_size)
             classifier = numpy.zeros((n_s, n_columns))
             classifier = classifier.astype(int)
             classifiers.append((os.path.basename(s), outpath_slide, classifier))
@@ -426,14 +439,11 @@ if __name__ == "__main__":
 
         # Extract features from positive images
 
-        if args.feature_method == 'Dense':
-            features = get_features(list_positive, nclusters=256, method=args.feature_method)
+        if feature_method == 'Dense' or feature_method == 'Daisy':
+            features = get_features(list_positive, nclusters=256, method=feature_method)
 
-        if args.feature_method == 'Daisy':
-            features = get_features(list_positive, nclusters=256, method=args.feature_method)
-
-        if args.feature_method == 'CNN':
-            features = get_features_CNN(list_positive)
+        if feature_method == 'VGG16' or feature_method == 'Xception':
+            features = get_features_CNN(list_positive, method=feature_method)
 
         pickle_save(features, outpath, 'features.p')
 
