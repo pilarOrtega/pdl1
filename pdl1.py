@@ -346,48 +346,6 @@ def pickle_load(file_name):
     return file
 
 
-def save_cluster_folder(outpath, classifier, n_division):
-    clusters = os.path.join(outpath, 'clusters')
-    outpath_images = os.path.join(outpath, '*.jpg')
-    try:
-        os.mkdir(clusters)
-        print("Directory", clusters, "created")
-    except FileExistsError:
-        print("Directory", clusters, "already exists")
-
-    dir_list = []
-    for i in range(2**n_division):
-        dir = os.path.join(clusters, '{}'.format(i))
-        try:
-            os.mkdir(dir)
-            print('Directory', dir, 'created')
-        except FileExistsError:
-            print('Directory', dir, 'already exists')
-        dir_list.append(dir)
-
-    cluster_list = []
-    print()
-    print('Saving images into clusters...')
-    for im in tqdm(glob.glob(outpath_images)):
-        image_name = os.path.basename(im)
-        number = image_name.split('-')
-        number = int(number[0])
-
-        if classifier[number][1] == 0:
-            continue
-
-        cluster = 0
-        for j in range(n_division):
-            exp = n_division - j - 1
-            cluster = cluster + classifier[number][j+2] * (2**exp)
-        cluster_list.append((im, cluster))
-
-    for x in cluster_list:
-        index = x[1]
-        image_name = os.path.basename(x[0])
-        image = imread(x[0])
-        image_path = os.path.join(dir_list[index], image_name)
-        imsave(image_path, image)
 ###############################################################################
 #
 # MAIN
@@ -501,13 +459,12 @@ if __name__ == "__main__":
                 param.append(f1)
                 param.append(f0)
                 number_divisions = 2**i
-                print('Division completed - division {} out of {} in level {}'.format(j, number_divisions, i))
+                print('Division completed - division {} out of {} in level {}'.format(j+1, number_divisions, i))
                 print()
 
         pickle_save(classifiers, outpath, 'classifiers.p')
 
         # Save to csvfile
-
         for x in classifiers:
             csv_cluster = 'cluster_division_{}.csv'.format(x[0])
             classifier = x[2]
@@ -551,4 +508,4 @@ if __name__ == "__main__":
                 writer.writerow(row)
 
         # Save images to clusters
-        #save_cluster_folder(outpath, classifier, n_division)
+        class_to_cluster.save_cluster_folder(outpath, classifier, n_division)
