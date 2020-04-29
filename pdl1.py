@@ -140,7 +140,7 @@ def get_features(image_list, nclusters=256, method='Dense'):
     # The extracted patches are used to fit the kmeans classifier
     features = []
     image_list_path = os.path.dirname(image_list[0])
-    print('Extracting dense features from images in ' + image_list_path)
+    print('Extracting features ({} method) from images in '.format(method) + image_list_path)
 
     if method == 'Dense':
         patch_shape = (8, 8, 3)
@@ -348,6 +348,7 @@ def pickle_save(file, path, name):
 def pickle_load(file_name):
     with open(file_name, "rb") as f:
         file = pickle.load(f)
+        print('Document ' + file_name + ' correctly loaded')
     return file
 
 
@@ -413,7 +414,7 @@ if __name__ == "__main__":
             classifiers.append((os.path.basename(s), outpath_slide, classifier))
             n = n + n_s
 
-        pickle_save(classifiers, outpath, 'classifier.p')
+        pickle_save(classifiers, outpath, 'classifiers.p')
 
         flag = 1
 
@@ -428,26 +429,27 @@ if __name__ == "__main__":
             list_positive += list_positive_x
         flag = 2
 
-        pickle_save(classifiers, outpath, 'classifier.p')
+        pickle_save(classifiers, outpath, 'classifiers.p')
         pickle_save(list_positive, outpath, 'list_positive.p')
 
     if flag < 3:
         if args.flag == 2:
             classifiers = pickle_load(args.classifier)
-            list_postive = pickle_load(args.list_positive)
+            list_positive = pickle_load(args.list_positive)
             outpath = args.outpath
 
+        print(outpath)
         # Extract features from positive images
 
         if feature_method == 'Dense' or feature_method == 'Daisy':
             features = get_features(list_positive, nclusters=256, method=feature_method)
 
         if feature_method == 'VGG16' or feature_method == 'Xception':
-            features = get_features_CNN(list_positive, method=feature_method)
+            features = get_features_CNN(list_positive, model=feature_method)
 
         pickle_save(features, outpath, 'features.p')
 
-        flag == 3
+        flag = 3
 
     if flag < 4:
         if args.flag == 3:
@@ -476,7 +478,7 @@ if __name__ == "__main__":
 
         # Save to csvfile
         for x in classifiers:
-            csv_cluster = 'cluster_division_{}.csv'.format(x[0])
+            csv_cluster = 'clusterdivision-{}.csv'.format(x[0])
             classifier = x[2]
             csv_features = 'features.csv'
             csv_file_path_cluster = os.path.join(outpath, csv_cluster)
@@ -517,5 +519,7 @@ if __name__ == "__main__":
                     row['feature_{}'.format(i)] = final_feat[index][i]
                 writer.writerow(row)
 
-        # Save images to clusters
-        class_to_cluster.save_cluster_folder(outpath, classifier, n_division)
+        # Save images to cluster
+
+        for x in classifiers:
+            class_to_cluster.save_cluster_folder(x[1], x[2], n_division)
