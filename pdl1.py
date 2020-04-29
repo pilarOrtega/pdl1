@@ -231,6 +231,7 @@ def get_features_CNN(image_list, model='VGG16'):
         for im in tqdm(image_list):
             image = imread(im)
             image = numpy.asarray(image)
+            image = numpy.expand_dims(image, axis=0)
             image = imagenet_utils.preprocess_input(image)
             curr_feat = model.predict(image)
             curr_feat = curr_feat.flatten()
@@ -244,6 +245,7 @@ def get_features_CNN(image_list, model='VGG16'):
         for im in tqdm(image_list):
             image = imread(im)
             image = numpy.asarray(image)
+            image = numpy.expand_dims(image, axis=0)
             image = preprocess_input(image)
             curr_feat = model.predict(image)
             curr_feat = curr_feat.flatten()
