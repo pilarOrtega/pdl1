@@ -375,6 +375,7 @@ if __name__ == "__main__":
     parser.add_argument('--tile_size', type=int, default=256, help='tile heigth and width in pixels [Default: %(default)s]')
     parser.add_argument('--feature_method', type=str, default='Dense', help='features extracted from individual patches [Default: %(default)s]')
     parser.add_argument('--flag', type=int, default=0, help='step of the process, from 1 to 5')
+    parser.add_argument('--save_cluster', type=bool, default=False, help='Set to True when cluster division desired')
     group_f1 = parser.add_argument_group('Flag 1')
     group_f1.add_argument('--path_1', type=str, help='path to the folder with the patches')
     group_f2 = parser.add_argument_group('Flag 2')
@@ -524,6 +525,6 @@ if __name__ == "__main__":
                 writer.writerow(row)
 
         # Save images to cluster
-
-        for x in classifiers:
-            class_to_cluster.save_cluster_folder(x[1], x[2], n_division)
+        if args.save_cluster:
+            for x in classifiers:
+                class_to_cluster.save_cluster_folder(x[1], x[2], n_division)
