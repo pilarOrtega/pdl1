@@ -478,7 +478,7 @@ if __name__ == "__main__":
 
         # Save to csvfile
         for x in classifiers:
-            csv_cluster = 'clusterdivision-{}.csv'.format(x[0])
+            csv_cluster = '{}.csv'.format(x[0])
             classifier = x[2]
             csv_features = 'features.csv'
             csv_file_path_cluster = os.path.join(outpath, csv_cluster)
