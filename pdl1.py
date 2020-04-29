@@ -29,6 +29,8 @@ import itertools
 from keras.utils import np_utils
 from keras.applications import VGG16, Xception
 from keras.applications import imagenet_utils
+from keras.applications.xception import preprocess_input
+
 
 ###############################################################################
 # THINGS TO IMPROVE #
@@ -220,30 +222,32 @@ def get_features_CNN(image_list, model='VGG16'):
     Returns:
         - features: list, contains tuples with image path + histogram of features
     """
+    features = []
     if model == 'VGG16':
         print('Loading network...')
         model = VGG16(weights='imagenet', include_top=False)
         model.summary()
+
+        for im in tqdm(image_list):
+            image = imread(im)
+            image = numpy.asarray(image)
+            image = imagenet_utils.preprocess_input(image)
+            curr_feat = model.predict(image)
+            curr_feat = curr_feat.flatten()
+            features.append((im, curr_feat))
 
     if model == 'Xception':
         print('Loading network...')
         model = Xception(weights='imagenet', include_top=False)
         model.summary()
 
-    batch = []
-    for im in tqdm(image_list):
-        image = imread(im)
-        image = numpy.asarray(image)
-        image = imagenet_utils.preprocess_input(image)
-        batch.append(image)
-
-    batch = numpy.array(batch)
-    features = model.predict(batch, batch_size=32)
-    features_flatten = features.reshape((features.shape[0], features.shape[1] * features.shape[2] * features.shape[3]))
-
-    features = []
-    for i in range(len(features_flatten)):
-        features.append(os.path.basename(image_list[i]), features_flatten[i])
+        for im in tqdm(image_list):
+            image = imread(im)
+            image = numpy.asarray(image)
+            image = preprocess_input(image)
+            curr_feat = model.predict(image)
+            curr_feat = curr_feat.flatten()
+            features.append((im, curr_feat))
 
     return features
 
