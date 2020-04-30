@@ -22,7 +22,7 @@ from skimage.feature import daisy
 import detect_dab
 import pickle
 import csv
-import class_to_cluster
+import class_to_cluster as ctc
 import itertools
 
 # Importing Keras libraries
@@ -75,8 +75,7 @@ def get_patches(slidepath, outpath, level=10, tissue_ratio=0.25, size=256):
     # Asures that the chosen level is valid
     if level < slide_dz.level_count:
         tiles = slide_dz.level_tiles[level]
-        print('Level {} : {} tiles (empty tiles included)'.format(level, slide_dz.level_tiles[level][0]*slide_dz.level_tiles[level][1]))
-        print()
+        print('Level {} contains {} tiles (empty tiles included)'.format(level, slide_dz.level_tiles[level][0]*slide_dz.level_tiles[level][1]))
     else:
         print('Invalid level')
         return
@@ -100,7 +99,7 @@ def get_patches(slidepath, outpath, level=10, tissue_ratio=0.25, size=256):
             if mask.sum() > tissue_ratio * tile.size[0] * tile.size[1]:
                 tile.save(tile_path)
                 n = n + 1
-    print('Total of {} tiles in slide {}'.format(n, slidepath))
+    print('Total of {} tiles with tissue ratio >{} in slide {}'.format(n, tissue_ratio, slidepath))
     print()
 
     return n, outpath
@@ -142,11 +141,13 @@ def get_features(image_list, nclusters=256, method='Dense'):
     # The extracted patches are used to fit the kmeans classifier
     features = []
     image_list_path = os.path.dirname(image_list[0])
+    image_list_path = os.path.dirname(image_list_path)
     print('Extracting features ({} method) from images in '.format(method) + image_list_path)
 
     if method == 'Dense':
         patch_shape = (8, 8, 3)
 
+        print('Step 1: KMeans fitting')
         for im in tqdm(image_list):
             image = imread(im)
             image = numpy.asarray(image)
@@ -159,6 +160,7 @@ def get_features(image_list, nclusters=256, method='Dense'):
             kmeans.partial_fit(patches_reshaped)
 
         # This loop gets again the features of each tile and gets a list of the histograms of each individual tile
+        print('Step 2: Histogram of features extraction')
         for im in tqdm(image_list):
             image = imread(im)
             image = numpy.asarray(image)
@@ -172,6 +174,8 @@ def get_features(image_list, nclusters=256, method='Dense'):
             histogram = numpy.histogram(result, bins=nclusters - 1)
             features.append((im, histogram[0]))
 
+        print('Feature extraction completed')
+        print()
         return features
 
     elif method == 'Daisy':
@@ -180,6 +184,7 @@ def get_features(image_list, nclusters=256, method='Dense'):
         q = 0
         r = 0
         # extraction
+        print('Step 1: KMeans fitting')
         for im in tqdm(image_list):
             image = imread(im)
             image = numpy.asarray(rgb2grey(image))
@@ -191,6 +196,7 @@ def get_features(image_list, nclusters=256, method='Dense'):
             daisyzy_reshaped = daisyzy.reshape(p * q, r)
             kmeans.partial_fit(daisyzy_reshaped)
 
+        print('Step 2: Histogram of features extraction')
         for im in tqdm(image_list):
             image = imread(im)
             image = numpy.asarray(rgb2grey(image))
@@ -204,6 +210,8 @@ def get_features(image_list, nclusters=256, method='Dense'):
             histogram = numpy.histogram(result, bins=nclusters - 1)
             features.append((im, histogram[0]))
 
+        print('Feature extraction completed')
+        print()
         return features
 
     else:
@@ -286,6 +294,8 @@ def divide_dab(path, classifier):
             image_negative.append(im)
 
     print('Division in path ' + path + ' completed.')
+    print('Number of positive elements: {} out of {}'.format(len(image_positive), len(image_path)))
+    print()
 
     return classifier, image_positive, image_negative
 
@@ -355,6 +365,7 @@ def pickle_load(file_name):
     with open(file_name, "rb") as f:
         file = pickle.load(f)
         print('Document ' + file_name + ' correctly loaded')
+        print()
     return file
 
 
@@ -398,11 +409,17 @@ if __name__ == "__main__":
     if feature_method == 'Xception':
         tile_size = 299
 
+    print()
+    print('[INFO] Starting execution from step {}'.format(flag))
+    print()
+
     try:
         os.mkdir(outpath)
         print("Directory", outpath, "created")
+        print()
     except FileExistsError:
         print("Directory", outpath, "already exists")
+        print()
 
     # Gets patches from initial slide
     if flag < 1:
@@ -414,6 +431,7 @@ if __name__ == "__main__":
         classifiers = []
         n = 0
         for s in glob.glob(slides):
+            print('[INFO] Extracting patches from slide {}'.format(s))
             n_s, outpath_slide = get_patches(s, outpath, level, args.tissue_ratio, tile_size)
             classifier = numpy.zeros((n_s, n_columns))
             classifier = classifier.astype(int)
@@ -429,7 +447,9 @@ if __name__ == "__main__":
             classifiers = pickle_load(args.classifier)
 
         list_positive = []
+        print('[INFO] Extracting positive patches...')
         for i in range(len(classifiers)):
+            print('Getting positive patches from slide {} out of {}'.format(i, len(classifiers)-1))
             classifier, list_positive_x, list_negative_x = divide_dab(classifiers[i][1], classifiers[i][2])
             classifiers[i] = (classifiers[i][0], classifiers[i][1], classifier)
             list_positive += list_positive_x
@@ -444,9 +464,9 @@ if __name__ == "__main__":
             list_positive = pickle_load(args.list_positive)
             outpath = args.outpath
 
-        print(outpath)
-        # Extract features from positive images
+        print('[INFO] Extracting features from {} positive images'.format(len(list_positive)))
 
+        # Extract features from positive images
         if feature_method == 'Dense' or feature_method == 'Daisy':
             features = get_features(list_positive, nclusters=256, method=feature_method)
 
@@ -468,6 +488,9 @@ if __name__ == "__main__":
         n_division = args.n_division
         k = 0
 
+        print('[INFO] Dividing patches into clusters')
+        print('Total of {} images to be divided in {} clusters'.format(len(features), 2**n_division))
+        print()
         for i in range(n_division):
             n_level = i + 2
             for j in range(2**i):
@@ -478,15 +501,18 @@ if __name__ == "__main__":
                 param.append(f0)
                 number_divisions = 2**i
                 print('Division completed - division {} out of {} in level {}'.format(j+1, number_divisions, i))
+                print('    {} images in cluster {}'.format(len(f1), 1))
+                print('    {} images in cluster {}'.format(len(f0), 0))
                 print()
 
         pickle_save(classifiers, outpath, 'classifiers.p')
 
         # Save to csvfile
+        print('[INFO] Saving csv files...')
+        print()
         for x in classifiers:
             csv_cluster = '{}.csv'.format(x[0])
             classifier = x[2]
-            csv_features = 'features.csv'
             csv_file_path_cluster = os.path.join(outpath, csv_cluster)
             csv_columns = ["Patch_number"]
             csv_columns.append('Positive')
@@ -502,6 +528,7 @@ if __name__ == "__main__":
                         row["Level_{}".format(j)] = classifier[i][j+2]
                     writer.writerow(row)
 
+        csv_features = 'features.csv'
         csv_file_path_features = os.path.join(outpath, csv_features)
         final_feat, final_imag_list = feature_list_division(features)
         csv_columns = ["Slidename"]
@@ -517,8 +544,8 @@ if __name__ == "__main__":
             writer.writeheader()
             for im in final_imag_list:
                 index = final_imag_list.index(im)
-                im = os.path.basename(im)
-                data = im.split('.')[0]
+                im_name = os.path.basename(im)
+                data = os.path.splitext(im_name)[0]
                 data = data.split('-')
                 row = {'Slidename': data[0], 'Number': data[1], 'X': data[3], 'Y': data[4]}
                 for i in range(shape_feat[1]):
@@ -526,6 +553,24 @@ if __name__ == "__main__":
                 writer.writerow(row)
 
         # Save images to cluster
+        print('[INFO] Saving images into clusters...')
         if args.save_cluster:
             for x in classifiers:
-                class_to_cluster.save_cluster_folder(x[1], x[2], n_division)
+                cluster_list = ctc.get_clusterlist(x[1], x[2], n_division)
+                ctc.save_cluster_folder(x[1], cluster_list, n_division)
+                csv_file_cluster_list = os.path.join(x[1],'cluster_list.csv')
+                csv_columns = ["Slidename"]
+                csv_columns.append('Number')
+                csv_columns.append('X')
+                csv_columns.append('Y')
+                csv_columns.append('Cluster')
+                with open(csv_file_cluster_list, 'w') as csv_file:
+                    writer = csv.DictWriter(csv_file, csv_columns)
+                    writer.writeheader()
+                    for im in cluster_list:
+                        index = final_imag_list.index(im[0])
+                        im_name = os.path.basename(im[0])
+                        data = os.path.splitext(im_name)[0]
+                        data = data.split('-')
+                        row = {'Slidename': data[0], 'Number': data[1], 'X': data[3], 'Y': data[4], 'Cluster': im[1]}
+                        writer.writerow(row)
