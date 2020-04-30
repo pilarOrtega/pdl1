@@ -225,7 +225,7 @@ def get_features_CNN(image_list, model='VGG16'):
     features = []
     if model == 'VGG16':
         print('Loading network...')
-        model = VGG16(weights='imagenet', include_top=False)
+        model = VGG16(weights='imagenet', include_top=False, pooling='avg')
         model.summary()
 
         for im in tqdm(image_list):
@@ -239,7 +239,7 @@ def get_features_CNN(image_list, model='VGG16'):
 
     if model == 'Xception':
         print('Loading network...')
-        model = Xception(weights='imagenet', include_top=False)
+        model = Xception(weights='imagenet', include_top=False, pooling='avg')
         model.summary()
 
         for im in tqdm(image_list):
@@ -412,7 +412,6 @@ if __name__ == "__main__":
 
         n_columns = args.n_division + 2
         classifiers = []
-        paths_slides = []
         n = 0
         for s in glob.glob(slides):
             n_s, outpath_slide = get_patches(s, outpath, level, args.tissue_ratio, tile_size)
