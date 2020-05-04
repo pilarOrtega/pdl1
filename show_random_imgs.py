@@ -6,7 +6,7 @@ import argparse
 from skimage.io import sift, imread, imsave, imshow
 
 
-def show_random_imgs(images, x, y, figsize=(10, 10)):
+def show_random_imgs(images, x, y, figsize=(10, 10), save_fig=False, name=''):
     n = x * y
     fig, axes = plt.subplots(x, y, figsize=figsize, sharex=True, sharey=True)
     print('Number of images ' + str(len(images)))
@@ -25,6 +25,8 @@ def show_random_imgs(images, x, y, figsize=(10, 10)):
             ax[i].set_title(image_number)
     fig.tight_layout()
     plt.show()
+    if save_fig:
+        plt.savefig(name)
 
 
 if __name__ == "__main__":

@@ -135,4 +135,6 @@ if __name__ == "__main__":
                 for image in cluster_list:
                     if image[1] == i:
                         image_list.append(image[0])
-                sri.show_random_imgs(image_list, 2, 8, (7,6))
+                path = os.path.dirname(csv_files[0])
+                name = os.path.join(path, 'cluster_{}.png'.format(i))
+                sri.show_random_imgs(image_list, 2, 8, (7,6), save_fig=True, name=name)
