@@ -18,7 +18,7 @@ from sklearn.cluster import MiniBatchKMeans
 from sklearn.preprocessing import StandardScaler
 from tqdm import tqdm
 from skimage.util.shape import view_as_windows
-from skimage.color import rgb2grey
+from skimage.color import rgb2grey, rgb2hed
 from skimage.feature import daisy
 import detect_dab
 import pickle
@@ -179,7 +179,7 @@ def get_features(image_list, nclusters=256, method='Dense'):
         print()
         return features
 
-    elif method == 'Daisy':
+    elif method == 'Daisy' or method == 'Daisy_DAB':
         patch_shape = (8, 8)
         p = 0
         q = 0
@@ -188,7 +188,11 @@ def get_features(image_list, nclusters=256, method='Dense'):
         print('Step 1: KMeans fitting')
         for im in tqdm(image_list):
             image = imread(im)
-            image = numpy.asarray(rgb2grey(image))
+            if method == 'Daisy':
+                image = numpy.asarray(rgb2grey(image))
+            if method == 'Daisy_DAB':
+                image = numpy.asarray(rgb2hed(image))
+                image = image[:, :, 2]
             daisyzy = daisy(image, step=1, radius=8, rings=3)
             # daisy has shape P, Q, R
             p = daisyzy.shape[0]
