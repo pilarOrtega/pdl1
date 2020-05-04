@@ -11,7 +11,8 @@ from tqdm import tqdm
 from skimage.util.shape import view_as_windows
 from skimage.color import rgb2hed
 
-def detect_dab(image, thr = 225, freq = 3):
+
+def detect_dab(image, thr=225, freq=3):
     """
     Input: image in rgb
     """
@@ -22,7 +23,8 @@ def detect_dab(image, thr = 225, freq = 3):
         dab = True
     return dab
 
-def get_hist(image, mode = 'hed', channel = 2, min_val = -0.55, max_val = -0.2):
+
+def get_hist(image, mode='hed', channel=2, min_val=-0.55, max_val=-0.2):
 
     if mode == 'rgb':
         image = rgb2hed(image)
@@ -34,7 +36,7 @@ def get_hist(image, mode = 'hed', channel = 2, min_val = -0.55, max_val = -0.2):
     for i in range(im_channel.shape[0]):
         for j in range(im_channel.shape[1]):
             im_channel[i, j] = abs(a*(im_channel[i, j]) + b)
-            im_channel[i, j] = abs(int(im_channel[i,j]))
+            im_channel[i, j] = abs(int(im_channel[i, j]))
 
     im_channel = im_channel.astype('int64')
     im_channel = numpy.reshape(im_channel, im_channel.shape[0]*im_channel.shape[1])
