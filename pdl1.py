@@ -474,10 +474,10 @@ if __name__ == "__main__":
         print('[INFO] Extracting features from {} positive images'.format(len(list_positive)))
 
         # Extract features from positive images
-        if feature_method == 'Dense' or feature_method == 'Daisy':
+        if feature_method in ['Dense', 'Daisy', 'Daisy_DAB']:
             features = get_features(list_positive, nclusters=256, method=feature_method)
 
-        if feature_method == 'VGG16' or feature_method == 'Xception':
+        if feature_method in ['VGG16', 'Xception']:
             features = get_features_CNN(list_positive, model=feature_method)
 
         pickle_save(features, outpath, 'features.p')
