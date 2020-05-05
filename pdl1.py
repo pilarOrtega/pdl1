@@ -16,6 +16,8 @@ import glob
 from skimage.io import sift, imread, imsave
 from sklearn.cluster import MiniBatchKMeans
 from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+from sklearn.manifold import TSNE
 from tqdm import tqdm
 from skimage.util.shape import view_as_windows
 from skimage.color import rgb2grey, rgb2hed
@@ -31,16 +33,6 @@ from keras.utils import np_utils
 from keras.applications import VGG16, Xception
 from keras.applications import imagenet_utils
 from keras.applications.xception import preprocess_input
-
-
-###############################################################################
-# THINGS TO IMPROVE #
-# Display preview clusters
-# Try different clustering methods (Kmeans, DBSCAN)
-# Try different feature extraction method
-# Better screen display
-# Results
-###############################################################################
 
 ###############################################################################
 #
@@ -376,6 +368,21 @@ def pickle_load(file_name):
     return file
 
 
+def feature_reduction(list_features):
+    features, image_list = feature_list_division(list_features)
+    pca = PCA(n_components=50)
+    features_pca = pca.fit_transform(features)
+    features_tsne = TSNE(random_state=RS).fit_transform(features_pca)
+
+    initial_features = features.shape[1]
+    final_features = features_tsne.shape[1]
+    print('Number of features reduced from {} to {}'.format(initial_features, final_features))
+    print()
+    result = []
+    for i in range(len(image_list)):
+        result.append((image_list[i], features_tsne[i]))
+
+    return result
 ###############################################################################
 #
 # MAIN
@@ -397,10 +404,9 @@ if __name__ == "__main__":
     parser.add_argument('--flag', type=int, default=0, help='step of the process, from 1 to 5')
     parser.add_argument('--save_cluster', action='store_true', help='Set to True when cluster division desired')
     group_f1 = parser.add_argument_group('Flag 1')
-    group_f1.add_argument('--path_1', type=str, help='path to the folder with the patches')
+    group_f1.add_argument('--classifier', type=str, help='path to classifier.p')
     group_f2 = parser.add_argument_group('Flag 2')
     group_f2.add_argument('--list_positive', type=str, help='path to list_positive.p')
-    group_f2.add_argument('--classifier', type=str, help='path to classifier.p')
     group_f3 = parser.add_argument_group('Flag 3')
     group_f3.add_argument('--feat_file', type=str, help='path to feat_file.txt')
 
@@ -479,6 +485,8 @@ if __name__ == "__main__":
 
         if feature_method in ['VGG16', 'Xception']:
             features = get_features_CNN(list_positive, model=feature_method)
+
+        features = feature_reduction(features)
 
         pickle_save(features, outpath, 'features.p')
 
