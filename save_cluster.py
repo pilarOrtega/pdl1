@@ -104,8 +104,6 @@ if __name__ == "__main__":
     # Manage parameters
     parser = argparse.ArgumentParser(description='Reads data from csv file and saves patches in corresponding clusters')
     parser.add_argument('-c', '--csv_files', type=str, nargs='+', help='path(s) to csv file(s)')
-    parser.add_argument('-s', '--save_cluster', action='store_true', default=False, help='saves a copy of the patches in cluster folders')
-    parser.add_argument('-v', '--show_images', action='store_true', default=False, help='show random set of images of each cluster')
     args = parser.parse_args()
 
     classifiers = []
@@ -122,19 +120,35 @@ if __name__ == "__main__":
     for x in classifiers:
         n_division = (x[2].shape[1]) - 2
         cluster_list = get_clusterlist(x[1], x[2], n_division)
-        if args.save_cluster:
-            print('Saving images from slide ' + x[1])
-            print()
-            save_cluster_folder(x[1], cluster_list, n_division)
-        if args.show_images:
-            print('Showing sample images from slide ' + x[1])
-            print()
-            for i in range(2**n_division):
-                image_list = []
-                print('Cluster {}'.format(i))
-                for image in cluster_list:
-                    if image[1] == i:
-                        image_list.append(image[0])
-                path = os.path.dirname(csv_files[0])
-                name = os.path.join(path, 'cluster_{}.png'.format(i))
-                sri.show_random_imgs(image_list, 2, 8, (7,6), save_fig=True, name=name)
+        print('Saving images from slide ' + x[1])
+        print()
+        save_cluster_folder(x[1], cluster_list, n_division)
+        csv_file_cluster_list = os.path.join(x[1], 'cluster_list.csv')
+        csv_columns = ["Slidename"]
+        csv_columns.append('Number')
+        csv_columns.append('X')
+        csv_columns.append('Y')
+        csv_columns.append('Cluster')
+        with open(csv_file_cluster_list, 'w') as csv_file:
+            writer = csv.DictWriter(csv_file, csv_columns)
+            writer.writeheader()
+            for im in cluster_list:
+                index = final_imag_list.index(im[0])
+                im_name = os.path.basename(im[0])
+                data = os.path.splitext(im_name)[0]
+                data = data.split('-')
+                row = {'Slidename': data[0], 'Number': data[1], 'X': data[3], 'Y': data[4], 'Cluster': im[1]}
+                writer.writerow(row)
+
+        # if args.show_images:
+        #     print('Showing sample images from slide ' + x[1])
+        #     print()
+        #     for i in range(2**n_division):
+        #         image_list = []
+        #         print('Cluster {}'.format(i))
+        #         for image in cluster_list:
+        #             if image[1] == i:
+        #                 image_list.append(image[0])
+        #         path = os.path.dirname(csv_files[0])
+        #         name = os.path.join(path, '{}_cluster_{}.png'.format(x[0], i))
+        #         sri.show_random_imgs(image_list, 2, 8, (7, 6), save_fig=True, name=name)

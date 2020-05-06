@@ -24,9 +24,11 @@ def show_random_imgs(images, x, y, figsize=(10, 10), save_fig=False, name=''):
             ax[i].imshow(im)
             ax[i].set_title(image_number)
     fig.tight_layout()
-    plt.show()
     if save_fig:
-        plt.savefig(name)
+        plt.savefig(name, bbox_inches='tight')
+    else:
+        plt.show()
+    plt.close(fig)
 
 
 if __name__ == "__main__":
