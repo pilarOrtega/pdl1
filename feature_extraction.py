@@ -8,6 +8,8 @@ from skimage.color import rgb2grey, rgb2hed
 from skimage.feature import daisy
 from skimage.util.shape import view_as_windows
 from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+from sklearn.manifold import TSNE
 import pickle
 import itertools
 import csv
@@ -224,9 +226,13 @@ if feature_method in ['Dense', 'Daisy', 'Daisy_DAB']:
 if feature_method in ['VGG16', 'Xception']:
     features = get_features_CNN(list_positive, model=feature_method)
 
+features, image_list = feature_list_division(features)
 features = feature_reduction(features)
 # StandardScaler normalizes the data
 features = StandardScaler().fit_transform(features)
+features_reduced = []
+for i in range(len(image_list)):
+    features_reduced.append((image_list[i], features[i]))
 
 name = args.list_positive
 name = os.path.basename(name)
@@ -234,11 +240,11 @@ name = os.path.splitext(name)[0]
 name = name.split('_')
 level = name[1]
 
-pickle_save(features, outpath, 'features_{}_level{}.p'.format(feature_method, level))
+pickle_save(features_reduced, outpath, 'features_{}_level{}.p'.format(feature_method, level))
 
 csv_features = 'features_{}_level{}.csv'.format(feature_method, level)
 csv_file_path_features = os.path.join(outpath, csv_features)
-final_feat, final_imag_list = feature_list_division(features)
+final_feat, final_imag_list = feature_list_division(features_reduced)
 csv_columns = ["Slidename"]
 csv_columns.append('Number')
 csv_columns.append('X')
