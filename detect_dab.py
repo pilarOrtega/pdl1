@@ -14,7 +14,7 @@ import pickle
 import argparse
 
 
-def detect_dab(image, thr=225, freq=3):
+def dab(image, thr=225, freq=3):
     """
     Input: image in rgb
     """
@@ -67,7 +67,7 @@ def divide_dab(path):
 
     for im in tqdm(image_path):
         image = imread(im)
-        if detect_dab(image):
+        if dab(image):
             image_positive.append(im)
         else:
             image_negative.append(im)
@@ -85,44 +85,53 @@ def pickle_save(file, path, name):
         pickle.dump(file, f)
 
 
-parser = argparse.ArgumentParser(description='Script that discriminates patches positives to DAB.')
-parser.add_argument('-l', '--list_slides', type=str, help='file with slide list')
-parser.add_argument('-o', '--outpath', type=str, help='path to outfolder')
+def detect_dab(list_slides, outpath):
 
-args = parser.parse_args()
+    classifier = []
+    list_positive = []
+    for i in range(len(list_slides)):
+        print('Getting positive patches from slide {} out of {}'.format(i+1, len(list_slides)))
+        list_positive_x, list_negative_x, n = divide_dab(list_slides[i][1])
+        c = numpy.zeros((n, 2))
+        c = c.astype(int)
+        for im in list_positive_x:
+            name = os.path.basename(im)
+            number = name.split('-')
+            number = int(number[1])
+            c[number][0] = number
+            c[number][1] = 1
+            list_positive.append(im)
+        for im in list_negative_x:
+            name = os.path.basename(im)
+            number = name.split('-')
+            number = int(number[1])
+            c[number][0] = number
+            c[number][1] = 0
+        classifier.append((list_slides[i][0], list_slides[i][1], c))
 
-with open(args.list_slides, "rb") as f:
-    list_slides = pickle.load(f)
+    name = outpath
+    name = os.path.basename(name)
+    name = os.path.splitext(name)[0]
+    name = name.split('_')
+    level = name[1]
+    tile_size = name[3]
+    pickle_save(classifier, outpath, 'class_{}_{}.p'.format(level, tile_size))
+    pickle_save(list_positive, outpath, 'list_positive_{}_{}.p'.format(level, tile_size))
 
-outpath = args.outpath
+    return classifier, list_positive
 
-classifier = []
-list_positive = []
-for i in range(len(list_slides)):
-    print('Getting positive patches from slide {} out of {}'.format(i+1, len(list_slides)))
-    list_positive_x, list_negative_x, n = divide_dab(list_slides[i][1])
-    c = numpy.zeros((n, 2))
-    c = c.astype(int)
-    for im in list_positive_x:
-        name = os.path.basename(im)
-        number = name.split('-')
-        number = int(number[1])
-        c[number][0] = number
-        c[number][1] = 1
-        list_positive.append(im)
-    for im in list_negative_x:
-        name = os.path.basename(im)
-        number = name.split('-')
-        number = int(number[1])
-        c[number][0] = number
-        c[number][1] = 0
-    classifier.append((list_slides[i][0], list_slides[i][1], c))
 
-name = args.list_slides
-name = os.path.basename(name)
-name = os.path.splitext(name)[0]
-name = name.split('_')
-level = name[1]
-tile_size = name[2]
-pickle_save(classifier, outpath, 'class_{}_{}.p'.format(level, tile_size))
-pickle_save(list_positive, outpath, 'list_positive_{}_{}.p'.format(level, tile_size))
+if __name__ == '__main__':
+
+    parser = argparse.ArgumentParser(description='Script that discriminates patches positives to DAB.')
+    parser.add_argument('-l', '--list_slides', type=str, help='file with slide list')
+    parser.add_argument('-o', '--outpath', type=str, help='path to outfolder')
+
+    args = parser.parse_args()
+
+    outpath = args.outpath
+    list_slides = args.list_slides
+    with open(list_slides, "rb") as f:
+        list_slides = pickle.load(f)
+
+    classifier, list_positive = detect_dab(list_slides, outpath)

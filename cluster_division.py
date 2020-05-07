@@ -69,78 +69,87 @@ def pickle_save(file, path, name):
     with open(file_path, "wb") as f:
         pickle.dump(file, f)
 
-parser = argparse.ArgumentParser(description='Script that discriminates patches positives to DAB.')
-parser.add_argument('-f', '--list_features', type=str, help='file with feature list')
-parser.add_argument('-c', '--classifiers', type=str, help='path to classification file')
-parser.add_argument('-n', '--n_division', type=int, default=4, help='number of divisions [Default: %(default)s]')
-parser.add_argument('-o', '--outpath', type=str, help='path to outfolder')
 
-args = parser.parse_args()
+def cluster_division(features, classifiers_0, n_division, outpath, feature_method):
+    param = []
+    param.append(features)
+    k = 0
 
-with open(args.list_features, "rb") as f:
-    features = pickle.load(f)
-with open(args.classifiers, "rb") as f:
-    classifiers_0 = pickle.load(f)
-outpath = args.outpath
+    classifiers = []
+    for s in classifiers_0:
+        n_samples = s[2].shape[0]
+        n_features = s[2].shape[1] + n_division
+        c = numpy.zeros((n_samples, n_features))
+        c[:, : - n_division] = s[2]
+        classifiers.append((s[0], s[1], c))
 
-param = []
-param.append(features)
-n_division = args.n_division
-k = 0
-
-classifiers = []
-for s in classifiers_0:
-    n_samples = s[2].shape[0]
-    n_features = s[2].shape[1] + n_division
-    c = numpy.zeros((n_samples, n_features))
-    c[:, : - n_division] = s[2]
-    classifiers.append((s[0], s[1], c))
-
-print('[INFO] Dividing patches into clusters')
-print('Total of {} images to be divided in {} clusters'.format(len(features), 2**n_division))
-print()
-for i in range(n_division):
-    n_level = i + 2
-    for j in range(2**i):
-        index = j + 2**i - 1
-        curr_features = param[index]
-        classifiers, f1, f0 = image_cluster(curr_features, classifiers, n_level)
-        param.append(f1)
-        param.append(f0)
-        number_divisions = 2**i
-        print('Division completed - division {} out of {} in level {}'.format(j+1, number_divisions, i))
-        print('    {} images in cluster {}'.format(len(f1), 1))
-        print('    {} images in cluster {}'.format(len(f0), 0))
-        print()
-
-name = args.classifiers
-name = os.path.basename(name)
-name = os.path.splitext(name)[0]
-name = name.split('_')
-level = name[1]
-tile_size = name[2]
-feature_method = args.list_features
-feature_method = os.path.basename(feature_method)
-feature_method = os.path.splitext(feature_method)[0]
-feature_method = feature_method.split('_')[1]
-pickle_save(classifiers, outpath, 'class_{}_{}.p'.format(feature_method, level))
-
-print('[INFO] Saving csv files...')
-print()
-for x in classifiers:
-    csv_cluster = '{}_class_{}_{}.csv'.format(x[0], feature_method, level)
-    c = x[2]
-    csv_file_path_cluster = os.path.join(outpath, csv_cluster)
-    csv_columns = ["Patch_number"]
-    csv_columns.append('Positive')
+    print('[INFO] Dividing patches into clusters')
+    print('Total of {} images to be divided in {} clusters'.format(len(features), 2**n_division))
+    print()
     for i in range(n_division):
-        csv_columns.append('Level_{}'.format(i))
+        n_level = i + 2
+        for j in range(2**i):
+            index = j + 2**i - 1
+            curr_features = param[index]
+            classifiers, f1, f0 = image_cluster(curr_features, classifiers, n_level)
+            param.append(f1)
+            param.append(f0)
+            number_divisions = 2**i
+            print('Division completed - division {} out of {} in level {}'.format(j+1, number_divisions, i))
+            print('    {} images in cluster {}'.format(len(f1), 1))
+            print('    {} images in cluster {}'.format(len(f0), 0))
+            print()
 
-    with open(csv_file_path_cluster, 'w') as csv_file:
-        writer = csv.DictWriter(csv_file, csv_columns)
-        writer.writeheader()
-        for i in range(c.shape[0]):
-            row = {'Patch_number': c[i][0], 'Positive': c[i][1]}
-            for j in range(n_division):
-                row["Level_{}".format(j)] = c[i][j+2]
-            writer.writerow(row)
+    name = outpath
+    name = os.path.basename(name)
+    name = os.path.splitext(name)[0]
+    name = name.split('_')
+    level = name[1]
+    pickle_save(classifiers, outpath, 'class_{}_{}.p'.format(feature_method, level))
+
+    print('[INFO] Saving csv files...')
+    print()
+    for x in classifiers:
+        csv_cluster = '{}_class_{}_{}.csv'.format(x[0], feature_method, level)
+        c = x[2]
+        csv_file_path_cluster = os.path.join(outpath, csv_cluster)
+        csv_columns = ["Patch_number"]
+        csv_columns.append('Positive')
+        for i in range(n_division):
+            csv_columns.append('Level_{}'.format(i))
+
+        with open(csv_file_path_cluster, 'w') as csv_file:
+            writer = csv.DictWriter(csv_file, csv_columns)
+            writer.writeheader()
+            for i in range(c.shape[0]):
+                row = {'Patch_number': c[i][0], 'Positive': c[i][1]}
+                for j in range(n_division):
+                    row["Level_{}".format(j)] = c[i][j+2]
+                writer.writerow(row)
+
+    return classifiers
+
+
+if __name__ = "__main__":
+
+    parser = argparse.ArgumentParser(description='Script that discriminates patches positives to DAB.')
+    parser.add_argument('-f', '--list_features', type=str, help='file with feature list')
+    parser.add_argument('-c', '--classifiers', type=str, help='path to classification file')
+    parser.add_argument('-n', '--n_division', type=int, default=4, help='number of divisions [Default: %(default)s]')
+    parser.add_argument('-o', '--outpath', type=str, help='path to outfolder')
+
+    args = parser.parse_args()
+
+    with open(args.list_features, "rb") as f:
+        features = pickle.load(f)
+    with open(args.classifiers, "rb") as f:
+        classifiers_0 = pickle.load(f)
+    outpath = args.outpath
+    n_division = args.n_division
+
+    feature_method = args.list_features
+    feature_method = os.path.basename(feature_method)
+    feature_method = os.path.splitext(feature_method)[0]
+    feature_method = feature_method.split('_')[1]
+
+    classifiers = cluster_division(features, classifiers_0, n_division, outpath, feature_method)

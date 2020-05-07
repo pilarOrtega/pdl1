@@ -71,38 +71,44 @@ def pickle_save(file, path, name):
         pickle.dump(file, f)
 
 
-parser = argparse.ArgumentParser(description='Script that divides a WSI in individual patches.')
-parser.add_argument('-s', '--slides', type=str, help='path to slide folder')
-parser.add_argument('-o', '--outpath', type=str, help='path to outfolder')
-parser.add_argument('-l', '--level', type=int, default=13, help='division level [Default: %(default)s]')
-parser.add_argument('-ts', '--tile_size', type=int, default=256, help='tile heigth and width in pixels [Default: %(default)s]')
-parser.add_argument('-tr', '--tissue_ratio', type=float, default=0.5, help='tissue ratio per patch [Default: %(default)s]')
+def patch_division(slides, outpath, level, tile_size, tissue_ratio):
 
-args = parser.parse_args()
+    slides = os.path.join(slides, '*.mrxs')
 
+    try:
+        os.mkdir(outpath)
+        print("Directory", outpath, "created")
+        print()
+    except FileExistsError:
+        print("Directory", outpath, "already exists")
+        print()
 
-outpath = args.outpath
-tile_size = args.tile_size
-tissue_ratio = args.tissue_ratio
-slides = args.slides
-slides = os.path.join(slides, '*.mrxs')
-level = args.level
+    patch_list = []
+    for s in glob.glob(slides):
+        print('[INFO] Extracting patches from slide {}'.format(s))
+        n_s, outpath_slide = get_patches(s, outpath, level, tissue_ratio, tile_size)
+        patch_list.append((os.path.basename(s), outpath_slide))
 
+    pickle_save(patch_list, outpath, 'list_{}_{}.p'.format(level, tile_size))
 
-try:
-    os.mkdir(outpath)
-    print("Directory", outpath, "created")
-    print()
-except FileExistsError:
-    print("Directory", outpath, "already exists")
-    print()
+    return patch_list
 
 
-patch_list = []
-for s in glob.glob(slides):
-    print('[INFO] Extracting patches from slide {}'.format(s))
-    n_s, outpath_slide = get_patches(s, outpath, level, tissue_ratio, tile_size)
-    patch_list.append((os.path.basename(s), outpath_slide))
+if __name__ == "__main__":
 
+    parser = argparse.ArgumentParser(description='Script that divides a WSI in individual patches.')
+    parser.add_argument('-s', '--slides', type=str, help='path to slide folder')
+    parser.add_argument('-o', '--outpath', type=str, help='path to outfolder')
+    parser.add_argument('-l', '--level', type=int, default=13, help='division level [Default: %(default)s]')
+    parser.add_argument('-ts', '--tile_size', type=int, default=256, help='tile heigth and width in pixels [Default: %(default)s]')
+    parser.add_argument('-tr', '--tissue_ratio', type=float, default=0.5, help='tissue ratio per patch [Default: %(default)s]')
 
-pickle_save(patch_list, outpath, 'list_{}_{}.p'.format(level, tile_size))
+    args = parser.parse_args()
+
+    outpath = args.outpath
+    tile_size = args.tile_size
+    tissue_ratio = args.tissue_ratio
+    slides = args.slides
+    level = args.level
+
+    patch_list = patch_division(slides, outpath, level, tile_size, tissue_ratio)

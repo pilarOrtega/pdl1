@@ -207,58 +207,67 @@ def feature_list_division(list_features):
     return features, image_list
 
 
-parser = argparse.ArgumentParser(description='Script that discriminates patches positives to DAB.')
-parser.add_argument('-l', '--list_positive', type=str, help='file with slide list')
-parser.add_argument('-o', '--outpath', type=str, help='path to outfolder')
-parser.add_argument('-f', '--feature_method', type=str, choices=['Dense', 'Daisy', 'Daisy_DAB', 'VGG16', 'Xception'], help='feature method')
+def feature_extraction(list_positive, outpath, feature_method):
 
-args = parser.parse_args()
+    print('[INFO] Extracting features from {} positive images'.format(len(list_positive)))
 
-with open(args.list_positive, "rb") as f:
-    list_positive = pickle.load(f)
+    # Extract features from positive images
+    if feature_method in ['Dense', 'Daisy', 'Daisy_DAB']:
+        features = get_features(list_positive, nclusters=256, method=feature_method)
 
-outpath = args.outpath
-feature_method = args.feature_method
+    if feature_method in ['VGG16', 'Xception']:
+        features = get_features_CNN(list_positive, model=feature_method)
 
-print('[INFO] Extracting features from {} positive images'.format(len(list_positive)))
+    features = feature_reduction(features)
 
-# Extract features from positive images
-if feature_method in ['Dense', 'Daisy', 'Daisy_DAB']:
-    features = get_features(list_positive, nclusters=256, method=feature_method)
+    name = outpath
+    name = os.path.basename(name)
+    name = os.path.splitext(name)[0]
+    name = name.split('_')
+    level = name[1]
 
-if feature_method in ['VGG16', 'Xception']:
-    features = get_features_CNN(list_positive, model=feature_method)
+    pickle_save(features, outpath, 'features_{}_level{}.p'.format(feature_method, level))
 
-features = feature_reduction(features)
+    csv_features = 'features_{}_level{}.csv'.format(feature_method, level)
+    csv_file_path_features = os.path.join(outpath, csv_features)
+    final_feat, final_imag_list = feature_list_division(features)
+    csv_columns = ["Slidename"]
+    csv_columns.append('Number')
+    csv_columns.append('X')
+    csv_columns.append('Y')
+    shape_feat = final_feat.shape
+    for i in range(shape_feat[1]):
+        csv_columns.append('feature_{}'.format(i))
 
-name = args.list_positive
-name = os.path.basename(name)
-name = os.path.splitext(name)[0]
-name = name.split('_')
-level = name[1]
+    with open(csv_file_path_features, 'w') as csv_file:
+        writer = csv.DictWriter(csv_file, csv_columns)
+        writer.writeheader()
+        for im in final_imag_list:
+            index = final_imag_list.index(im)
+            im_name = os.path.basename(im)
+            data = os.path.splitext(im_name)[0]
+            data = data.split('-')
+            row = {'Slidename': data[0], 'Number': data[1], 'X': data[3], 'Y': data[4]}
+            for i in range(shape_feat[1]):
+                row['feature_{}'.format(i)] = final_feat[index][i]
+            writer.writerow(row)
 
-pickle_save(features, outpath, 'features_{}_level{}.p'.format(feature_method, level))
+    return features
 
-csv_features = 'features_{}_level{}.csv'.format(feature_method, level)
-csv_file_path_features = os.path.join(outpath, csv_features)
-final_feat, final_imag_list = feature_list_division(features)
-csv_columns = ["Slidename"]
-csv_columns.append('Number')
-csv_columns.append('X')
-csv_columns.append('Y')
-shape_feat = final_feat.shape
-for i in range(shape_feat[1]):
-    csv_columns.append('feature_{}'.format(i))
 
-with open(csv_file_path_features, 'w') as csv_file:
-    writer = csv.DictWriter(csv_file, csv_columns)
-    writer.writeheader()
-    for im in final_imag_list:
-        index = final_imag_list.index(im)
-        im_name = os.path.basename(im)
-        data = os.path.splitext(im_name)[0]
-        data = data.split('-')
-        row = {'Slidename': data[0], 'Number': data[1], 'X': data[3], 'Y': data[4]}
-        for i in range(shape_feat[1]):
-            row['feature_{}'.format(i)] = final_feat[index][i]
-        writer.writerow(row)
+if __name__ = "__main__":
+
+    parser = argparse.ArgumentParser(description='Script that discriminates patches positives to DAB.')
+    parser.add_argument('-l', '--list_positive', type=str, help='file with slide list')
+    parser.add_argument('-o', '--outpath', type=str, help='path to outfolder')
+    parser.add_argument('-f', '--feature_method', type=str, choices=['Dense', 'Daisy', 'Daisy_DAB', 'VGG16', 'Xception'], help='feature method')
+
+    args = parser.parse_args()
+
+    with open(args.list_positive, "rb") as f:
+        list_positive = pickle.load(f)
+
+    outpath = args.outpath
+    feature_method = args.feature_method
+
+    features = feature_extraction(list_positive, outpath, feature_method)
