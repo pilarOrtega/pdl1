@@ -3,8 +3,11 @@ import numpy
 import argparse
 from matplotlib import pyplot as plt
 import glob
+import csv
 from skimage.io import sift, imread, imsave
 from sklearn.cluster import MiniBatchKMeans
+import pickle
+from tqdm import tqdm
 
 
 def image_cluster(features, classifiers, n, method='Kmeans'):
@@ -61,18 +64,23 @@ def feature_list_division(list_features):
     return features, image_list
 
 
+def pickle_save(file, path, name):
+    file_path = os.path.join(path, name)
+    with open(file_path, "wb") as f:
+        pickle.dump(file, f)
+
 parser = argparse.ArgumentParser(description='Script that discriminates patches positives to DAB.')
 parser.add_argument('-f', '--list_features', type=str, help='file with feature list')
 parser.add_argument('-c', '--classifiers', type=str, help='path to classification file')
 parser.add_argument('-n', '--n_division', type=int, default=4, help='number of divisions [Default: %(default)s]')
-parser.add_argument('-o', '--outpath', type=int, help='path to outfolder')
+parser.add_argument('-o', '--outpath', type=str, help='path to outfolder')
 
 args = parser.parse_args()
 
 with open(args.list_features, "rb") as f:
     features = pickle.load(f)
 with open(args.classifiers, "rb") as f:
-    classifiers = pickle.load(f)
+    classifiers_0 = pickle.load(f)
 outpath = args.outpath
 
 param = []
@@ -80,12 +88,13 @@ param.append(features)
 n_division = args.n_division
 k = 0
 
-for s in classifiers:
+classifiers = []
+for s in classifiers_0:
     n_samples = s[2].shape[0]
     n_features = s[2].shape[1] + n_division
     c = numpy.zeros((n_samples, n_features))
-    c[:, : - s[2].shape[1]] = s[2]
-    s[2] = c
+    c[:, : - n_division] = s[2]
+    classifiers.append((s[0], s[1], c))
 
 print('[INFO] Dividing patches into clusters')
 print('Total of {} images to be divided in {} clusters'.format(len(features), 2**n_division))

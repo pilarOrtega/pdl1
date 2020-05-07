@@ -77,8 +77,6 @@ parser.add_argument('-o', '--outpath', type=str, help='path to outfolder')
 parser.add_argument('-l', '--level', type=int, default=13, help='division level [Default: %(default)s]')
 parser.add_argument('-ts', '--tile_size', type=int, default=256, help='tile heigth and width in pixels [Default: %(default)s]')
 parser.add_argument('-tr', '--tissue_ratio', type=float, default=0.5, help='tissue ratio per patch [Default: %(default)s]')
-parser.add_argument('-n', '--n_division', type=int, default=4, help='number of divisions [Default: %(default)s]')
-
 
 args = parser.parse_args()
 
@@ -89,7 +87,6 @@ tissue_ratio = args.tissue_ratio
 slides = args.slides
 slides = os.path.join(slides, '*.mrxs')
 level = args.level
-n_division = args.n_division
 
 
 try:
@@ -101,7 +98,6 @@ except FileExistsError:
     print()
 
 
-n_columns = n_division + 2
 patch_list = []
 for s in glob.glob(slides):
     print('[INFO] Extracting patches from slide {}'.format(s))

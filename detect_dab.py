@@ -125,4 +125,4 @@ name = name.split('_')
 level = name[1]
 tile_size = name[2]
 pickle_save(classifier, outpath, 'class_{}_{}.p'.format(level, tile_size))
-pickle_save(list_positive, outpath, 'list_positive.p')
+pickle_save(list_positive, outpath, 'list_positive_{}_{}.p'.format(level, tile_size))
