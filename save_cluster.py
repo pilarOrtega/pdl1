@@ -8,8 +8,8 @@ from skimage.io import sift, imread, imsave
 import show_random_imgs as sri
 
 
-def save_cluster_folder(outpath, cluster_list, n_division):
-    clusters = os.path.join(outpath, 'clusters')
+def save_cluster_folder(outpath, cluster_list, n_division, feature_method):
+    clusters = os.path.join(outpath, 'clusters_{}'.format(feature_method))
     try:
         os.mkdir(clusters)
         print("Directory", clusters, "created")
@@ -114,15 +114,19 @@ if __name__ == "__main__":
         path = os.path.dirname(file)
         slide = os.path.basename(file)
         slide = os.path.splitext(slide)[0]
+        slide = slide.split('-')[0]
         path = os.path.join(path, slide)
         classifiers.append((slide, path, list_to_array(list_file)))
 
+    feature_method = os.path.basename(csv_files[0])
+    feature_method = os.path.splitext(feature_method)[0]
+    feature_method = feature_method.split('-')[1]
     for x in classifiers:
         n_division = (x[2].shape[1]) - 2
         cluster_list = get_clusterlist(x[1], x[2], n_division)
         print('Saving images from slide ' + x[1])
         print()
-        save_cluster_folder(x[1], cluster_list, n_division)
+        save_cluster_folder(x[1], cluster_list, n_division, feature_method)
         csv_file_cluster_list = os.path.join(x[1], 'cluster_list.csv')
         csv_columns = ["Slidename"]
         csv_columns.append('Number')
@@ -133,7 +137,6 @@ if __name__ == "__main__":
             writer = csv.DictWriter(csv_file, csv_columns)
             writer.writeheader()
             for im in cluster_list:
-                index = final_imag_list.index(im[0])
                 im_name = os.path.basename(im[0])
                 data = os.path.splitext(im_name)[0]
                 data = data.split('-')

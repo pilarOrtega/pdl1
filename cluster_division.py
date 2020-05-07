@@ -105,12 +105,12 @@ def cluster_division(features, classifiers_0, n_division, outpath, feature_metho
     name = os.path.splitext(name)[0]
     name = name.split('_')
     level = name[1]
-    pickle_save(classifiers, outpath, 'class_{}_{}.p'.format(feature_method, level))
+    pickle_save(classifiers, outpath, 'class{}-{}.p'.format(feature_method, level))
 
     print('[INFO] Saving csv files...')
     print()
     for x in classifiers:
-        csv_cluster = '{}_class_{}_{}.csv'.format(x[0], feature_method, level)
+        csv_cluster = '{}-{}-level{}.csv'.format(x[0], feature_method, level)
         c = x[2]
         csv_file_path_cluster = os.path.join(outpath, csv_cluster)
         csv_columns = ["Patch_number"]
@@ -130,7 +130,7 @@ def cluster_division(features, classifiers_0, n_division, outpath, feature_metho
     return classifiers
 
 
-if __name__ = "__main__":
+if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Script that discriminates patches positives to DAB.')
     parser.add_argument('-f', '--list_features', type=str, help='file with feature list')
@@ -143,7 +143,7 @@ if __name__ = "__main__":
     with open(args.list_features, "rb") as f:
         features = pickle.load(f)
     with open(args.classifiers, "rb") as f:
-        classifiers_0 = pickle.load(f)
+        classifiers = pickle.load(f)
     outpath = args.outpath
     n_division = args.n_division
 
@@ -152,4 +152,4 @@ if __name__ = "__main__":
     feature_method = os.path.splitext(feature_method)[0]
     feature_method = feature_method.split('_')[1]
 
-    classifiers = cluster_division(features, classifiers_0, n_division, outpath, feature_method)
+    classifiers = cluster_division(features, classifiers, n_division, outpath, feature_method)

@@ -83,15 +83,15 @@ def patch_division(slides, outpath, level, tile_size, tissue_ratio):
         print("Directory", outpath, "already exists")
         print()
 
-    patch_list = []
+    slide_list = []
     for s in glob.glob(slides):
         print('[INFO] Extracting patches from slide {}'.format(s))
         n_s, outpath_slide = get_patches(s, outpath, level, tissue_ratio, tile_size)
-        patch_list.append((os.path.basename(s), outpath_slide))
+        slide_list.append((os.path.basename(s), outpath_slide))
 
-    pickle_save(patch_list, outpath, 'list_{}_{}.p'.format(level, tile_size))
+    pickle_save(slide_list, outpath, 'list_{}_{}.p'.format(level, tile_size))
 
-    return patch_list
+    return slide_list
 
 
 if __name__ == "__main__":
@@ -111,4 +111,4 @@ if __name__ == "__main__":
     slides = args.slides
     level = args.level
 
-    patch_list = patch_division(slides, outpath, level, tile_size, tissue_ratio)
+    slide_list = patch_division(slides, outpath, level, tile_size, tissue_ratio)

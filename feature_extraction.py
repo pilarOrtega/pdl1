@@ -255,7 +255,7 @@ def feature_extraction(list_positive, outpath, feature_method):
     return features
 
 
-if __name__ = "__main__":
+if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Script that discriminates patches positives to DAB.')
     parser.add_argument('-l', '--list_positive', type=str, help='file with slide list')
