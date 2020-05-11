@@ -127,7 +127,7 @@ if __name__ == "__main__":
         print('Saving images from slide ' + x[1])
         print()
         save_cluster_folder(x[1], cluster_list, n_division, feature_method)
-        csv_file_cluster_list = os.path.join(x[1], 'cluster_list.csv')
+        csv_file_cluster_list = os.path.join(x[1], 'cluster_list_.csv'.format(feature_method))
         csv_columns = ["Slidename"]
         csv_columns.append('Number')
         csv_columns.append('X')
