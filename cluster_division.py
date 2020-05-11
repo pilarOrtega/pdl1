@@ -6,6 +6,7 @@ import glob
 import csv
 from skimage.io import sift, imread, imsave
 from sklearn.cluster import MiniBatchKMeans
+from sklearn.metrics import davies_bouldin_score
 import pickle
 from tqdm import tqdm
 
@@ -25,7 +26,8 @@ def image_cluster(features, classifiers, n, method='Kmeans'):
     if method == 'Kmeans':
         cls = MiniBatchKMeans(n_clusters=2)
         labels = cls.fit_predict(features)
-
+        score = davies_bouldin_score(features, labels)
+        print('Davies-Bouldin Score: {}'.format(score))
     else:
         print('Method not valid')
 
