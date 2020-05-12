@@ -77,7 +77,43 @@ def get_features(image_list, nclusters=256, method='Dense'):
         print()
         return features
 
-    elif method == 'Daisy' or method == 'Daisy_DAB':
+    if method == 'DenseDAB':
+        patch_shape = (8, 8)
+
+        print('Step 1: KMeans fitting')
+        for im in tqdm(image_list):
+            image = imread(im)
+            image = numpy.asarray(rgb2hed(image))
+            image = image[:, :, 2]
+            image = image.astype(float)
+            patches = view_as_windows(image, patch_shape)
+            plines = patches.shape[0]
+            pcols = patches.shape[1]
+            patches_reshaped = patches.reshape(plines, pcols, patch_shape[0] * patch_shape[1])
+            patches_reshaped = patches_reshaped.reshape(plines * pcols, patch_shape[0] * patch_shape[1])
+            kmeans.partial_fit(patches_reshaped)
+
+        # This loop gets again the features of each tile and gets a list of the histograms of each individual tile
+        print('Step 2: Histogram of features extraction')
+        for im in tqdm(image_list):
+            image = imread(im)
+            image = numpy.asarray(rgb2hed(image))
+            image = image[:, :, 2]
+            image = image.astype(float)
+            patches = view_as_windows(image, patch_shape)
+            plines = patches.shape[0]
+            pcols = patches.shape[1]
+            patches_reshaped = patches.reshape(plines, pcols, patch_shape[0] * patch_shape[1])
+            patches_reshaped = patches_reshaped.reshape(plines * pcols, patch_shape[0] * patch_shape[1])
+            result = kmeans.predict(patches_reshaped)
+            histogram = numpy.histogram(result, bins=nclusters - 1)
+            features.append((im, histogram[0]))
+
+        print('Feature extraction completed')
+        print()
+        return features
+
+    elif method == 'Daisy' or method == 'DaisyDAB':
         patch_shape = (8, 8)
         p = 0
         q = 0
@@ -88,7 +124,7 @@ def get_features(image_list, nclusters=256, method='Dense'):
             image = imread(im)
             if method == 'Daisy':
                 image = numpy.asarray(rgb2grey(image))
-            if method == 'Daisy_DAB':
+            if method == 'DaisyDAB':
                 image = numpy.asarray(rgb2hed(image))
                 image = image[:, :, 2]
             daisyzy = daisy(image, step=1, radius=8, rings=3)
@@ -102,7 +138,11 @@ def get_features(image_list, nclusters=256, method='Dense'):
         print('Step 2: Histogram of features extraction')
         for im in tqdm(image_list):
             image = imread(im)
-            image = numpy.asarray(rgb2grey(image))
+            if method == 'Daisy':
+                image = numpy.asarray(rgb2grey(image))
+            if method == 'DaisyDAB':
+                image = numpy.asarray(rgb2hed(image))
+                image = image[:, :, 2]
             daisyzy = daisy(image, step=1, radius=8, rings=3)
             # daisy has shape P, Q, R
             p = daisyzy.shape[0]
@@ -212,7 +252,7 @@ def feature_extraction(list_positive, outpath, feature_method):
     print('[INFO] Extracting features from {} positive images'.format(len(list_positive)))
 
     # Extract features from positive images
-    if feature_method in ['Dense', 'Daisy', 'Daisy_DAB']:
+    if feature_method in ['Dense', 'DenseDAB', 'Daisy', 'DaisyDAB']:
         features = get_features(list_positive, nclusters=256, method=feature_method)
 
     if feature_method in ['VGG16', 'Xception']:
@@ -260,7 +300,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Script that discriminates patches positives to DAB.')
     parser.add_argument('-l', '--list_positive', type=str, help='file with slide list')
     parser.add_argument('-o', '--outpath', type=str, help='path to outfolder')
-    parser.add_argument('-f', '--feature_method', type=str, choices=['Dense', 'Daisy', 'Daisy_DAB', 'VGG16', 'Xception'], help='feature method')
+    parser.add_argument('-f', '--feature_method', type=str, choices=['Dense', 'DenseDAB', 'Daisy', 'DaisyDAB', 'VGG16', 'Xception'], help='feature method')
 
     args = parser.parse_args()
 
