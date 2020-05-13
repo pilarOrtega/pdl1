@@ -89,7 +89,7 @@ def cluster_division(features, classifiers_0, n_division, outpath, feature_metho
     print('Total of {} images to be divided in {} clusters'.format(len(features), 2**n_division))
     print()
     for i in range(n_division):
-        n_level = i + 2
+        n_level = i + 4
         for j in range(2**i):
             index = j + 2**i - 1
             curr_features = param[index]
@@ -116,6 +116,8 @@ def cluster_division(features, classifiers_0, n_division, outpath, feature_metho
         c = x[2]
         csv_file_path_cluster = os.path.join(outpath, csv_cluster)
         csv_columns = ["Patch_number"]
+        csv_columns.append('X')
+        csv_columns.append('Y')
         csv_columns.append('Positive')
         for i in range(n_division):
             csv_columns.append('Level_{}'.format(i))
@@ -124,9 +126,9 @@ def cluster_division(features, classifiers_0, n_division, outpath, feature_metho
             writer = csv.DictWriter(csv_file, csv_columns)
             writer.writeheader()
             for i in range(c.shape[0]):
-                row = {'Patch_number': c[i][0], 'Positive': c[i][1]}
+                row = {'Patch_number': c[i][0], 'X': c[i][1], 'Y': c[i][2], 'Positive': c[i][3]}
                 for j in range(n_division):
-                    row["Level_{}".format(j)] = c[i][j+2]
+                    row["Level_{}".format(j)] = c[i][j+4]
                 writer.writerow(row)
 
     return classifiers
