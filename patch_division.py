@@ -73,7 +73,7 @@ def pickle_save(file, path, name):
 
 def patch_division(slides, outpath, level, tile_size, tissue_ratio):
 
-    slides = os.path.join(slides, '*.mrxs')
+    slides = os.path.join(slides, '*.PDL1.mrxs')
 
     try:
         os.mkdir(outpath)
