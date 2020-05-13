@@ -122,7 +122,7 @@ if __name__ == "__main__":
     feature_method = os.path.splitext(feature_method)[0]
     feature_method = feature_method.split('-')[1]
     for x in classifiers:
-        n_division = (x[2].shape[1]) - 2
+        n_division = (x[2].shape[1]) - 4
         cluster_list = get_clusterlist(x[1], x[2], n_division)
         print('Saving images from slide ' + x[1])
         print()
