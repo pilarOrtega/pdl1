@@ -3,7 +3,6 @@ from openslide import OpenSlide, deepzoom
 import numpy
 from matplotlib import pyplot as plt
 import sys
-import cv2
 import glob
 from skimage.io import sift, imread, imsave, imshow
 from sklearn.cluster import MiniBatchKMeans
