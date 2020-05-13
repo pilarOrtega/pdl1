@@ -13,8 +13,12 @@ parser.add_argument('-tr', '--tissue_ratio', type=float, default=0.25, help='tis
 parser.add_argument('-ts', '--tile_size', type=int, default=256, help='tile heigth and width in pixels [Default: %(default)s]')
 parser.add_argument('-f', '--feature_method', type=str, default='Dense', help='features extracted from individual patches [Default: %(default)s]')
 parser.add_argument('-n', '--n_division', type=int, default=4, help='number of divisions [Default: %(default)s]')
+parser.add_argument('-d', '--device', default="0")
 
 args = parser.parse_args()
+
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+os.environ["CUDA_VISIBLE_DEVICE"] = args.device
 
 slides = args.slides
 outpath = args.outpath
