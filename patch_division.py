@@ -102,9 +102,12 @@ if __name__ == "__main__":
     parser.add_argument('-l', '--level', type=int, default=13, help='division level [Default: %(default)s]')
     parser.add_argument('-ts', '--tile_size', type=int, default=256, help='tile heigth and width in pixels [Default: %(default)s]')
     parser.add_argument('-tr', '--tissue_ratio', type=float, default=0.5, help='tissue ratio per patch [Default: %(default)s]')
+    parser.add_argument('-d', '--device', default='0')
 
     args = parser.parse_args()
 
+    os.environ.[‘CUDA_DEVICE_ORDER’] = ‘PCI_BUS_ID’
+    os.environ[‘CUDA_VISIBLE_DEVICE’] = args.device
     outpath = args.outpath
     tile_size = args.tile_size
     tissue_ratio = args.tissue_ratio
