@@ -114,7 +114,7 @@ def detect_dab(list_slides, outpath):
             y = int(number[4])
             c[slide_number][0] = slide_number
             c[slide_number][1] = x
-            x[slide_number][2] = y
+            c[slide_number][2] = y
             c[slide_number][3] = 0
         classifier.append((list_slides[i][0], list_slides[i][1], c))
 
