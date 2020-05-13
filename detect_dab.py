@@ -92,21 +92,31 @@ def detect_dab(list_slides, outpath):
     for i in range(len(list_slides)):
         print('Getting positive patches from slide {} out of {}'.format(i+1, len(list_slides)))
         list_positive_x, list_negative_x, n = divide_dab(list_slides[i][1])
-        c = numpy.zeros((n, 2))
+        c = numpy.zeros((n, 4))
         c = c.astype(int)
         for im in list_positive_x:
             name = os.path.basename(im)
+            name = os.path.splitext(name)[0]
             number = name.split('-')
-            number = int(number[1])
-            c[number][0] = number
-            c[number][1] = 1
+            slide_number = int(number[1])
+            x = int(number[3])
+            y = int(number[4])
+            c[slide_number][0] = slide_number
+            c[slide_number][1] = x
+            c[slide_number][2] = y
+            c[slide_number][3] = 1
             list_positive.append(im)
         for im in list_negative_x:
             name = os.path.basename(im)
+            name = os.path.splitext(name)[0]
             number = name.split('-')
-            number = int(number[1])
-            c[number][0] = number
-            c[number][1] = 0
+            slide_number = int(number[1])
+            x = int(number[3])
+            y = int(number[4])
+            c[slide_number][0] = slide_number
+            c[slide_number][1] = x
+            x[slide_number][2] = y
+            c[slide_number][3] = 0
         classifier.append((list_slides[i][0], list_slides[i][1], c))
 
     name = outpath
