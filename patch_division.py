@@ -6,6 +6,7 @@ import Pysiderois_Arnaud.pysliderois.tissue as tissue
 import numpy
 import pickle
 import argparse
+from matplotlib import pyplot as plt
 
 
 def get_patches(slidepath, outpath, level=10, tissue_ratio=0.25, size=256):
@@ -27,10 +28,19 @@ def get_patches(slidepath, outpath, level=10, tissue_ratio=0.25, size=256):
 
     # Opens the slide with OpenSlide
     slide = OpenSlide(slidepath)
+
     slide_dz = deepzoom.DeepZoomGenerator(slide, tile_size=(size - 2), overlap=1)
     slidename = os.path.basename(slidepath)
     slidenumber = slidename.split('.')
     slidenumber = slidenumber[2]
+
+    image = slide.read_region((0,0), 7, slide.level_dimensions[7])
+    image = numpy.array(image)[:, :, 0:3]
+    name = '{}.png'.format(slidename)
+    name = os.path.join(outpath, name)
+    fig = plt.figure()
+    plt.imshow(image)
+    fig.savefig(name, bbox_inches='tight', dpi=fig.dpi)
 
     # Asures that the chosen level is valid
     if level < slide_dz.level_count:
