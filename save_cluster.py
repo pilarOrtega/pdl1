@@ -142,16 +142,3 @@ if __name__ == "__main__":
                 data = data.split('-')
                 row = {'Slidename': data[0], 'Number': data[1], 'X': data[3], 'Y': data[4], 'Cluster': im[1]}
                 writer.writerow(row)
-
-        # if args.show_images:
-        #     print('Showing sample images from slide ' + x[1])
-        #     print()
-        #     for i in range(2**n_division):
-        #         image_list = []
-        #         print('Cluster {}'.format(i))
-        #         for image in cluster_list:
-        #             if image[1] == i:
-        #                 image_list.append(image[0])
-        #         path = os.path.dirname(csv_files[0])
-        #         name = os.path.join(path, '{}_cluster_{}.png'.format(x[0], i))
-        #         sri.show_random_imgs(image_list, 2, 8, (7, 6), save_fig=True, name=name)
