@@ -11,30 +11,39 @@ from matplotlib import pyplot as plt
 
 def get_patches(slidepath, outpath, level=10, tissue_ratio=0.25, size=256):
     """
-    Function that divides a slide into patches with different resolution
+    Function that divides a slide into patches with different resolution.
 
     Arguments:
         - slidepath: str, path to the image to patchify
-        - outpath: str, path to the folder in which the patches will be saved
+        - outpath: str, path to the folder in which a new folder will be
+          created, where the patches will be saved. This folder has the same
+          name as the image to patchify
         - level: int, level in which image is patchified. The bigger the level,
           the higher the number of patches and the resolution of the images.
-        - tissue_ratio: float, minimum surface of tissue tile to be considered
-        - size: int, side number of pixels (n pixels size*size)
+          Default = 10
+        - tissue_ratio: float, minimum surface of tissue tile to be considered.
+          Default = 0.25
+        - size: int, side number of pixels (n pixels size*size). Default = 256
 
     Returns:
         - n: int, number of patches
-        - outpath
+        - outpath: str, path to folder where the patches are saved
+
     """
 
     # Opens the slide with OpenSlide
     slide = OpenSlide(slidepath)
 
+    # Gets deepzoom tile division
     slide_dz = deepzoom.DeepZoomGenerator(slide, tile_size=(size - 2), overlap=1)
+
+    # Gets the name and number of the slide
     slidename = os.path.basename(slidepath)
     slidenumber = slidename.split('.')
     slidenumber = slidenumber[2]
 
-    image = slide.read_region((0,0), 7, slide.level_dimensions[7])
+    # Saves a preview of the slide under 'slidename.png'
+    image = slide.read_region((0, 0), 7, slide.level_dimensions[7])
     image = numpy.array(image)[:, :, 0:3]
     name = '{}.png'.format(slidename)
     name = os.path.join(outpath, name)
@@ -50,6 +59,7 @@ def get_patches(slidepath, outpath, level=10, tissue_ratio=0.25, size=256):
         print('Invalid level')
         return
 
+    # Creates new directory - where patches will be stored
     outpath = os.path.join(outpath, slidename)
     try:
         os.mkdir(outpath)
@@ -62,11 +72,13 @@ def get_patches(slidepath, outpath, level=10, tissue_ratio=0.25, size=256):
     print("Saving tiles image " + slidepath + "...")
     for i in tqdm(range(tiles[0])):
         for j in range(tiles[1]):
+            # Gets the tile in position (i, j)
             tile = slide_dz.get_tile(level, (i, j))
-            tile_path = os.path.join(outpath, '{}-{}-level{}-{}-{}.jpg'.format(slidenumber, n, level, i, j))
             image = numpy.array(tile)[..., :3]
             mask = tissue.get_tissue_from_rgb(image)
+            # Saves tile in outpath only if tissue ratio is higher than threshold
             if mask.sum() > tissue_ratio * tile.size[0] * tile.size[1]:
+                tile_path = os.path.join(outpath, '{}-{}-level{}-{}-{}.jpg'.format(slidenumber, n, level, i, j))
                 tile.save(tile_path)
                 n = n + 1
     print('Total of {} tiles with tissue ratio >{} in slide {}'.format(n, tissue_ratio, slidepath))
@@ -81,10 +93,22 @@ def pickle_save(file, path, name):
         pickle.dump(file, f)
 
 
-def patch_division(slides, outpath, level, tile_size, tissue_ratio):
+def patch_division(slides, outpath, level, tile_size=256, tissue_ratio=0.25):
+    """
+    Gets a set of slides (*.PDL1.mrxs) and divides each one of them into patches.
+    The final patches are stored in a folder with the same name as the slide.
 
-    slides = os.path.join(slides, '*.PDL1.mrxs')
+    Arguments:
+        - Slides: str, path to folder with slides.
+        - Outpath: str, directory in which the slide folders will be saved.
+          Will be created if doesn't exist
+        - level: int, resolution level
+        - tissue_ratio: float, minimum surface of tissue tile to be considered.
+          Default = 0.25
+        - tile_size: int, side number of pixels (n pixels size*size). Default = 256
+    """
 
+    # Creates directory outpath if doesn't exist yet
     try:
         os.mkdir(outpath)
         print("Directory", outpath, "created")
@@ -93,10 +117,14 @@ def patch_division(slides, outpath, level, tile_size, tissue_ratio):
         print("Directory", outpath, "already exists")
         print()
 
+    # Collects all files in folder slide with the format *.PDL1.mrxs
+    slides = os.path.join(slides, '*.PDL1.mrxs')
     slide_list = []
     for s in glob.glob(slides):
         print('[INFO] Extracting patches from slide {}'.format(s))
+        # Obtains patches from each slide s
         n_s, outpath_slide = get_patches(s, outpath, level, tissue_ratio, tile_size)
+        # Saves the slide name and the path to the patch folder in slide_list
         slide_list.append((os.path.basename(s), outpath_slide))
 
     pickle_save(slide_list, outpath, 'list_{}_{}.p'.format(level, tile_size))
