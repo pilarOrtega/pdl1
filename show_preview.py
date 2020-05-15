@@ -19,8 +19,8 @@ def get_preview(classifiers, level, size, slide_folder):
         preview = numpy.zeros(tiles)
         n_division = (s[2].shape[1]) - 4
         for x in classifier:
-            im_x = x[1]
-            im_y = x[2]
+            im_x = int(x[1])
+            im_y = int(x[2])
             if x[3] == 0:
                 preview[im_x][im_y] = 1
             else:
