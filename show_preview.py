@@ -8,6 +8,7 @@ import csv
 
 
 def get_preview(classifiers, level, size, slide_folder):
+    previews = []
     for s in classifiers:
         slidename = s[0]
         slidepath = os.path.join(slide_folder, slidename)
@@ -28,21 +29,26 @@ def get_preview(classifiers, level, size, slide_folder):
                     exp = n_division - j - 1
                     cluster = cluster + x[j+4] * (2**exp)
                 preview[im_x][im_y] = cluster + 2
-        return preview
+        previews.append((slidename, preview))
+    return previews
 
 
-def show_preview(classifiers, level, size, slide_folder, name):
-    preview = get_preview(classifiers, level, size, slide_folder)
-    plt.imshow(preview, cmap='tab20b')
-    plt.colorbar()
-    plt.show()
-    fig.savefig(name, bbox_inches='tight', dpi=fig.dpi)
+def show_preview(classifiers, level, size, slide_folder, outpath):
+    previews = get_preview(classifiers, level, size, slide_folder)
+    for im in previews:
+        slidename = 'clusters-level{}-ts{}-{}.png'.format(level, size, im[0])
+        name = os.path.join(outpath, slidename)
+        fig = plt.figure()
+        plt.imshow(im[1], cmap='tab20b')
+        plt.colorbar()
+        # plt.show()
+        fig.savefig(name, bbox_inches='tight', dpi=fig.dpi)
 
 
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Obtains a preview of the slide which display the clusters in different colors')
-    parser.add_argument('-c', '--classifiers', type=str, help='path to classification file (.csv)')
+    parser.add_argument('-c', '--csv_files', type=str, nargs='+', help='path(s) to csv file(s)')
     parser.add_argument('-o', '--outpath', type=str, help='name of the out file (.png)')
     parser.add_argument('-l', '--level', type=int, default=13, help='division level [Default: %(default)s]')
     parser.add_argument('-ts', '--tile_size', type=int, default=256, help='tile heigth and width in pixels [Default: %(default)s]')
