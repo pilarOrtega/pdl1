@@ -36,13 +36,13 @@ def get_preview(classifiers, level, size, slide_folder):
 def show_preview(classifiers, level, size, slide_folder, outpath):
     previews = get_preview(classifiers, level, size, slide_folder)
     for im in previews:
-        slidename = 'clusters-level{}-ts{}-{}.png'.format(level, size, im[0])
+        slidename = '{}_clusters-level{}-ts{}.png'.format(im[0], level, size)
         name = os.path.join(outpath, slidename)
         fig = plt.figure()
         plt.imshow(im[1], cmap='tab20b')
         plt.colorbar()
-        # plt.show()
         fig.savefig(name, bbox_inches='tight', dpi=fig.dpi)
+        plt.close()
 
 
 if __name__ == "__main__":
