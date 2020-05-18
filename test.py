@@ -15,6 +15,7 @@ parser.add_argument('-ts', '--tile_size', type=int, default=256, help='tile heig
 parser.add_argument('-f', '--feature_method', type=str, default='Dense', help='features extracted from individual patches [Default: %(default)s]')
 parser.add_argument('-n', '--n_division', type=int, default=4, help='number of divisions [Default: %(default)s]')
 parser.add_argument('-d', '--device', default="0")
+parser.add_argument('-j', '--jobs', type=int)
 
 args = parser.parse_args()
 
@@ -29,8 +30,9 @@ tissue_ratio = args.tissue_ratio
 tile_size = args.tile_size
 feature_method = args.feature_method
 n_division = args.n_division
+jobs = args.jobs
 
-slide_list = patch_division(slides, outpath, level, tile_size, tissue_ratio)
+slide_list = patch_division(slides, outpath, level, tile_size=tile_size, tissue_ratio=tissue_ratio, jobs=jobs)
 classifiers, list_positive = detect_dab(slide_list, outpath)
 features = feature_extraction(list_positive, outpath, feature_method)
 classifiers = cluster_division(features, classifiers, n_division, outpath, feature_method)
