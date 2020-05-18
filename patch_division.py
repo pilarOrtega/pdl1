@@ -127,7 +127,7 @@ def patch_division(slides, outpath, level, tile_size=256, tissue_ratio=0.25, job
     start = time.time()
     Parallel(n_jobs=jobs)(delayed(get_patches)(s, outpath, level, tissue_ratio, tile_size) for s in glob.glob(slides))
     end = time.time()
-    print('{:.4f} s'.format(end-start))
+    print('Total time patch extraction: {:.4f} s'.format(end-start))
     for s in glob.glob(slides):
         # print('[INFO] Extracting patches from slide {}'.format(s))
         # Obtains patches from each slide s
