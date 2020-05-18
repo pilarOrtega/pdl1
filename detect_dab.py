@@ -11,11 +11,19 @@ from skimage.util.shape import view_as_windows
 from skimage.color import rgb2hed
 import pickle
 import argparse
+from joblib import Parallel, delayed
+import time
 
 
 def dab(image, thr=225, freq=3):
     """
-    Input: image in rgb
+    Detects if an image has DAB tinction or not
+
+    Arguments:
+        - image: PIL image, in rgb
+
+    Returns:
+        - dab: bool, True if image has DAB, False if not
     """
     dab = False
     image = rgb2hed(image)
@@ -26,7 +34,9 @@ def dab(image, thr=225, freq=3):
 
 
 def get_hist(image, mode='hed', channel=2, min_val=-0.55, max_val=-0.2):
-
+    """
+    Gets color histogram of the HED image
+    """
     if mode == 'rgb':
         image = rgb2hed(image)
     im_channel = image[:, :, channel]
@@ -58,12 +68,14 @@ def divide_dab(path):
         - image_positive, image_negative: list
     """
 
+    # Collects all images .jpg from path
     image_path = os.path.join(path, "*.jpg")
     image_path = glob.glob(image_path)
     image_positive = []
     image_negative = []
     n = len(image_path)
 
+    # Detects DAB presence in each image. DAB positive images are stored in image_positive list
     for im in tqdm(image_path):
         image = imread(im)
         if dab(image):
@@ -84,39 +96,50 @@ def pickle_save(file, path, name):
         pickle.dump(file, f)
 
 
-def detect_dab(list_slides, outpath):
+def detect_dab_delayed(slide):
+    list_positive, list_negative, n = divide_dab(slide[1])
+    c = numpy.zeros((n, 4))
+    c = c.astype(int)
+    for im in list_positive:
+        name = os.path.basename(im)
+        name = os.path.splitext(name)[0]
+        number = name.split('-')
+        slide_number = int(number[1])
+        x = int(number[3])
+        y = int(number[4])
+        c[slide_number][0] = slide_number
+        c[slide_number][1] = x
+        c[slide_number][2] = y
+        c[slide_number][3] = 1
+    for im in list_negative:
+        name = os.path.basename(im)
+        name = os.path.splitext(name)[0]
+        number = name.split('-')
+        slide_number = int(number[1])
+        x = int(number[3])
+        y = int(number[4])
+        c[slide_number][0] = slide_number
+        c[slide_number][1] = x
+        c[slide_number][2] = y
+        c[slide_number][3] = 0
+    classifier = (slide[0], slide[1], c)
+
+    return classifier, list_positive
+
+
+def detect_dab(list_slides, outpath, jobs):
+
+    # Parallelization
+    start = time.time()
+    result = Parallel(n_jobs=jobs)(delayed(detect_dab_delayed)(s) for s in (list_slides))
+    end = time.time()
 
     classifier = []
     list_positive = []
     for i in range(len(list_slides)):
-        print('Getting positive patches from slide {} out of {}'.format(i+1, len(list_slides)))
-        list_positive_x, list_negative_x, n = divide_dab(list_slides[i][1])
-        c = numpy.zeros((n, 4))
-        c = c.astype(int)
-        for im in list_positive_x:
-            name = os.path.basename(im)
-            name = os.path.splitext(name)[0]
-            number = name.split('-')
-            slide_number = int(number[1])
-            x = int(number[3])
-            y = int(number[4])
-            c[slide_number][0] = slide_number
-            c[slide_number][1] = x
-            c[slide_number][2] = y
-            c[slide_number][3] = 1
-            list_positive.append(im)
-        for im in list_negative_x:
-            name = os.path.basename(im)
-            name = os.path.splitext(name)[0]
-            number = name.split('-')
-            slide_number = int(number[1])
-            x = int(number[3])
-            y = int(number[4])
-            c[slide_number][0] = slide_number
-            c[slide_number][1] = x
-            c[slide_number][2] = y
-            c[slide_number][3] = 0
-        classifier.append((list_slides[i][0], list_slides[i][1], c))
+        classifier.append(result[i][0])
+        for p in result[i][1]:
+            list_positive.append(p)
 
     name = outpath
     name = os.path.basename(name)
@@ -135,12 +158,14 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Script that discriminates patches positives to DAB.')
     parser.add_argument('-l', '--list_slides', type=str, help='file with slide list')
     parser.add_argument('-o', '--outpath', type=str, help='path to outfolder')
+    parser.add_argument('-j', '--jobs', type=int)
 
     args = parser.parse_args()
 
     outpath = args.outpath
     list_slides = args.list_slides
+    jobs = args.jobs
     with open(list_slides, "rb") as f:
         list_slides = pickle.load(f)
 
-    classifier, list_positive = detect_dab(list_slides, outpath)
+    classifier, list_positive = detect_dab(list_slides, outpath, jobs=jobs)
