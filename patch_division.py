@@ -7,6 +7,7 @@ import numpy
 import pickle
 import argparse
 from matplotlib import pyplot as plt
+from PIL import ImageOps
 
 
 def get_patches(slidepath, outpath, level=10, tissue_ratio=0.25, size=256):
@@ -44,6 +45,7 @@ def get_patches(slidepath, outpath, level=10, tissue_ratio=0.25, size=256):
 
     # Saves a preview of the slide under 'slidename.png'
     image = slide.read_region((0, 0), 7, slide.level_dimensions[7])
+    image = ImageOps.mirror(image)
     image = numpy.array(image)[:, :, 0:3]
     name = '{}.png'.format(slidename)
     name = os.path.join(outpath, name)
