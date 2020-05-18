@@ -33,7 +33,7 @@ n_division = args.n_division
 jobs = args.jobs
 
 slide_list = patch_division(slides, outpath, level, tile_size=tile_size, tissue_ratio=tissue_ratio, jobs=jobs)
-classifiers, list_positive = detect_dab(slide_list, outpath)
+classifiers, list_positive = detect_dab(slide_list, outpath, jobs=jobs)
 features = feature_extraction(list_positive, outpath, feature_method)
 classifiers = cluster_division(features, classifiers, n_division, outpath, feature_method)
 show_preview(classifiers, level, tile_size, slides, outpath)
