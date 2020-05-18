@@ -8,6 +8,8 @@ import pickle
 import argparse
 from matplotlib import pyplot as plt
 from PIL import ImageOps
+from joblib import Parallel, delayed
+import time
 
 
 def get_patches(slidepath, outpath, level=10, tissue_ratio=0.25, size=256):
@@ -95,7 +97,7 @@ def pickle_save(file, path, name):
         pickle.dump(file, f)
 
 
-def patch_division(slides, outpath, level, tile_size=256, tissue_ratio=0.25):
+def patch_division(slides, outpath, level, tile_size=256, tissue_ratio=0.25, jobs=1):
     """
     Gets a set of slides (*.PDL1.mrxs) and divides each one of them into patches.
     The final patches are stored in a folder with the same name as the slide.
@@ -122,12 +124,18 @@ def patch_division(slides, outpath, level, tile_size=256, tissue_ratio=0.25):
     # Collects all files in folder slide with the format *.PDL1.mrxs
     slides = os.path.join(slides, '*.PDL1.mrxs')
     slide_list = []
+    start = time.time()
+    Parallel(n_jobs=jobs)(delayed(get_patches)(s, outpath, level, tissue_ratio, tile_size) for s in glob.glob(slides))
+    end = time.time()
+    print('{:.4f} s'.format(end-start))
     for s in glob.glob(slides):
-        print('[INFO] Extracting patches from slide {}'.format(s))
+        # print('[INFO] Extracting patches from slide {}'.format(s))
         # Obtains patches from each slide s
-        n_s, outpath_slide = get_patches(s, outpath, level, tissue_ratio, tile_size)
+        # n_s, outpath_slide = get_patches(s, outpath, level, tissue_ratio, tile_size)
         # Saves the slide name and the path to the patch folder in slide_list
-        slide_list.append((os.path.basename(s), outpath_slide))
+        slidename = os.path.basename(s)
+        outpath_slide = os.path.join(outpath, slidename)
+        slide_list.append((slidename, outpath_slide))
 
     pickle_save(slide_list, outpath, 'list_{}_{}.p'.format(level, tile_size))
 
@@ -143,6 +151,7 @@ if __name__ == "__main__":
     parser.add_argument('-ts', '--tile_size', type=int, default=256, help='tile heigth and width in pixels [Default: %(default)s]')
     parser.add_argument('-tr', '--tissue_ratio', type=float, default=0.5, help='tissue ratio per patch [Default: %(default)s]')
     parser.add_argument('-d', '--device', default='0')
+    parser.add_argument('-j', '--jobs', type=int)
 
     args = parser.parse_args()
 
@@ -153,5 +162,6 @@ if __name__ == "__main__":
     tissue_ratio = args.tissue_ratio
     slides = args.slides
     level = args.level
+    jobs = args.jobs
 
-    slide_list = patch_division(slides, outpath, level, tile_size, tissue_ratio)
+    slide_list = patch_division(slides, outpath, level, tile_size=tile_size, tissue_ratio=tissue_ratio, jobs=jobs)
