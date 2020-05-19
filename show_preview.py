@@ -33,10 +33,10 @@ def get_preview(classifiers, level, size, slide_folder):
     return previews
 
 
-def show_preview(classifiers, level, size, slide_folder, outpath):
+def show_preview(classifiers, level, size, slide_folder, outpath, feature_method):
     previews = get_preview(classifiers, level, size, slide_folder)
     for im in previews:
-        slidename = '{}_clusters-level{}-ts{}.png'.format(im[0], level, size)
+        slidename = '{}_{}-level{}-ts{}.png'.format(feature_method, im[0], level, size)
         name = os.path.join(outpath, slidename)
         fig = plt.figure()
         plt.imshow(im[1], cmap='tab20b')
@@ -53,6 +53,7 @@ if __name__ == "__main__":
     parser.add_argument('-l', '--level', type=int, default=13, help='division level [Default: %(default)s]')
     parser.add_argument('-ts', '--tile_size', type=int, default=256, help='tile heigth and width in pixels [Default: %(default)s]')
     parser.add_argument('-s', '--slide_folder', type=str, default=0.5, help='path to slide folder')
+    parser.add_agument('-f', '--feature_method', type=str)
 
     args = parser.parse_args()
 
@@ -68,4 +69,4 @@ if __name__ == "__main__":
         path = os.path.join(path, slide)
         classifiers.append((slide, path, list_to_array(list_file)))
 
-    show_preview(classifiers, args.level, args.tile_size, args.slide_folder, args.outpath)
+    show_preview(classifiers, args.level, args.tile_size, args.slide_folder, args.outpath, args.feature_method)
