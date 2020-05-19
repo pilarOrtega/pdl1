@@ -57,7 +57,7 @@ def get_hist(image, mode='hed', channel=2, min_val=-0.55, max_val=-0.2):
     return hist
 
 
-def divide_dab(path):
+def divide_dab(path, threshold):
     """
     Divides set of images according to the presence of DAB staining
 
@@ -78,7 +78,7 @@ def divide_dab(path):
     # Detects DAB presence in each image. DAB positive images are stored in image_positive list
     for im in tqdm(image_path):
         image = imread(im)
-        if dab(image):
+        if dab(image, thr=threshold):
             image_positive.append(im)
         else:
             image_negative.append(im)
@@ -96,8 +96,8 @@ def pickle_save(file, path, name):
         pickle.dump(file, f)
 
 
-def detect_dab_delayed(slide):
-    list_positive, list_negative, n = divide_dab(slide[1])
+def detect_dab_delayed(slide, threshold):
+    list_positive, list_negative, n = divide_dab(slide[1], threshold=threshold)
     c = numpy.zeros((n, 4))
     c = c.astype(int)
     for im in list_positive:
@@ -127,11 +127,11 @@ def detect_dab_delayed(slide):
     return classifier, list_positive
 
 
-def detect_dab(list_slides, outpath, jobs):
+def detect_dab(list_slides, outpath, jobs, threshold):
 
     # Parallelization
     start = time.time()
-    result = Parallel(n_jobs=jobs)(delayed(detect_dab_delayed)(s) for s in (list_slides))
+    result = Parallel(n_jobs=jobs)(delayed(detect_dab_delayed)(s, threshold) for s in (list_slides))
     end = time.time()
 
     classifier = []
@@ -158,6 +158,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Script that discriminates patches positives to DAB.')
     parser.add_argument('-l', '--list_slides', type=str, help='file with slide list')
     parser.add_argument('-o', '--outpath', type=str, help='path to outfolder')
+    parser.add_argument('-t', '--threshold', type=int, default=225)
     parser.add_argument('-j', '--jobs', type=int)
 
     args = parser.parse_args()
@@ -165,7 +166,8 @@ if __name__ == '__main__':
     outpath = args.outpath
     list_slides = args.list_slides
     jobs = args.jobs
+    threshold = args.threshold
     with open(list_slides, "rb") as f:
         list_slides = pickle.load(f)
 
-    classifier, list_positive = detect_dab(list_slides, outpath, jobs=jobs)
+    classifier, list_positive = detect_dab(list_slides, outpath, jobs=jobs, threshold=threshold)
