@@ -57,18 +57,6 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    # classifiers = []
-    # csv_files = args.csv_files
-    # for file in csv_files:
-    #     print('Reading file '+file)
-    #     list_file = read_csv(file)
-    #     path = os.path.dirname(file)
-    #     slide = os.path.basename(file)
-    #     slide = os.path.splitext(slide)[0]
-    #     slide = slide.split('-')[0]
-    #     path = os.path.join(path, slide)
-    #     classifiers.append((slide, path, list_to_array(list_file)))
-
     with open(args.classifiers, "rb") as f:
         classifiers = pickle.load(f)
 
