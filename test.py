@@ -3,6 +3,7 @@ from detect_dab import *
 from feature_extraction import *
 from cluster_division import *
 from show_preview import *
+from save_cluster import *
 
 
 # Manage parameters
@@ -36,4 +37,11 @@ slide_list = patch_division(slides, outpath, level, tile_size=tile_size, tissue_
 classifiers, list_positive = detect_dab(slide_list, outpath, jobs=jobs)
 features = feature_extraction(list_positive, outpath, feature_method)
 classifiers = cluster_division(features, classifiers, n_division, outpath, feature_method)
+outpath = os.path.join(outpath, 'Results_{}'.format(feature_method))
+try:
+    os.mkdir(outpath)
+    print("Directory", outpath, "created")
+except FileExistsError:
+    print("Directory", outpath, "already exists")
 show_preview(classifiers, level, tile_size, slides, outpath, feature_method)
+save_cluster(classifiers, outpath, feature_method)
