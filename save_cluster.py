@@ -5,7 +5,7 @@ import csv
 import numpy
 import argparse
 from skimage.io import sift, imread, imsave
-import show_random_imgs as sri
+from show_random_imgs import *
 
 
 def save_cluster_folder(outpath, cluster_list, n_division, feature_method):
@@ -92,6 +92,43 @@ def list_to_array(list):
     list_array = list_array.astype(int)
     return list_array
 
+
+def save_cluster(classifiers, outpath, feature_method, x=4, y=8, figsize=(13, 7), save_folder=False):
+    cluster_list = []
+    for x in classifiers:
+        n_division = (x[2].shape[1]) - 4
+        clist = get_clusterlist(x[1], x[2], n_division)
+        cluster_list.extend(clist)
+        if save_folder:
+            print('Saving images from slide ' + x[1])
+            print()
+            save_cluster_folder(x[1], clist, n_division, feature_method)
+            csv_file_cluster_list = os.path.join(x[1], 'cluster_list_{}.csv'.format(feature_method))
+            csv_columns = ["Slidename"]
+            csv_columns.append('Number')
+            csv_columns.append('X')
+            csv_columns.append('Y')
+            csv_columns.append('Cluster')
+            with open(csv_file_cluster_list, 'w') as csv_file:
+                writer = csv.DictWriter(csv_file, csv_columns)
+                writer.writeheader()
+                for im in clist:
+                    im_name = os.path.basename(im[0])
+                    data = os.path.splitext(im_name)[0]
+                    data = data.split('-')
+                    row = {'Slidename': data[0], 'Number': data[1], 'X': data[3], 'Y': data[4], 'Cluster': im[1]}
+                    writer.writerow(row)
+
+    for i in range(2**n_division):
+        list_images = []
+        for im in cluster_list:
+            if im[1] == i:
+                list_images.append(im[0])
+        cluster_name = os.path.join(outpath, '{}_cluster_{}.png'.format(feature_method, i))
+        show_random_imgs(list_images, x, y, figsize, save_fig=True, name=cluster_name)
+
+    return cluster_list
+
 ###############################################################################
 #
 # MAIN
@@ -103,42 +140,19 @@ if __name__ == "__main__":
 
     # Manage parameters
     parser = argparse.ArgumentParser(description='Reads data from csv file and saves patches in corresponding clusters')
-    parser.add_argument('-c', '--csv_files', type=str, nargs='+', help='path(s) to csv file(s)')
+    parser.add_argument('-c', '--classifiers', type=str, help='path to classifier file')
+    parser.add_argument('-o', '--outpath', type=str, help='path to outfolder')
+    parser.add_argument('-s', '--save_folder', action='store_true', help='saves patches in cluster folders')
     args = parser.parse_args()
 
-    classifiers = []
-    csv_files = args.csv_files
-    for file in csv_files:
-        print('Reading file '+file)
-        list_file = read_csv(file)
-        path = os.path.dirname(file)
-        slide = os.path.basename(file)
-        slide = os.path.splitext(slide)[0]
-        slide = slide.split('-')[0]
-        path = os.path.join(path, slide)
-        classifiers.append((slide, path, list_to_array(list_file)))
-
-    feature_method = os.path.basename(csv_files[0])
-    feature_method = os.path.splitext(feature_method)[0]
+    classifiers = args.classifiers
+    outpath = args.outpath
+    save_folder = args.save_folder
+    feature_method = os.path.basename(classifiers)
+    feature_method = os.path.splitext(classifiers)[0]
     feature_method = feature_method.split('-')[1]
-    for x in classifiers:
-        n_division = (x[2].shape[1]) - 4
-        cluster_list = get_clusterlist(x[1], x[2], n_division)
-        print('Saving images from slide ' + x[1])
-        print()
-        save_cluster_folder(x[1], cluster_list, n_division, feature_method)
-        csv_file_cluster_list = os.path.join(x[1], 'cluster_list_{}.csv'.format(feature_method))
-        csv_columns = ["Slidename"]
-        csv_columns.append('Number')
-        csv_columns.append('X')
-        csv_columns.append('Y')
-        csv_columns.append('Cluster')
-        with open(csv_file_cluster_list, 'w') as csv_file:
-            writer = csv.DictWriter(csv_file, csv_columns)
-            writer.writeheader()
-            for im in cluster_list:
-                im_name = os.path.basename(im[0])
-                data = os.path.splitext(im_name)[0]
-                data = data.split('-')
-                row = {'Slidename': data[0], 'Number': data[1], 'X': data[3], 'Y': data[4], 'Cluster': im[1]}
-                writer.writerow(row)
+
+    if save_folder:
+        cluster_list = save_cluster(classifiers, outpath, feature_method, save_folder=save_folder)
+    else:
+        cluster_list = save_cluster(classifiers, outpath, feature_method)
