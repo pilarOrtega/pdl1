@@ -6,6 +6,7 @@ import numpy
 import argparse
 from skimage.io import sift, imread, imsave
 from show_random_imgs import *
+import pickle
 
 
 def save_cluster_folder(outpath, cluster_list, n_division, feature_method):
