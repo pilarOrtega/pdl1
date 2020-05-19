@@ -48,7 +48,7 @@ def show_preview(classifiers, level, size, slide_folder, outpath, feature_method
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Obtains a preview of the slide which display the clusters in different colors')
-    parser.add_argument('-c', '--csv_files', type=str, nargs='+', help='path(s) to csv file(s)')
+    parser.add_argument('-c', '--classifiers', type=str, help='path(s) to csv file(s)')
     parser.add_argument('-o', '--outpath', type=str, help='name of the out file (.png)')
     parser.add_argument('-l', '--level', type=int, default=13, help='division level [Default: %(default)s]')
     parser.add_argument('-ts', '--tile_size', type=int, default=256, help='tile heigth and width in pixels [Default: %(default)s]')
@@ -57,16 +57,19 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    classifiers = []
-    csv_files = args.csv_files
-    for file in csv_files:
-        print('Reading file '+file)
-        list_file = read_csv(file)
-        path = os.path.dirname(file)
-        slide = os.path.basename(file)
-        slide = os.path.splitext(slide)[0]
-        slide = slide.split('-')[0]
-        path = os.path.join(path, slide)
-        classifiers.append((slide, path, list_to_array(list_file)))
+    # classifiers = []
+    # csv_files = args.csv_files
+    # for file in csv_files:
+    #     print('Reading file '+file)
+    #     list_file = read_csv(file)
+    #     path = os.path.dirname(file)
+    #     slide = os.path.basename(file)
+    #     slide = os.path.splitext(slide)[0]
+    #     slide = slide.split('-')[0]
+    #     path = os.path.join(path, slide)
+    #     classifiers.append((slide, path, list_to_array(list_file)))
+
+    with open(args.classifiers, "rb") as f:
+        classifiers = pickle.load(f)
 
     show_preview(classifiers, args.level, args.tile_size, args.slide_folder, args.outpath, args.feature_method)
