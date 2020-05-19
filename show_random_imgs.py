@@ -24,7 +24,7 @@ def show_random_imgs(images, x, y, figsize=(10, 10), save_fig=False, name=''):
             im = imread(images[k])
             ax[i].imshow(im)
             ax[i].set_title(image_slide+'-'+image_number, fontdict={'fontsize': 6, 'fontweight': 'medium'})
-    fig.suptitle(name)
+    fig.suptitle(name, va='baseline')
     fig.tight_layout()
     plt.show()
     if save_fig:
