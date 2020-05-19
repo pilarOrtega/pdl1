@@ -41,6 +41,7 @@ def save_cluster_folder(outpath, cluster_list, n_division, feature_method):
 def get_clusterlist(outpath, classifier, n_division):
     cluster_list = []
     image_list = glob.glob(os.path.join(outpath, '*.jpg'))
+    print('Get cluster list from {}'.format(outpath))
     for im in tqdm(image_list):
         image_name = os.path.basename(im)
         number = image_name.split('-')
@@ -96,15 +97,15 @@ def list_to_array(list):
 
 def save_cluster(classifiers, outpath, feature_method, x=4, y=8, figsize=(13, 7), save_folder=False):
     cluster_list = []
-    for x in classifiers:
-        n_division = (x[2].shape[1]) - 4
-        clist = get_clusterlist(x[1], x[2], n_division)
+    for c in classifiers:
+        n_division = (c[2].shape[1]) - 4
+        clist = get_clusterlist(c[1], c[2], n_division)
         cluster_list.extend(clist)
         if save_folder:
-            print('Saving images from slide ' + x[1])
+            print('Saving images from slide ' + c[1])
             print()
-            save_cluster_folder(x[1], clist, n_division, feature_method)
-            csv_file_cluster_list = os.path.join(x[1], 'cluster_list_{}.csv'.format(feature_method))
+            save_cluster_folder(c[1], clist, n_division, feature_method)
+            csv_file_cluster_list = os.path.join(c[1], 'cluster_list_{}.csv'.format(feature_method))
             csv_columns = ["Slidename"]
             csv_columns.append('Number')
             csv_columns.append('X')
