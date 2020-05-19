@@ -36,7 +36,7 @@ def get_preview(classifiers, level, size, slide_folder):
 def show_preview(classifiers, level, size, slide_folder, outpath, feature_method):
     previews = get_preview(classifiers, level, size, slide_folder)
     for im in previews:
-        slidename = '{}_{}-level{}-ts{}.png'.format(feature_method, im[0], level, size)
+        slidename = '{}-{}-level{}-ts{}.png'.format(im[0], feature_method, level, size)
         name = os.path.join(outpath, slidename)
         fig = plt.figure()
         plt.imshow(im[1], cmap='tab20b')
@@ -48,7 +48,7 @@ def show_preview(classifiers, level, size, slide_folder, outpath, feature_method
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Obtains a preview of the slide which display the clusters in different colors')
-    parser.add_argument('-c', '--classifiers', type=str, help='path(s) to csv file(s)')
+    parser.add_argument('-c', '--classifiers', type=str, help='path to classifier file')
     parser.add_argument('-o', '--outpath', type=str, help='name of the out file (.png)')
     parser.add_argument('-l', '--level', type=int, default=13, help='division level [Default: %(default)s]')
     parser.add_argument('-ts', '--tile_size', type=int, default=256, help='tile heigth and width in pixels [Default: %(default)s]')
