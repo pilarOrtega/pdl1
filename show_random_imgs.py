@@ -18,11 +18,12 @@ def show_random_imgs(images, x, y, figsize=(10, 10), save_fig=False, name=''):
     else:
         for i in range(n):
             k = randint(0, len(images)-1)
-            image_number = os.path.basename(images[k])
-            image_number = image_number.split('-')[1]
+            image_data = os.path.basename(images[k])
+            image_number = image_data.split('-')[1]
+            image_slide = image_data.split('-')[0]
             im = imread(images[k])
             ax[i].imshow(im)
-            ax[i].set_title(image_number)
+            ax[i].set_title(image_slide+image_number)
     fig.tight_layout()
     plt.show()
     if save_fig:
