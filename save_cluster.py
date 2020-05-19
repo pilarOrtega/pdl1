@@ -47,7 +47,7 @@ def get_clusterlist(outpath, classifier, n_division):
         number = image_name.split('-')
         number = int(number[1])
 
-        if classifier[number][1] == 0:
+        if classifier[number][3] == 0:
             continue
 
         cluster = 0
