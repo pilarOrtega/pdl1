@@ -151,6 +151,8 @@ if __name__ == "__main__":
     feature_method = os.path.basename(classifiers)
     feature_method = os.path.splitext(classifiers)[0]
     feature_method = feature_method.split('-')[1]
+    with open(classifiers, "rb") as f:
+        classifiers = pickle.load(f)
 
     if save_folder:
         cluster_list = save_cluster(classifiers, outpath, feature_method, save_folder=save_folder)
