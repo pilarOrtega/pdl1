@@ -53,7 +53,7 @@ if __name__ == "__main__":
     parser.add_argument('-l', '--level', type=int, default=13, help='division level [Default: %(default)s]')
     parser.add_argument('-ts', '--tile_size', type=int, default=256, help='tile heigth and width in pixels [Default: %(default)s]')
     parser.add_argument('-s', '--slide_folder', type=str, default=0.5, help='path to slide folder')
-    parser.add_agument('-f', '--feature_method', type=str)
+    parser.add_argument('-f', '--feature_method', type=str)
 
     args = parser.parse_args()
 
