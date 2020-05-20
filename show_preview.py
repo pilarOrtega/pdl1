@@ -30,7 +30,7 @@ def get_preview(s, level, size, slide_folder, n_division):
                 exp = n_division - j - 1
                 cluster = cluster + x[j+4] * (2**exp)
             preview[im_x][im_y] = cluster + 2
-    result.append((slidename, preview))
+    result.extend((slidename, preview))
     return result
 
 
@@ -39,8 +39,9 @@ def show_preview(classifiers, level, size, slide_folder, outpath, feature_method
         n_division = (s[2].shape[1]) - 4
 
     start = time.time()
-    previews = Parallel(n_jobs=4)(delayed(get_preview)(s, level, size, slide_folder, n_division) for s in (classifiers))
+    previews = Parallel(n_jobs=4)(delayed(get_preview)(s, level, size, slide_folder, n_division) for s in tqdm(classifiers))
     end = time.time()
+    print('Total time get previews: {:.4f} s'.format(end-start))
 
     for im in previews:
         slidename = '{}-{}-level{}-ts{}-{}.png'.format(im[0], feature_method, level, size, n_division)
