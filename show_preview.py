@@ -11,6 +11,7 @@ import time
 
 
 def get_preview(s, level, size, slide_folder, n_division):
+    result = []
     slidename = s[0]
     slidepath = os.path.join(slide_folder, slidename)
     classifier = s[2]
@@ -29,7 +30,8 @@ def get_preview(s, level, size, slide_folder, n_division):
                 exp = n_division - j - 1
                 cluster = cluster + x[j+4] * (2**exp)
             preview[im_x][im_y] = cluster + 2
-    return preview
+    result.append((slidename, preview))
+    return result
 
 
 def show_preview(classifiers, level, size, slide_folder, outpath, feature_method, n_division=0):
