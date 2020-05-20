@@ -82,8 +82,9 @@ def get_features(image_list, nclusters=256, method='Dense'):
         patch_shape = (8, 8)
 
         print('Step 1: KMeans fitting')
-        for im in tqdm(image_list):
-            image = imread(im)
+        # Fits k-means in 1/50 of the images
+        for i in tqdm(range(0, len(image_list), 50)):
+            image = imread(im[i])
             image = numpy.asarray(rgb2hed(image))
             image = image[:, :, 2]
             image = image.astype(float)
@@ -121,8 +122,8 @@ def get_features(image_list, nclusters=256, method='Dense'):
         r = 0
         # extraction
         print('Step 1: KMeans fitting')
-        for im in tqdm(image_list):
-            image = imread(im)
+        for i in tqdm(range(0, len(image_list), 50)):
+            image = imread(im[i])
             if method == 'Daisy':
                 image = numpy.asarray(rgb2grey(image))
             if method == 'DaisyDAB':
