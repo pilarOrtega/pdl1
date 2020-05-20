@@ -7,7 +7,7 @@ from openslide import OpenSlide, deepzoom
 import csv
 
 
-def get_preview(classifiers, level, size, slide_folder):
+def get_preview(classifiers, level, size, slide_folder, n_division):
     previews = []
     for s in classifiers:
         slidename = s[0]
@@ -17,7 +17,6 @@ def get_preview(classifiers, level, size, slide_folder):
         slide_dz = deepzoom.DeepZoomGenerator(slide, tile_size=(size - 2), overlap=1)
         tiles = slide_dz.level_tiles[level]
         preview = numpy.zeros(tiles)
-        n_division = (s[2].shape[1]) - 4
         for x in classifier:
             im_x = int(x[1])
             im_y = int(x[2])
@@ -33,10 +32,12 @@ def get_preview(classifiers, level, size, slide_folder):
     return previews
 
 
-def show_preview(classifiers, level, size, slide_folder, outpath, feature_method):
-    previews = get_preview(classifiers, level, size, slide_folder)
+def show_preview(classifiers, level, size, slide_folder, outpath, feature_method, n_division=0):
+    if n_division == 0:
+        n_division = (s[2].shape[1]) - 4
+    previews = get_preview(classifiers, level, size, slide_folder, n_division)
     for im in previews:
-        slidename = '{}-{}-level{}-ts{}.png'.format(im[0], feature_method, level, size)
+        slidename = '{}-{}-level{}-ts{}-{}.png'.format(im[0], feature_method, level, size, n_division)
         name = os.path.join(outpath, slidename)
         fig = plt.figure()
         plt.imshow(im[1], cmap='tab20b')
@@ -53,6 +54,7 @@ if __name__ == "__main__":
     parser.add_argument('-l', '--level', type=int, default=13, help='division level [Default: %(default)s]')
     parser.add_argument('-ts', '--tile_size', type=int, default=256, help='tile heigth and width in pixels [Default: %(default)s]')
     parser.add_argument('-s', '--slide_folder', type=str, default=0.5, help='path to slide folder')
+    parser.add_argument('-n', '--n_division', type=int, default=0, help='number of divisions')
     parser.add_argument('-f', '--feature_method', type=str)
 
     args = parser.parse_args()
@@ -60,4 +62,4 @@ if __name__ == "__main__":
     with open(args.classifiers, "rb") as f:
         classifiers = pickle.load(f)
 
-    show_preview(classifiers, args.level, args.tile_size, args.slide_folder, args.outpath, args.feature_method)
+    show_preview(classifiers, args.level, args.tile_size, args.slide_folder, args.outpath, args.feature_method, args.n_division)

@@ -43,5 +43,5 @@ try:
     print("Directory", outpath, "created")
 except FileExistsError:
     print("Directory", outpath, "already exists")
-show_preview(classifiers, level, tile_size, slides, outpath, feature_method)
+show_preview(classifiers, level, tile_size, slides, outpath, feature_method, n_division)
 save_cluster(classifiers, outpath, feature_method)
