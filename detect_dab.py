@@ -8,6 +8,7 @@ from skimage.io import sift, imread, imsave, imshow
 from sklearn.cluster import MiniBatchKMeans
 from tqdm import tqdm
 from skimage.util.shape import view_as_windows
+from skimage.exposure import histogram
 from skimage.color import rgb2hed
 import pickle
 import argparse
@@ -15,7 +16,7 @@ from joblib import Parallel, delayed
 import time
 
 
-def dab(image, thr=225, freq=3):
+def dab(image, thr=85, freq=10):
     """
     Detects if an image has DAB tinction or not
 
@@ -27,34 +28,10 @@ def dab(image, thr=225, freq=3):
     """
     dab = False
     image = rgb2hed(image)
-    hist = get_hist(image)
+    hist = histogram(image[:, :, 2], source_range='dtype')[0]
     if numpy.sum(hist[thr:]) > freq:
         dab = True
     return dab
-
-
-def get_hist(image, mode='hed', channel=2, min_val=-0.55, max_val=-0.2):
-    """
-    Gets color histogram of the HED image
-    """
-    if mode == 'rgb':
-        image = rgb2hed(image)
-    im_channel = image[:, :, channel]
-    x = (min_val, max_val)
-    y = (0, 255)
-    a = (y[0]-y[1])/(x[0]-x[1])
-    b = y[1] - a*x[1]
-    for i in range(im_channel.shape[0]):
-        for j in range(im_channel.shape[1]):
-            im_channel[i, j] = abs(a*(im_channel[i, j]) + b)
-            im_channel[i, j] = abs(int(im_channel[i, j]))
-
-    im_channel = im_channel.astype('int64')
-    im_channel = numpy.reshape(im_channel, im_channel.shape[0]*im_channel.shape[1])
-
-    hist = numpy.bincount(im_channel, minlength=255)
-
-    return hist
 
 
 def divide_dab(path, threshold):
