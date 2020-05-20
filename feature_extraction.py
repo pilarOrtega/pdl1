@@ -304,7 +304,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-    os.environ["CUDA_VISIBLE_DEVICE"] = 0
+    os.environ["CUDA_VISIBLE_DEVICE"] = "0"
 
     with open(args.list_positive, "rb") as f:
         list_positive = pickle.load(f)
