@@ -47,8 +47,9 @@ def get_features(image_list, nclusters=256, method='Dense'):
         patch_shape = (8, 8, 3)
 
         print('Step 1: KMeans fitting')
-        for im in tqdm(image_list):
-            image = imread(im)
+        # Fits k-means in 1/50 of the images
+        for i in tqdm(range(0, len(image_list), 50)):
+            image = imread(im[i])
             image = numpy.asarray(image)
             image = image.astype(float)
             patches = view_as_windows(image, patch_shape)
