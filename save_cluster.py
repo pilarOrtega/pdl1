@@ -7,6 +7,8 @@ import argparse
 from skimage.io import sift, imread, imsave
 from show_random_imgs import *
 import pickle
+from joblib import Parallel, delayed
+import time
 
 
 def save_cluster_folder(outpath, cluster_list, n_division, feature_method):
@@ -121,13 +123,19 @@ def save_cluster(classifiers, outpath, feature_method, x=4, y=8, figsize=(13, 7)
                     row = {'Slidename': data[0], 'Number': data[1], 'X': data[3], 'Y': data[4], 'Cluster': im[1]}
                     writer.writerow(row)
 
+    list_cluster = []
     for i in range(2**n_division):
         list_images = []
         for im in cluster_list:
             if im[1] == i:
                 list_images.append(im[0])
         cluster_name = os.path.join(outpath, '{}_cluster_{}.png'.format(feature_method, i))
-        show_random_imgs(list_images, x, y, figsize, save_fig=True, name=cluster_name)
+        list_cluster.append((cluster_name, list_images))
+
+    start = time.time()
+    Parallel(n_jobs=4)(delayed(show_random_images)(l[1], x, y, figsize, save_fig=True, name=l[0]) for l in tqdm(list_cluster))
+    end = time.time()
+    print('Total time get images: {:.4f} s'.format(end-start))
 
     return cluster_list
 
