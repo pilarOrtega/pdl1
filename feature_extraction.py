@@ -301,11 +301,10 @@ if __name__ == "__main__":
     parser.add_argument('-l', '--list_positive', type=str, help='file with slide list')
     parser.add_argument('-o', '--outpath', type=str, help='path to outfolder')
     parser.add_argument('-f', '--feature_method', type=str, choices=['Dense', 'DenseDAB', 'Daisy', 'DaisyDAB', 'VGG16', 'Xception'], help='feature method')
-    parser.add_argument('-d', '--device', default="0")
     args = parser.parse_args()
 
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-    os.environ["CUDA_VISIBLE_DEVICE"] = args.device
+    os.environ["CUDA_VISIBLE_DEVICE"] = "0"
 
     with open(args.list_positive, "rb") as f:
         list_positive = pickle.load(f)
