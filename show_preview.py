@@ -5,37 +5,41 @@ import pickle
 from save_cluster import *
 from openslide import OpenSlide, deepzoom
 import csv
+from tqdm import tqdm
+from joblib import Parallel, delayed
+import time
 
 
-def get_preview(classifiers, level, size, slide_folder, n_division):
-    previews = []
-    for s in classifiers:
-        slidename = s[0]
-        slidepath = os.path.join(slide_folder, slidename)
-        classifier = s[2]
-        slide = OpenSlide(slidepath)
-        slide_dz = deepzoom.DeepZoomGenerator(slide, tile_size=(size - 2), overlap=1)
-        tiles = slide_dz.level_tiles[level]
-        preview = numpy.zeros(tiles)
-        for x in classifier:
-            im_x = int(x[1])
-            im_y = int(x[2])
-            if x[3] == 0:
-                preview[im_x][im_y] = 1
-            else:
-                cluster = 0
-                for j in range(n_division):
-                    exp = n_division - j - 1
-                    cluster = cluster + x[j+4] * (2**exp)
-                preview[im_x][im_y] = cluster + 2
-        previews.append((slidename, preview))
-    return previews
+def get_preview(s, level, size, slide_folder, n_division):
+    slidename = s[0]
+    slidepath = os.path.join(slide_folder, slidename)
+    classifier = s[2]
+    slide = OpenSlide(slidepath)
+    slide_dz = deepzoom.DeepZoomGenerator(slide, tile_size=(size - 2), overlap=1)
+    tiles = slide_dz.level_tiles[level]
+    preview = numpy.zeros(tiles)
+    for x in classifier:
+        im_x = int(x[1])
+        im_y = int(x[2])
+        if x[3] == 0:
+            preview[im_x][im_y] = 1
+        else:
+            cluster = 0
+            for j in range(n_division):
+                exp = n_division - j - 1
+                cluster = cluster + x[j+4] * (2**exp)
+            preview[im_x][im_y] = cluster + 2
+    return preview
 
 
 def show_preview(classifiers, level, size, slide_folder, outpath, feature_method, n_division=0):
     if n_division == 0:
         n_division = (s[2].shape[1]) - 4
-    previews = get_preview(classifiers, level, size, slide_folder, n_division)
+
+    start = time.time()
+    previews = Parallel(n_jobs=4)(delayed(get_preview)(s, level, size, slide_folder, n_division) for s in (classifiers))
+    end = time.time()
+
     for im in previews:
         slidename = '{}-{}-level{}-ts{}-{}.png'.format(im[0], feature_method, level, size, n_division)
         name = os.path.join(outpath, slidename)
