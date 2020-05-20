@@ -49,7 +49,7 @@ def get_features(image_list, nclusters=256, method='Dense'):
         print('Step 1: KMeans fitting')
         # Fits k-means in 1/50 of the images
         for i in tqdm(range(0, len(image_list), 50)):
-            image = imread(im[i])
+            image = imread(image_list[i])
             image = numpy.asarray(image)
             image = image.astype(float)
             patches = view_as_windows(image, patch_shape)
@@ -84,7 +84,7 @@ def get_features(image_list, nclusters=256, method='Dense'):
         print('Step 1: KMeans fitting')
         # Fits k-means in 1/50 of the images
         for i in tqdm(range(0, len(image_list), 50)):
-            image = imread(im[i])
+            image = imread(image_list[i])
             image = numpy.asarray(rgb2hed(image))
             image = image[:, :, 2]
             image = image.astype(float)
@@ -123,7 +123,7 @@ def get_features(image_list, nclusters=256, method='Dense'):
         # extraction
         print('Step 1: KMeans fitting')
         for i in tqdm(range(0, len(image_list), 50)):
-            image = imread(im[i])
+            image = imread(image_list[i])
             if method == 'Daisy':
                 image = numpy.asarray(rgb2grey(image))
             if method == 'DaisyDAB':
