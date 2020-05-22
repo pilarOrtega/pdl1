@@ -205,7 +205,7 @@ def get_features_CNN(image_list, model='VGG16'):
 
     if model in ['Xception', 'XceptionDAB']:
         print('Loading network...')
-        model = Xception(weights='imagenet', include_top=False, input_shape=(224, 224, 3), pooling='avg')
+        model = Xception(weights='imagenet', include_top=False, pooling='avg')
         model.summary()
 
         for im in tqdm(image_list):
