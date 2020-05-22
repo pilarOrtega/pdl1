@@ -24,7 +24,7 @@ from keras.applications import imagenet_utils
 from keras.applications.xception import preprocess_input
 
 
-def hof_dense(im, patch_shape, kmeans, dab=False):
+def hof_dense(im, patch_shape, kmeans, nclusters, dab=False):
     result = []
     image = imread(im)
     if dab:
@@ -43,7 +43,7 @@ def hof_dense(im, patch_shape, kmeans, dab=False):
     return result
 
 
-def hof_daisy(im, kmeans, dab=False):
+def hof_daisy(im, kmeans, nclusters, dab=False):
     result = []
     image = imread(im)
     if dab:
@@ -102,7 +102,7 @@ def get_features(image_list, nclusters=256, method='Dense'):
 
         # This loop gets again the features of each tile and gets a list of the histograms of each individual tile
         print('Step 2: Histogram of features extraction')
-        features = Parallel(n_jobs=-2)(delayed(hof_dense)(im, patch_shape, kmeans) for im in tqdm(image_list))
+        features = Parallel(n_jobs=-2)(delayed(hof_dense)(im, patch_shape, kmeans, nclusters) for im in tqdm(image_list))
 
         print('Feature extraction completed')
         print()
@@ -127,7 +127,7 @@ def get_features(image_list, nclusters=256, method='Dense'):
 
         # This loop gets again the features of each tile and gets a list of the histograms of each individual tile
         print('Step 2: Histogram of features extraction')
-        features = Parallel(n_jobs=-2)(delayed(hof_dense)(im, patch_shape, kmeans, dab=True) for im in tqdm(image_list))
+        features = Parallel(n_jobs=-2)(delayed(hof_dense)(im, patch_shape, kmeans, nclusters, dab=True) for im in tqdm(image_list))
 
         print('Feature extraction completed')
         print()
@@ -161,10 +161,10 @@ def get_features(image_list, nclusters=256, method='Dense'):
         start2 = time.time()
         print('Step 2: Histogram of features extraction')
         if method == 'Daisy':
-            features = Parallel(n_jobs=-2)(delayed(hof_daisy)(im, kmeans) for im in tqdm(image_list))
+            features = Parallel(n_jobs=-2)(delayed(hof_daisy)(im, kmeans, nclusters) for im in tqdm(image_list))
 
         if method == 'DaisyDAB':
-            features = Parallel(n_jobs=-2)(delayed(hof_daisy)(im, kmeans, dab=True) for im in tqdm(image_list))
+            features = Parallel(n_jobs=-2)(delayed(hof_daisy)(im, kmeans, nclusters, dab=True) for im in tqdm(image_list))
         end2 = time.time()
         print('Total time KMeans fitting: {:.4f} s'.format(end2-start2))
 
