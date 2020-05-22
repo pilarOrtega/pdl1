@@ -164,6 +164,17 @@ def get_features(image_list, nclusters=256, method='Dense'):
         return
 
 
+def imagetoDAB(image):
+    image_hed = rgb2hed(image)
+    d = image_hed[:, :, 2]
+    img_dab = np.zeros_like(image)
+    img_dab[:, :, 0] = d
+    img_dab[:, :, 1] = d
+    img_dab[:, :, 2] = d
+
+    return img_dab
+
+
 def get_features_CNN(image_list, model='VGG16'):
     """
     Extracts image features using CNN
@@ -176,13 +187,15 @@ def get_features_CNN(image_list, model='VGG16'):
         - features: list, contains tuples with image path + histogram of features
     """
     features = []
-    if model == 'VGG16':
+    if model in ['VGG16', 'VGG16DAB']:
         print('Loading network...')
         model = VGG16(weights='imagenet', include_top=False, pooling='avg')
         model.summary()
 
         for im in tqdm(image_list):
             image = imread(im)
+            if model == 'VGG16DAB':
+                image = imagetoDAB(image)
             image = numpy.asarray(image)
             image = numpy.expand_dims(image, axis=0)
             image = imagenet_utils.preprocess_input(image)
@@ -190,13 +203,15 @@ def get_features_CNN(image_list, model='VGG16'):
             curr_feat = curr_feat.flatten()
             features.append((im, curr_feat))
 
-    if model == 'Xception':
+    if model in ['Xception', 'XceptionDAB']:
         print('Loading network...')
-        model = Xception(weights='imagenet', include_top=False, pooling='avg')
+        model = Xception(weights='imagenet', include_top=False, input_shape=(224, 224, 3), pooling='avg')
         model.summary()
 
         for im in tqdm(image_list):
             image = imread(im)
+            if model == 'XceptionDAB':
+                image = imagetoDAB(image)
             image = numpy.asarray(image)
             image = numpy.expand_dims(image, axis=0)
             image = preprocess_input(image)
@@ -257,7 +272,7 @@ def feature_extraction(list_positive, outpath, feature_method):
     if feature_method in ['Dense', 'DenseDAB', 'Daisy', 'DaisyDAB']:
         features = get_features(list_positive, nclusters=256, method=feature_method)
 
-    if feature_method in ['VGG16', 'Xception']:
+    if feature_method in ['VGG16', 'VGG16DAB', 'Xception', 'XceptionDAB']:
         features = get_features_CNN(list_positive, model=feature_method)
 
     features = feature_reduction(features)
@@ -302,7 +317,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Script that discriminates patches positives to DAB.')
     parser.add_argument('-l', '--list_positive', type=str, help='file with slide list')
     parser.add_argument('-o', '--outpath', type=str, help='path to outfolder')
-    parser.add_argument('-f', '--feature_method', type=str, choices=['Dense', 'DenseDAB', 'Daisy', 'DaisyDAB', 'VGG16', 'Xception'], help='feature method')
+    parser.add_argument('-f', '--feature_method', type=str, choices=['Dense', 'DenseDAB', 'Daisy', 'DaisyDAB', 'VGG16', 'VGG16', 'Xception', 'XceptionDAB'], help='feature method')
     args = parser.parse_args()
 
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
