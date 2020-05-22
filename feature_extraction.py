@@ -13,12 +13,52 @@ from sklearn.manifold import TSNE
 import pickle
 import itertools
 import csv
+from joblib import Parallel, delayed
+
 
 # Importing Keras libraries
 from keras.utils import np_utils
 from keras.applications import VGG16, Xception
 from keras.applications import imagenet_utils
 from keras.applications.xception import preprocess_input
+
+
+def hof_dense(im, patch_shape, kmeans, dab=False):
+    result = []
+    image = imread(im)
+    if dab:
+        image = rgb2hed(image)
+        image = image[:, :, 2]
+    image = numpy.asarray(image)
+    image = image.astype(float)
+    patches = view_as_windows(image, patch_shape)
+    plines = patches.shape[0]
+    pcols = patches.shape[1]
+    patches_reshaped = patches.reshape(plines, pcols, patch_shape[0] * patch_shape[1] * patch_shape[2])
+    patches_reshaped = patches_reshaped.reshape(plines * pcols, patch_shape[0] * patch_shape[1] * patch_shape[2])
+    result = kmeans.predict(patches_reshaped)
+    histogram = numpy.histogram(result, bins=nclusters - 1)
+    result.extend((im, histogram[0]))
+    return result
+
+
+def hof_daisy(im, kmeans, dab=False):
+    result = []
+    image = imread(im)
+    if dab:
+        image = numpy.asarray(rgb2hed(image))
+        image = image[:, :, 2]
+    else:
+        image = numpy.asarray(rgb2grey(image))
+    daisyzy = daisy(image, step=1, radius=8, rings=3)
+    # daisy has shape P, Q, R
+    p = daisyzy.shape[0]
+    q = daisyzy.shape[1]
+    r = daisyzy.shape[2]
+    daisyzy_reshaped = daisyzy.reshape(p * q, r)
+    result = kmeans.predict(daisyzy_reshaped)
+    histogram = numpy.histogram(result, bins=nclusters - 1)
+    result.extend((im, histogram[0]))
 
 
 def get_features(image_list, nclusters=256, method='Dense'):
@@ -61,18 +101,7 @@ def get_features(image_list, nclusters=256, method='Dense'):
 
         # This loop gets again the features of each tile and gets a list of the histograms of each individual tile
         print('Step 2: Histogram of features extraction')
-        for im in tqdm(image_list):
-            image = imread(im)
-            image = numpy.asarray(image)
-            image = image.astype(float)
-            patches = view_as_windows(image, patch_shape)
-            plines = patches.shape[0]
-            pcols = patches.shape[1]
-            patches_reshaped = patches.reshape(plines, pcols, patch_shape[0] * patch_shape[1] * patch_shape[2])
-            patches_reshaped = patches_reshaped.reshape(plines * pcols, patch_shape[0] * patch_shape[1] * patch_shape[2])
-            result = kmeans.predict(patches_reshaped)
-            histogram = numpy.histogram(result, bins=nclusters - 1)
-            features.append((im, histogram[0]))
+        features = Parallel(n_jobs=-2)(delayed(hof_dense)(im, patch_shape, kmeans) for im in tqdm(image_list))
 
         print('Feature extraction completed')
         print()
@@ -97,19 +126,7 @@ def get_features(image_list, nclusters=256, method='Dense'):
 
         # This loop gets again the features of each tile and gets a list of the histograms of each individual tile
         print('Step 2: Histogram of features extraction')
-        for im in tqdm(image_list):
-            image = imread(im)
-            image = numpy.asarray(rgb2hed(image))
-            image = image[:, :, 2]
-            image = image.astype(float)
-            patches = view_as_windows(image, patch_shape)
-            plines = patches.shape[0]
-            pcols = patches.shape[1]
-            patches_reshaped = patches.reshape(plines, pcols, patch_shape[0] * patch_shape[1])
-            patches_reshaped = patches_reshaped.reshape(plines * pcols, patch_shape[0] * patch_shape[1])
-            result = kmeans.predict(patches_reshaped)
-            histogram = numpy.histogram(result, bins=nclusters - 1)
-            features.append((im, histogram[0]))
+        features = Parallel(n_jobs=-2)(delayed(hof_dense)(im, patch_shape, kmeans, dab=True) for im in tqdm(image_list))
 
         print('Feature extraction completed')
         print()
@@ -121,6 +138,7 @@ def get_features(image_list, nclusters=256, method='Dense'):
         q = 0
         r = 0
         # extraction
+        start1 = time.time()
         print('Step 1: KMeans fitting')
         for i in tqdm(range(0, len(image_list), 50)):
             image = imread(image_list[i])
@@ -136,26 +154,19 @@ def get_features(image_list, nclusters=256, method='Dense'):
             r = daisyzy.shape[2]
             daisyzy_reshaped = daisyzy.reshape(p * q, r)
             kmeans.partial_fit(daisyzy_reshaped)
+        end1 = time.time()
+        print('Total time KMeans fitting: {:.4f} s'.format(end1-start1))
 
+        start2 = time.time()
         print('Step 2: Histogram of features extraction')
-        for im in tqdm(image_list):
-            image = imread(im)
-            if method == 'Daisy':
-                image = numpy.asarray(rgb2grey(image))
-            if method == 'DaisyDAB':
-                image = numpy.asarray(rgb2hed(image))
-                image = image[:, :, 2]
-            daisyzy = daisy(image, step=1, radius=8, rings=3)
-            # daisy has shape P, Q, R
-            p = daisyzy.shape[0]
-            q = daisyzy.shape[1]
-            r = daisyzy.shape[2]
-            daisyzy_reshaped = daisyzy.reshape(p * q, r)
-            result = kmeans.predict(daisyzy_reshaped)
-            histogram = numpy.histogram(result, bins=nclusters - 1)
-            features.append((im, histogram[0]))
+        if method == 'Daisy':
+            features = Parallel(n_jobs=-2)(delayed(hof_daisy)(im, kmeans) for im in tqdm(image_list))
 
-        print('Feature extraction completed')
+        if method == 'DaisyDAB':
+            features = Parallel(n_jobs=-2)(delayed(hof_daisy)(im, kmeans, dab=True) for im in tqdm(image_list))
+        end2 = time.time()
+        print('Total time KMeans fitting: {:.4f} s'.format(end2-start2))
+
         print()
         return features
 
@@ -268,12 +279,15 @@ def feature_extraction(list_positive, outpath, feature_method):
 
     print('[INFO] Extracting features from {} positive images'.format(len(list_positive)))
 
+    start = time.time()
     # Extract features from positive images
     if feature_method in ['Dense', 'DenseDAB', 'Daisy', 'DaisyDAB']:
         features = get_features(list_positive, nclusters=256, method=feature_method)
 
     if feature_method in ['VGG16', 'VGG16DAB', 'Xception', 'XceptionDAB']:
         features = get_features_CNN(list_positive, model=feature_method)
+    end = time.time()
+    print('Feature extraction completed in time {:.4f} s'.format(end-start))
 
     features = feature_reduction(features)
 
