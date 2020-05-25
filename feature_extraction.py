@@ -25,7 +25,7 @@ from keras.applications.xception import preprocess_input
 
 
 def hof_dense(im, patch_shape, kmeans, nclusters, dab=False):
-    result = []
+    features = []
     image = imread(im)
     if dab:
         image = rgb2hed(image)
@@ -39,12 +39,12 @@ def hof_dense(im, patch_shape, kmeans, nclusters, dab=False):
     patches_reshaped = patches_reshaped.reshape(plines * pcols, patch_shape[0] * patch_shape[1] * patch_shape[2])
     result = kmeans.predict(patches_reshaped)
     histogram = numpy.histogram(result, bins=nclusters - 1)
-    result.extend((im, histogram[0]))
+    features.extend((im, histogram[0]))
     return result
 
 
 def hof_daisy(im, kmeans, nclusters, dab=False):
-    result = []
+    features = []
     image = imread(im)
     if dab:
         image = numpy.asarray(rgb2hed(image))
@@ -59,8 +59,8 @@ def hof_daisy(im, kmeans, nclusters, dab=False):
     daisyzy_reshaped = daisyzy.reshape(p * q, r)
     result = kmeans.predict(daisyzy_reshaped)
     histogram = numpy.histogram(result, bins=nclusters - 1)
-    result.extend((im, histogram[0]))
-
+    features.extend((im, histogram[0]))
+    return features
 
 def get_features(image_list, nclusters=256, method='Dense'):
 
