@@ -42,7 +42,8 @@ def get_patches(slidepath, outpath, level=10, tissue_ratio=0.25, size=256):
 
     # Gets the name and number of the slide
     slidename = os.path.basename(slidepath)
-    slidenumber = slidename.split('.')
+    slidename = os.path.splitext(slidename)[0]
+    slidenumber = slidename.split('_')
     slidenumber = slidenumber[2]
 
     # Saves a preview of the slide under 'slidename.png'
