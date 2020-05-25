@@ -163,13 +163,10 @@ def detect_dab(list_slides, outpath, jobs, threshold):
     print('Total time DAB detection: {:.4f} s'.format(end-start))
 
     classifier = [result[i][0] for i in range(len(list_slides))]
-    list_positive = [result[i][1] for i in range(len(list_slides))]
-    # classifier = []
-    # list_positive = []
-    # for i in range(len(list_slides)):
-    #     classifier.append(result[i][0])
-    #     for p in result[i][1]:
-    #         list_positive.append(p)
+    list_positive = []
+    for i in range(len(list_slides)):
+        for p in result[i][1]:
+            list_positive.append(p)
 
     name = outpath
     name = os.path.basename(name)
