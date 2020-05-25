@@ -17,6 +17,7 @@ parser.add_argument('-f', '--feature_method', type=str, default='Dense', help='f
 parser.add_argument('-n', '--n_division', type=int, default=4, help='number of divisions [Default: %(default)s]')
 parser.add_argument('-d', '--device', default="0")
 parser.add_argument('-j', '--jobs', type=int)
+parser.add_argument('-b', '--features_batch', action=store_true)
 
 args = parser.parse_args()
 
@@ -32,9 +33,12 @@ tile_size = args.tile_size
 feature_method = args.feature_method
 n_division = args.n_division
 jobs = args.jobs
+features_batch = args.features_batch
 
 slide_list = patch_division(slides, outpath, level, tile_size=tile_size, tissue_ratio=tissue_ratio, jobs=jobs)
 classifiers, list_positive = detect_dab(slide_list, outpath, jobs=jobs, threshold=85)
+if features_batch:
+    features = feature_extraction_batch(list_positive, outpath, feature_method)
 features = feature_extraction(list_positive, outpath, feature_method)
 classifiers = cluster_division(features, classifiers, n_division, outpath, feature_method)
 outpath = os.path.join(outpath, 'Results_{}'.format(feature_method))
