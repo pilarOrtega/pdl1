@@ -137,7 +137,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Script that discriminates patches positives to DAB.')
     parser.add_argument('-l', '--list_slides', type=str, help='file with slide list')
     parser.add_argument('-o', '--outpath', type=str, help='path to outfolder')
-    parser.add_argument('-t', '--threshold', type=int, default=225)
+    parser.add_argument('-t', '--threshold', type=int, default=85)
     parser.add_argument('-j', '--jobs', type=int)
 
     args = parser.parse_args()
