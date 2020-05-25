@@ -111,12 +111,14 @@ def detect_dab(list_slides, outpath, jobs, threshold):
     result = Parallel(n_jobs=jobs)(delayed(detect_dab_delayed)(s, threshold) for s in (list_slides))
     end = time.time()
 
-    classifier = []
-    list_positive = []
-    for i in range(len(list_slides)):
-        classifier.append(result[i][0])
-        for p in result[i][1]:
-            list_positive.append(p)
+    classifier = [result[i][0] for i in range(len(list_slides))]
+    list_positive = [result[i][1] for i in range(len(list_slides))]
+    # classifier = []
+    # list_positive = []
+    # for i in range(len(list_slides)):
+    #     classifier.append(result[i][0])
+    #     for p in result[i][1]:
+    #         list_positive.append(p)
 
     name = outpath
     name = os.path.basename(name)
