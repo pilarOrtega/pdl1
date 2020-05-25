@@ -14,7 +14,10 @@ import time
 
 def get_patches(slidepath, outpath, level=10, tissue_ratio=0.25, size=256):
     """
-    Function that divides a slide into patches with different resolution.
+    Function that divides a slide into patches with different resolution. The
+    patches are saved inside a folder with the slide name, and have the format
+    {slide_name}#{patch_number}-level{}-{x}-{y}.jpg. It also saves a preview
+    for each slide under the format slidename.png
 
     Arguments:
         - slidepath: str, path to the image to patchify

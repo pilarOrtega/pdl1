@@ -40,9 +40,11 @@ def divide_dab(path, threshold):
 
     Arguments:
         - path: str, path to image folder
+        - threshold: int, threshold level for DAB detection
 
     Returns:
         - image_positive, image_negative: list
+        - n: int, total number of images
     """
 
     # Collects all images .jpg from path
@@ -74,10 +76,30 @@ def pickle_save(file, path, name):
 
 
 def detect_dab_delayed(slide, threshold):
-    list_positive, list_negative, n = divide_dab(slide[1], threshold=threshold)
+    """
+    Gets the DAB positive patches for a slide and creates the classifier asarray
+
+    Arguments:
+        - Slide: str, path to slide folder with the individual patches
+        - Threshold: int, threshold level for DAB detection
+
+    Returns:
+        - classifier: list with three elements (1) slide name (2) path to slide
+            folder (3) classifier array. The classifier array is an array with
+            shape (n, 4) - with n being the total number of patches. Classifier
+            array saves for each patch the patch number (from 0 to n-1), the x
+            coordenate, the y coordenate and a 1 if DAB positive or 0 if DAB
+            negative
+        - list_positive: list with the paths to all patches that are positive
+            to DAB
+    """
+    # Divide all patches in positive or negative to DAB
+    list_positive, list_negative, n = divide_dab(slide, threshold=threshold)
+    # Creates a numpy array with n rows and 4 columns (number, x, y, positive)
     c = numpy.zeros((n, 4))
     c = c.astype(int)
     for im in list_positive:
+        # Extracts the patch number from the patch path
         name = os.path.basename(im)
         name = os.path.splitext(name)[0]
         number = name.split('#')[1]
@@ -85,9 +107,11 @@ def detect_dab_delayed(slide, threshold):
         slide_number = int(number[0])
         x = int(number[2])
         y = int(number[3])
+        # Loads data in classifier matrix
         c[slide_number][0] = slide_number
         c[slide_number][1] = x
         c[slide_number][2] = y
+        # Positive column = 1 if patch is in list_positive
         c[slide_number][3] = 1
     for im in list_negative:
         name = os.path.basename(im)
@@ -100,6 +124,7 @@ def detect_dab_delayed(slide, threshold):
         c[slide_number][0] = slide_number
         c[slide_number][1] = x
         c[slide_number][2] = y
+        # Positive column = 0 if patch is in list_negative
         c[slide_number][3] = 0
     classifier = (slide[0], slide[1], c)
 
@@ -107,11 +132,35 @@ def detect_dab_delayed(slide, threshold):
 
 
 def detect_dab(list_slides, outpath, jobs, threshold):
+    """
+    For a list of slides, this function gets the patches that have DAB tinction
+    on them (DAB positive patches). It saves two .p files in the outpath
+    directory with classifier and list positive.
 
+    Arguments:
+        - list_slides: list with slides to evaluate. Each list element has two
+            values (1) Slidename (2) path to folder where the patches from the
+            slide are stored.
+        - outpath: str, path to the folder where the results will be saved. It
+            has the format /level_{}_ts_{}_{other information}
+        - jobs: int, number of processors to be used during parallelization
+        - threshold: int, threshold level for DAB detection
+
+    Returns:
+        - classifier: list with lentgh len(list_slides). For each slide, it
+            contains three elements: (1) slide name (2) path to slide folder (3)
+            classifier array. The classifier array is an array with shape (n, 4)
+            - with n being the total number of patches. Classifier array saves
+            for each patch the patch number (from 0 to n-1), the x coordenate,
+            the y coordenate and a 1 if DAB positive or 0 if DAB negative
+        - list positive: list with the path to all patches that resulted DAB
+            positive for all slides in list_slides
+    """
     # Parallelization
     start = time.time()
-    result = Parallel(n_jobs=jobs)(delayed(detect_dab_delayed)(s, threshold) for s in (list_slides))
+    result = Parallel(n_jobs=jobs)(delayed(detect_dab_delayed)(s[1], threshold) for s in (list_slides))
     end = time.time()
+    print('Total time DAB detection: {:.4f} s'.format(end-start))
 
     classifier = [result[i][0] for i in range(len(list_slides))]
     list_positive = [result[i][1] for i in range(len(list_slides))]
