@@ -24,8 +24,23 @@ from keras.applications import imagenet_utils
 from keras.applications.xception import preprocess_input
 
 
-def hof_dense(im, patch_shape, kmeans, nclusters, dab=False):
+def hof_dense(im, kmeans, nclusters, dab=False):
+    """
+    Function that gets the histogram of features (HoF) of a given image im for
+    dense features.
+
+    Arguments:
+        - im: str, path to image
+        - kmeans: sklearn MiniBatchKMeans fitted with a subset of all patches
+        - nclusters: int, number of bins of the final HoF
+        - dab: bool, set to true for only getting the HoF in the DAB channel
+
+    Returns:
+        - features: list with two elements: (1) im - path to image (2) histogram
+            of features of the image
+    """
     features = []
+    patch_shape = (8, 8, 3)
     image = imread(im)
     if dab:
         image = rgb2hed(image)
@@ -40,10 +55,24 @@ def hof_dense(im, patch_shape, kmeans, nclusters, dab=False):
     result = kmeans.predict(patches_reshaped)
     histogram = numpy.histogram(result, bins=nclusters - 1)
     features.extend((im, histogram[0]))
-    return result
+    return features
 
 
 def hof_daisy(im, kmeans, nclusters, dab=False):
+    """
+    Function that gets the histogram of features (HoF) of a given image im for
+    daisy features.
+
+    Arguments:
+        - im: str, path to image
+        - kmeans: sklearn MiniBatchKMeans fitted with a subset of all patches
+        - nclusters: int, number of bins of the final HoF
+        - dab: bool, set to true for only getting the HoF in the DAB channel
+
+    Returns:
+        - features: list with two elements: (1) im - path to image (2) histogram
+            of features of the image
+    """
     features = []
     image = imread(im)
     if dab:
@@ -62,6 +91,7 @@ def hof_daisy(im, kmeans, nclusters, dab=False):
     features.extend((im, histogram[0]))
     return features
 
+
 def get_features(image_list, nclusters=256, method='Dense'):
 
     """
@@ -69,12 +99,15 @@ def get_features(image_list, nclusters=256, method='Dense'):
     features by means of a KMeans clustering algorithm.
 
     Arguments:
-        - image_list: list, image set
-        - nclusters: int, number of visual words in which the features are clustered
-        - method: str, Dense or Daisy
+        - image_list: list which contains the list of images to extract HoF.
+            Each element of the list is a path to an image.
+        - nclusters: int, number of visual words in which the features are
+            clustered. Default 256
+        - method: str, Dense, DenseDAB, Daisy or DaisyDAB
 
     Returns:
-        - features: list, contains tuples with image path + histogram of features
+        - features: list, contains tuples with image path and histogram of
+            features for each image.
     """
     kmeans = MiniBatchKMeans(n_clusters=nclusters)
     # This for loop passes the window "patch_shape" to extract individual 8x8x3 patches all along the tiles.
@@ -102,7 +135,7 @@ def get_features(image_list, nclusters=256, method='Dense'):
 
         # This loop gets again the features of each tile and gets a list of the histograms of each individual tile
         print('Step 2: Histogram of features extraction')
-        features = Parallel(n_jobs=-2)(delayed(hof_dense)(im, patch_shape, kmeans, nclusters) for im in tqdm(image_list))
+        features = Parallel(n_jobs=-2)(delayed(hof_dense)(im, kmeans, nclusters) for im in tqdm(image_list))
 
         print('Feature extraction completed')
         print()
@@ -177,6 +210,10 @@ def get_features(image_list, nclusters=256, method='Dense'):
 
 
 def imagetoDAB(image):
+    """
+    Transforms a RGB image into a 3 channel image in which all 3 channels are
+    channel DAB from color space HED.
+    """
     image_hed = rgb2hed(image)
     d = image_hed[:, :, 2]
     img_dab = np.zeros_like(image)
@@ -193,7 +230,7 @@ def get_features_CNN(image_list, model='VGG16'):
 
     Arguments:
         - image_list: list, image set
-        - model: str, VGG16 or Xception
+        - model: str, VGG16, VGG16DAB, Xception or XceptionDAB
 
     Returns:
         - features: list, contains tuples with image path + histogram of features
