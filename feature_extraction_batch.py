@@ -173,7 +173,7 @@ def feature_extraction(list_positive, outpath, feature_method):
         with open(lf, "rb") as f:
             features = pickle.load(f)
         features = feature_reduction(features)
-        with open(lf, "wb") ad f:
+        with open(lf, "wb") as f:
             pickle.dump(features, f)
 
     features = []
