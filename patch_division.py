@@ -135,6 +135,7 @@ def patch_division(slides, outpath, level, tile_size=256, tissue_ratio=0.25, job
         # n_s, outpath_slide = get_patches(s, outpath, level, tissue_ratio, tile_size)
         # Saves the slide name and the path to the patch folder in slide_list
         slidename = os.path.basename(s)
+        slidename = os.path.splitext(slidename)[0]
         outpath_slide = os.path.join(outpath, slidename)
         slide_list.append((slidename, outpath_slide))
 
