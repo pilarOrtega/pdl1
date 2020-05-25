@@ -35,20 +35,20 @@ def imagetoDAB(image):
     return img_dab
 
 
-def get_features_CNN(image_list, model='VGG16'):
+def get_features_CNN(image_list, method='VGG16'):
     """
     Extracts image features using CNN
 
     Arguments:
         - image_list: list, image set
-        - model: str, VGG16 or Xception
+        - method: str, VGG16 or Xception
 
     Returns:
         - features: list, contains tuples with image path + histogram of features
     """
     features = []
     list_features_batch = []
-    if model in ['VGG16', 'VGG16DAB']:
+    if method in ['VGG16', 'VGG16DAB']:
         print('Loading network...')
         model = VGG16(weights='imagenet', include_top=False, pooling='avg')
         model.summary()
@@ -57,7 +57,7 @@ def get_features_CNN(image_list, model='VGG16'):
         n = 0
         for im in tqdm(image_list):
             image = imread(im)
-            if model == 'VGG16DAB':
+            if method == 'VGG16DAB':
                 image = imagetoDAB(image)
             image = numpy.asarray(image)
             image = numpy.expand_dims(image, axis=0)
@@ -68,7 +68,7 @@ def get_features_CNN(image_list, model='VGG16'):
             n += 1
             # When list has 100000 images + features, it is saved with pickle and a new list starts
             if n == 100000:
-                features_batch = os.path.join(outpath, 'features_{}_batch{}.p'.format(model, x))
+                features_batch = os.path.join(outpath, 'features_{}_batch{}.p'.format(method, x))
                 with open(features_batch, "wb") as f:
                     pickle.dump(features, f)
                 list_features_batch.append(features_batch)
@@ -76,12 +76,12 @@ def get_features_CNN(image_list, model='VGG16'):
                 n = 0
                 x += 1
 
-        features_batch = os.path.join(outpath, 'features_{}_batch{}.p'.format(model, x))
+        features_batch = os.path.join(outpath, 'features_{}_batch{}.p'.format(method, x))
         with open(features_batch, "wb") as f:
             pickle.dump(features, f)
         list_features_batch.append(features_batch)
 
-    if model in ['Xception', 'XceptionDAB']:
+    if method in ['Xception', 'XceptionDAB']:
         print('Loading network...')
         model = Xception(weights='imagenet', include_top=False, pooling='avg')
         model.summary()
@@ -90,7 +90,7 @@ def get_features_CNN(image_list, model='VGG16'):
         n = 0
         for im in tqdm(image_list):
             image = imread(im)
-            if model == 'XceptionDAB':
+            if method == 'XceptionDAB':
                 image = imagetoDAB(image)
             image = numpy.asarray(image)
             image = numpy.expand_dims(image, axis=0)
@@ -101,7 +101,7 @@ def get_features_CNN(image_list, model='VGG16'):
             n += 1
             # When list has 100000 images + features, it is saved with pickle and a new list starts
             if n == 100000:
-                features_batch = os.path.join(outpath, 'features_{}_batch{}.p'.format(model, x))
+                features_batch = os.path.join(outpath, 'features_{}_batch{}.p'.format(method, x))
                 with open(features_batch, "wb") as f:
                     pickle.dump(features, f)
                 list_features_batch.append(features_batch)
@@ -109,7 +109,7 @@ def get_features_CNN(image_list, model='VGG16'):
                 n = 0
                 x += 1
 
-        features_batch = os.path.join(outpath, 'features_{}_batch{}.p'.format(model, x))
+        features_batch = os.path.join(outpath, 'features_{}_batch{}.p'.format(method, x))
         with open(features_batch, "wb") as f:
             pickle.dump(features, f)
         list_features_batch.append(features_batch)
@@ -165,7 +165,7 @@ def feature_extraction(list_positive, outpath, feature_method):
 
     start = time.time()
     # Extract features from positive images
-    list_features_batch = get_features_CNN(list_positive, model=feature_method)
+    list_features_batch = get_features_CNN(list_positive, method=feature_method)
     end = time.time()
     print('Feature extraction completed in time {:.4f} s'.format(end-start))
 
