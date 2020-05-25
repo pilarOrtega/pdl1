@@ -83,7 +83,7 @@ def get_patches(slidepath, outpath, level=10, tissue_ratio=0.25, size=256):
             mask = tissue.get_tissue_from_rgb(image, whitetol=240)
             # Saves tile in outpath only if tissue ratio is higher than threshold
             if mask.sum() > tissue_ratio * tile.size[0] * tile.size[1]:
-                tile_path = os.path.join(outpath, '{}-{}-level{}-{}-{}.jpg'.format(slidenumber, n, level, i, j))
+                tile_path = os.path.join(outpath, '{}#{}-level{}-{}-{}.jpg'.format(slidenumber, n, level, i, j))
                 tile.save(tile_path)
                 n = n + 1
     print('Total of {} tiles with tissue ratio >{} in slide {}'.format(n, tissue_ratio, slidepath))

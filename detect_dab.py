@@ -80,10 +80,11 @@ def detect_dab_delayed(slide, threshold):
     for im in list_positive:
         name = os.path.basename(im)
         name = os.path.splitext(name)[0]
-        number = name.split('-')
-        slide_number = int(number[1])
-        x = int(number[3])
-        y = int(number[4])
+        number = name.split('#')[1]
+        number = number.split('-')
+        slide_number = int(number[0])
+        x = int(number[2])
+        y = int(number[3])
         c[slide_number][0] = slide_number
         c[slide_number][1] = x
         c[slide_number][2] = y
@@ -91,10 +92,11 @@ def detect_dab_delayed(slide, threshold):
     for im in list_negative:
         name = os.path.basename(im)
         name = os.path.splitext(name)[0]
-        number = name.split('-')
-        slide_number = int(number[1])
-        x = int(number[3])
-        y = int(number[4])
+        number = name.split('#')[1]
+        number = number.split('-')
+        slide_number = int(number[0])
+        x = int(number[2])
+        y = int(number[3])
         c[slide_number][0] = slide_number
         c[slide_number][1] = x
         c[slide_number][2] = y
