@@ -8,7 +8,7 @@ from skimage.color import rgb2grey, rgb2hed
 from skimage.feature import daisy
 from skimage.util.shape import view_as_windows
 from sklearn.preprocessing import StandardScaler
-from sklearn.decomposition import PCA
+from sklearn.decomposition import PCA, IncrementalPCA
 from sklearn.manifold import TSNE
 import pickle
 import itertools
@@ -119,7 +119,7 @@ def get_features_CNN(image_list, model='VGG16'):
 
 def feature_reduction(list_features):
     features, image_list = feature_list_division(list_features)
-    pca = PCA(n_components=0.5)
+    pca = IncrementalPCA(n_components=50)
     features_pca = pca.fit_transform(features)
     features_tsne = TSNE(n_components=2, random_state=123).fit_transform(features_pca)
 
@@ -176,6 +176,12 @@ def feature_extraction(list_positive, outpath, feature_method):
         with open(lf, "wb") ad f:
             pickle.dump(features, f)
 
+    features = []
+    for lf in list_features_batch:
+        with open(lf, "rb") as f:
+            batch = pickle.load(f)
+            features.extend(batch)
+
     name = outpath
     name = os.path.basename(name)
     name = os.path.splitext(name)[0]
@@ -195,21 +201,18 @@ def feature_extraction(list_positive, outpath, feature_method):
     with open(csv_file_path_features, 'w') as csv_file:
         writer = csv.DictWriter(csv_file, csv_columns)
         writer.writeheader()
-        for lf in list_features_batch:
-            with open(lf, "rb") as f:
-                features = pickle.load(f)
-            final_feat, final_imag_list = feature_list_division(features)
-            for im in final_imag_list:
-                index = final_imag_list.index(im)
-                im_name = os.path.basename(im)
-                data = os.path.splitext(im_name)[0]
-                data = data.split('-')
-                row = {'Slidename': data[0], 'Number': data[1], 'X': data[3], 'Y': data[4]}
-                for i in range(shape_feat[1]):
-                    row['feature_{}'.format(i)] = final_feat[index][i]
-                writer.writerow(row)
+        final_feat, final_imag_list = feature_list_division(features)
+        for im in final_imag_list:
+            index = final_imag_list.index(im)
+            im_name = os.path.basename(im)
+            data = os.path.splitext(im_name)[0]
+            data = data.split('-')
+            row = {'Slidename': data[0], 'Number': data[1], 'X': data[3], 'Y': data[4]}
+            for i in range(shape_feat[1]):
+                row['feature_{}'.format(i)] = final_feat[index][i]
+            writer.writerow(row)
 
-    return list_features_batch
+    return features
 
 
 if __name__ == "__main__":

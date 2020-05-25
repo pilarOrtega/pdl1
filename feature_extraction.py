@@ -8,7 +8,7 @@ from skimage.color import rgb2grey, rgb2hed
 from skimage.feature import daisy
 from skimage.util.shape import view_as_windows
 from sklearn.preprocessing import StandardScaler
-from sklearn.decomposition import PCA
+from sklearn.decomposition import PCA, IncrementalPCA
 from sklearn.manifold import TSNE
 import pickle
 import itertools
@@ -236,7 +236,7 @@ def get_features_CNN(image_list, model='VGG16'):
 
 def feature_reduction(list_features):
     features, image_list = feature_list_division(list_features)
-    pca = PCA(n_components=0.5)
+    pca = IncrementalPCA(n_components=50)
     features_pca = pca.fit_transform(features)
     features_tsne = TSNE(n_components=2, random_state=123).fit_transform(features_pca)
 
