@@ -15,7 +15,7 @@ import itertools
 import csv
 from joblib import Parallel, delayed
 import time
-from numba import jit
+from numba import jit, njit
 
 
 # Importing Keras libraries
