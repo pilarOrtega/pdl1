@@ -25,7 +25,6 @@ from keras.applications import imagenet_utils
 from keras.applications.xception import preprocess_input
 
 
-@jit
 def get_patch_reshaped(patches, patch_shape):
     plines = patches.shape[0]
     pcols = patches.shape[1]
@@ -64,6 +63,7 @@ def hof_dense(im, kmeans, nclusters, dab=False):
     image = numpy.asarray(image)
     image = image.astype(float)
     patches = view_as_windows(image, patch_shape)
+    patches = numpy.ascontiguousarray(patches)
     patches_reshaped = get_patch_reshaped(patches, patch_shape)
     result = kmeans.predict(patches_reshaped)
     histogram = numpy.histogram(result, bins=nclusters - 1)
@@ -280,7 +280,7 @@ def get_features_CNN(image_list, model='VGG16'):
 
 def feature_reduction(list_features):
     features, image_list = feature_list_division(list_features)
-    pca = IncrementalPCA(n_components=50)
+    pca = IncrementalPCA(n_components=30, batch_size=20)
     features_pca = pca.fit_transform(features)
     features_tsne = TSNE(n_components=2, random_state=123).fit_transform(features_pca)
 
@@ -291,9 +291,11 @@ def feature_reduction(list_features):
     print()
     # StandardScaler normalizes the data
     features_scaled = StandardScaler().fit_transform(features_tsne)
-    result = []
-    for i in range(len(image_list)):
-        result.append((image_list[i], features_scaled[i]))
+    # List comprehension
+    result = [(image_list[i], features_scaled[i]) for i in range(len(image_list))]
+    # result = []
+    # for i in range(len(image_list)):
+    #     result.append((image_list[i], features_scaled[i]))
 
     return result
 
