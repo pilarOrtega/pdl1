@@ -25,7 +25,7 @@ from keras.applications import imagenet_utils
 from keras.applications.xception import preprocess_input
 
 
-@njit
+@jit
 def get_patch_reshaped(patches, patch_shape):
     plines = patches.shape[0]
     pcols = patches.shape[1]
