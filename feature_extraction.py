@@ -15,6 +15,7 @@ import itertools
 import csv
 from joblib import Parallel, delayed
 import time
+from numba import jit
 
 
 # Importing Keras libraries
@@ -22,6 +23,19 @@ from keras.utils import np_utils
 from keras.applications import VGG16, Xception
 from keras.applications import imagenet_utils
 from keras.applications.xception import preprocess_input
+
+
+@njit
+def get_patch_reshaped(patches, patch_shape):
+    plines = patches.shape[0]
+    pcols = patches.shape[1]
+    if len(patch_shape) == 3:
+        patches_reshaped = patches.reshape(plines, pcols, patch_shape[0] * patch_shape[1] * patch_shape[2])
+        patches_reshaped = patches_reshaped.reshape(plines * pcols, patch_shape[0] * patch_shape[1] * patch_shape[2])
+    if len(patch_shape) == 2:
+        patches_reshaped = patches.reshape(plines, pcols, patch_shape[0] * patch_shape[1])
+        patches_reshaped = patches_reshaped.reshape(plines * pcols, patch_shape[0] * patch_shape[1])
+    return patches_reshaped
 
 
 def hof_dense(im, kmeans, nclusters, dab=False):
@@ -40,19 +54,17 @@ def hof_dense(im, kmeans, nclusters, dab=False):
             of features of the image
     """
     features = []
-    patch_shape = (8, 8, 3)
     image = imread(im)
     if dab:
         patch_shape = (8, 8)
         image = rgb2hed(image)
         image = image[:, :, 2]
+    else:
+        patch_shape = (8, 8, 3)
     image = numpy.asarray(image)
     image = image.astype(float)
     patches = view_as_windows(image, patch_shape)
-    plines = patches.shape[0]
-    pcols = patches.shape[1]
-    patches_reshaped = patches.reshape(plines, pcols, patch_shape[0] * patch_shape[1] * patch_shape[2])
-    patches_reshaped = patches_reshaped.reshape(plines * pcols, patch_shape[0] * patch_shape[1] * patch_shape[2])
+    patches_reshaped = get_patch_reshaped(patches, patch_shape)
     result = kmeans.predict(patches_reshaped)
     histogram = numpy.histogram(result, bins=nclusters - 1)
     features.extend((im, histogram[0]))
@@ -128,10 +140,7 @@ def get_features(image_list, nclusters=256, method='Dense'):
             image = numpy.asarray(image)
             image = image.astype(float)
             patches = view_as_windows(image, patch_shape)
-            plines = patches.shape[0]
-            pcols = patches.shape[1]
-            patches_reshaped = patches.reshape(plines, pcols, patch_shape[0] * patch_shape[1] * patch_shape[2])
-            patches_reshaped = patches_reshaped.reshape(plines * pcols, patch_shape[0] * patch_shape[1] * patch_shape[2])
+            patches_reshaped = get_patch_reshaped(patches, patch_shape)
             kmeans.partial_fit(patches_reshaped)
 
         # This loop gets again the features of each tile and gets a list of the histograms of each individual tile
@@ -153,10 +162,7 @@ def get_features(image_list, nclusters=256, method='Dense'):
             image = image[:, :, 2]
             image = image.astype(float)
             patches = view_as_windows(image, patch_shape)
-            plines = patches.shape[0]
-            pcols = patches.shape[1]
-            patches_reshaped = patches.reshape(plines, pcols, patch_shape[0] * patch_shape[1])
-            patches_reshaped = patches_reshaped.reshape(plines * pcols, patch_shape[0] * patch_shape[1])
+            patches_reshaped = get_patch_reshaped(patches, patch_shape)
             kmeans.partial_fit(patches_reshaped)
 
         # This loop gets again the features of each tile and gets a list of the histograms of each individual tile
