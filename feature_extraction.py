@@ -280,17 +280,15 @@ def get_features_CNN(image_list, model='VGG16'):
 
 def feature_reduction(list_features):
     features, image_list = feature_list_division(list_features)
-    pca = IncrementalPCA(n_components=30, batch_size=20)
+    pca = PCA(n_components=0.5)
     features_pca = pca.fit_transform(features)
-    features_tsne = TSNE(n_components=2, random_state=123).fit_transform(features_pca)
 
     initial_features = features.shape[1]
     pca_features = features_pca.shape[1]
-    final_features = features_tsne.shape[1]
-    print('Number of features reduced from {} to {} ({} features after PCA)'.format(initial_features, final_features, pca_features))
+    print('Number of features reduced from {} to {} ({} features after PCA)'.format(initial_features, pca_features))
     print()
     # StandardScaler normalizes the data
-    features_scaled = StandardScaler().fit_transform(features_tsne)
+    features_scaled = StandardScaler().fit_transform(features_pca)
     # List comprehension
     result = [(image_list[i], features_scaled[i]) for i in range(len(image_list))]
     # result = []
