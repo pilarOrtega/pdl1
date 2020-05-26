@@ -43,6 +43,7 @@ def hof_dense(im, kmeans, nclusters, dab=False):
     patch_shape = (8, 8, 3)
     image = imread(im)
     if dab:
+        patch_shape = (8, 8)
         image = rgb2hed(image)
         image = image[:, :, 2]
     image = numpy.asarray(image)
