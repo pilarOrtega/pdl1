@@ -169,13 +169,18 @@ def feature_extraction(list_positive, outpath, feature_method):
     end = time.time()
     print('Feature extraction completed in time {:.4f} s'.format(end-start))
 
+    start = time.time()
     for lf in list_features_batch:
         with open(lf, "rb") as f:
             features = pickle.load(f)
         features = feature_reduction(features)
         with open(lf, "wb") as f:
             pickle.dump(features, f)
+    end = time.time()
+    print('Feature reduction completed in time {:.4f} s'.format(end-start))
 
+    print('Saving features...')
+    start = time.time()
     features = []
     for lf in list_features_batch:
         with open(lf, "rb") as f:
@@ -202,7 +207,7 @@ def feature_extraction(list_positive, outpath, feature_method):
         writer = csv.DictWriter(csv_file, csv_columns)
         writer.writeheader()
         final_feat, final_imag_list = feature_list_division(features)
-        for im in final_imag_list:
+        for im in tqdm(final_imag_list):
             index = final_imag_list.index(im)
             im_name = os.path.basename(im)
             data = os.path.splitext(im_name)[0]
@@ -211,7 +216,8 @@ def feature_extraction(list_positive, outpath, feature_method):
             for i in range(shape_feat[1]):
                 row['feature_{}'.format(i)] = final_feat[index][i]
             writer.writerow(row)
-
+    end = time.time
+    print('Csv file correctly saved in {:.4f} s'.format(end-start))
     return features
 
 

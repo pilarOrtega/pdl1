@@ -327,8 +327,13 @@ def feature_extraction(list_positive, outpath, feature_method):
     end = time.time()
     print('Feature extraction completed in time {:.4f} s'.format(end-start))
 
+    start = time.time()
     features = feature_reduction(features)
+    end = time.time()
+    print('Feature reduction completed in time {:.4f} s'.format(end-start))
 
+    print('Saving features...')
+    start = time.time()
     name = outpath
     name = os.path.basename(name)
     name = os.path.splitext(name)[0]
@@ -351,7 +356,7 @@ def feature_extraction(list_positive, outpath, feature_method):
     with open(csv_file_path_features, 'w') as csv_file:
         writer = csv.DictWriter(csv_file, csv_columns)
         writer.writeheader()
-        for im in final_imag_list:
+        for im in tqdm(final_imag_list):
             index = final_imag_list.index(im)
             im_name = os.path.basename(im)
             data = os.path.splitext(im_name)[0]
@@ -360,7 +365,8 @@ def feature_extraction(list_positive, outpath, feature_method):
             for i in range(shape_feat[1]):
                 row['feature_{}'.format(i)] = final_feat[index][i]
             writer.writerow(row)
-
+    end = time.time()
+    print('Csv file correctly saved in {:.4f} s'.format(end-start))
     return features
 
 
