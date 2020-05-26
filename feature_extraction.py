@@ -160,7 +160,7 @@ def get_features(image_list, nclusters=256, method='Dense'):
 
         # This loop gets again the features of each tile and gets a list of the histograms of each individual tile
         print('Step 2: Histogram of features extraction')
-        features = Parallel(n_jobs=-2)(delayed(hof_dense)(im, patch_shape, kmeans, nclusters, dab=True) for im in tqdm(image_list))
+        features = Parallel(n_jobs=-2)(delayed(hof_dense)(im, kmeans, nclusters, dab=True) for im in tqdm(image_list))
 
         print('Feature extraction completed')
         print()
