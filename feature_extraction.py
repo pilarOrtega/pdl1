@@ -379,15 +379,15 @@ def feature_extraction(list_positive, outpath, feature_method):
 
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser(description='Script that discriminates patches positives to DAB.')
+    parser = argparse.ArgumentParser(description='Script that obtains the histogram of features of a set of images using different methods')
     parser.add_argument('-l', '--list_positive', type=str, help='file with slide list')
     parser.add_argument('-o', '--outpath', type=str, help='path to outfolder')
     parser.add_argument('-f', '--feature_method', type=str, choices=['Dense', 'DenseDAB', 'Daisy', 'DaisyDAB', 'VGG16', 'VGG16', 'Xception', 'XceptionDAB'], help='feature method')
     parser.add_argument('-d', '--device', default="0", type=str, help='GPU device to use [Default: %(default)s]')
     args = parser.parse_args()
 
-    #os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-    #os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+    os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+    os.environ["CUDA_VISIBLE_DEVICES"] = args.device
 
     with open(args.list_positive, "rb") as f:
         list_positive = pickle.load(f)
