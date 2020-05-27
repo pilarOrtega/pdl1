@@ -108,7 +108,7 @@ def cluster_division(features, classifiers_0, n_division, outpath, feature_metho
     name = os.path.splitext(name)[0]
     name = name.split('_')
     level = name[1]
-    pickle_save(classifiers, outpath, 'class{}-{}.p'.format(feature_method, level))
+    pickle_save(classifiers, outpath, 'class-{}-{}.p'.format(feature_method, level))
 
     print('[INFO] Saving csv files...')
     print()
