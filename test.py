@@ -4,6 +4,15 @@ from feature_extraction import *
 from cluster_division import *
 from show_preview import *
 from save_cluster import *
+import pickle
+
+
+def pickle_load(file_name):
+    with open(file_name, "rb") as f:
+        file = pickle.load(f)
+        print('Document ' + file_name + ' correctly loaded')
+        print()
+    return file
 
 
 # Manage parameters
@@ -15,9 +24,11 @@ parser.add_argument('-tr', '--tissue_ratio', type=float, default=0.25, help='tis
 parser.add_argument('-ts', '--tile_size', type=int, default=256, help='tile heigth and width in pixels [Default: %(default)s]')
 parser.add_argument('-f', '--feature_method', type=str, default='Dense', help='features extracted from individual patches [Default: %(default)s]')
 parser.add_argument('-n', '--n_division', type=int, default=4, help='number of divisions [Default: %(default)s]')
-parser.add_argument('-d', '--device', default="0")
+parser.add_argument('--flag', type=int, default=0, help='Step')
+parser.add_argument('-d', '--device', default="0)
 parser.add_argument('-j', '--jobs', type=int)
 parser.add_argument('-b', '--features_batch', action='store_true')
+
 
 args = parser.parse_args()
 
@@ -34,18 +45,43 @@ feature_method = args.feature_method
 n_division = args.n_division
 jobs = args.jobs
 features_batch = args.features_batch
+flag = args.flag
+# Flag is an argument that determines in which step start the execution. It is
 
-slide_list = patch_division(slides, outpath, level, tile_size=tile_size, tissue_ratio=tissue_ratio, jobs=jobs)
-classifiers, list_positive = detect_dab(slide_list, outpath, jobs=jobs, threshold=85)
-if features_batch:
-    features = feature_extraction_batch(list_positive, outpath, feature_method)
-features = feature_extraction(list_positive, outpath, feature_method)
-classifiers = cluster_division(features, classifiers, n_division, outpath, feature_method)
-outpath = os.path.join(outpath, 'Results_{}'.format(feature_method))
-try:
-    os.mkdir(outpath)
-    print("Directory", outpath, "created")
-except FileExistsError:
-    print("Directory", outpath, "already exists")
-show_preview(classifiers, level, tile_size, slides, outpath, feature_method, n_division)
-save_cluster(classifiers, outpath, feature_method)
+if flag == 0:
+    slide_list = patch_division(slides, outpath, level, tile_size=tile_size, tissue_ratio=tissue_ratio, jobs=jobs)
+
+if flag <= 1:
+    if flag == 1:
+        slide_list = os.path.join(outpath, 'list_{}_{}.p'.format(level, tile_size))
+        slide_list = pickle.load(slide_list)
+    classifiers, list_positive = detect_dab(slide_list, outpath, jobs=jobs, threshold=85)
+
+if flag <= 2:
+    if flag == 2:
+        list_positive = os.path.join(outpath, 'list_positive_{}_{}.p'.format(level, tile_size))
+        list_positive = pickle.load(list_positive)
+    if features_batch:
+        features = feature_extraction_batch(list_positive, outpath, feature_method)
+    features = feature_extraction(list_positive, outpath, feature_method)
+
+if flag <= 3:
+    if flag == 3:
+        classifiers = os.path.join(outpath, 'class_{}_{}.p'.format(level, tile_size))
+        classifiers = pickle.load(classifiers)
+        features = os.path.join(outpath, 'features_{}_level{}.p'.format(feature_method, level))
+        features = pickle.load(features)
+    classifiers = cluster_division(features, classifiers, n_division, outpath, feature_method)
+
+if flag <= 4:
+    if flag == 4:
+        classifiers = os.path.join(outpath, 'class-{}-{}.p'.format(feature_method, level))
+        classifiers = pickle.load(classifiers)
+    outpath = os.path.join(outpath, 'Results_{}'.format(feature_method))
+    try:
+        os.mkdir(outpath)
+        print("Directory", outpath, "created")
+    except FileExistsError:
+        print("Directory", outpath, "already exists")
+    show_preview(classifiers, level, tile_size, slides, outpath, feature_method, n_division)
+    save_cluster(classifiers, outpath, feature_method)
