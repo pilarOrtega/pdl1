@@ -25,7 +25,7 @@ parser.add_argument('-ts', '--tile_size', type=int, default=256, help='tile heig
 parser.add_argument('-f', '--feature_method', type=str, default='Dense', help='features extracted from individual patches [Default: %(default)s]')
 parser.add_argument('-n', '--n_division', type=int, default=4, help='number of divisions [Default: %(default)s]')
 parser.add_argument('--flag', type=int, default=0, help='Step')
-parser.add_argument('-d', '--device', default="0)
+parser.add_argument('-d', '--device', default="0")
 parser.add_argument('-j', '--jobs', type=int)
 parser.add_argument('-b', '--features_batch', action='store_true')
 
