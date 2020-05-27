@@ -1,4 +1,4 @@
-pickle_loadfrom patch_division import *
+from patch_division import *
 from detect_dab import *
 from feature_extraction import *
 from cluster_division import *
