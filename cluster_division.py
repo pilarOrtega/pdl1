@@ -35,8 +35,9 @@ def image_cluster(features, classifiers, n, method='Kmeans'):
         # Gets the index of the image
         index = image_list.index(im)
         image_name = os.path.basename(im)
+        image_name = image_name.split('#')[1]
         number = image_name.split('-')
-        number = int(number[1])
+        number = int(number[0])
         image = imread(im)
         slide_path = os.path.dirname(im)
         index_slide = slide_list.index(os.path.basename(slide_path))
