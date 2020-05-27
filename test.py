@@ -5,6 +5,7 @@ from cluster_division import *
 from show_preview import *
 from save_cluster import *
 import pickle
+import time
 
 
 def pickle_load(file_name):
@@ -49,21 +50,33 @@ flag = args.flag
 # Flag is an argument that determines in which step start the execution. It is
 
 if flag == 0:
+    start = time.time()
     slide_list = patch_division(slides, outpath, level, tile_size=tile_size, tissue_ratio=tissue_ratio, jobs=jobs)
+    end = time.time()
+    print('***** Total time patch_division {:.4f} s *****'.format(end-start))
+    print()
 
 if flag <= 1:
     if flag == 1:
         slide_list = os.path.join(outpath, 'list_{}_{}.p'.format(level, tile_size))
         slide_list = pickle_load(slide_list)
+    start = time.time()
     classifiers, list_positive = detect_dab(slide_list, outpath, jobs=jobs, threshold=85)
+    end = time.time()
+    print('***** Total time detect_dab {:.4f} s *****'.format(end-start))
+    print()
 
 if flag <= 2:
     if flag == 2:
         list_positive = os.path.join(outpath, 'list_positive_{}_{}.p'.format(level, tile_size))
         list_positive = pickle_load(list_positive)
+    start = time.time()
     if features_batch:
         features = feature_extraction_batch(list_positive, outpath, feature_method)
     features = feature_extraction(list_positive, outpath, feature_method)
+    end = time.time()
+    print('***** Total time feature_extraction {:.4f} s *****'.format(end-start))
+    print()
 
 if flag <= 3:
     if flag == 3:
@@ -71,7 +84,11 @@ if flag <= 3:
         classifiers = pickle_load(classifiers)
         features = os.path.join(outpath, 'features_{}_level{}.p'.format(feature_method, level))
         features = pickle_load(features)
+    start = time.time()
     classifiers = cluster_division(features, classifiers, n_division, outpath, feature_method)
+    end = time.time()
+    print('***** Total time cluster_division {:.4f} s *****'.format(end-start))
+    print()
 
 if flag <= 4:
     if flag == 4:
