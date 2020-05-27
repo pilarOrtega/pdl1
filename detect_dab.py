@@ -14,6 +14,7 @@ import pickle
 import argparse
 from joblib import Parallel, delayed
 import time
+from numba import jit
 
 
 def dab(image, thr=85, freq=10):
@@ -126,7 +127,7 @@ def detect_dab_delayed(slide, threshold):
         c[slide_number][2] = y
         # Positive column = 0 if patch is in list_negative
         c[slide_number][3] = 0
-    classifier = (slide[0], slide[1], c)
+    classifier = (os.path.basename(slide), slide, c)
 
     return classifier, list_positive
 
