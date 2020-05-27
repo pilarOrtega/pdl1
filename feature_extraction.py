@@ -285,7 +285,7 @@ def feature_reduction(list_features):
 
     initial_features = features.shape[1]
     pca_features = features_pca.shape[1]
-    print('Number of features reduced from {} to {} ({} features after PCA)'.format(initial_features, pca_features))
+    print('Number of features reduced from {} to {}'.format(initial_features, pca_features))
     print()
     # StandardScaler normalizes the data
     features_scaled = StandardScaler().fit_transform(features_pca)
