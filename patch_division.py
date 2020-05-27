@@ -82,7 +82,7 @@ def get_patches(slidepath, outpath, level=10, tissue_ratio=0.25, size=256):
             # Gets the tile in position (i, j)
             tile = slide_dz.get_tile(level, (i, j))
             image = numpy.array(tile)[..., :3]
-            mask = tissue.get_tissue_from_rgb(image, whitetol=240)
+            mask = tissue.get_tissue_from_rgb(image, blacktol=10, whitetol=240)
             # Saves tile in outpath only if tissue ratio is higher than threshold
             if mask.sum() > tissue_ratio * tile.size[0] * tile.size[1]:
                 tile_path = os.path.join(outpath, '{}#{}-level{}-{}-{}.jpg'.format(slidenumber, n, level, i, j))
