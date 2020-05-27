@@ -1,4 +1,4 @@
-from patch_division import *
+pickle_loadfrom patch_division import *
 from detect_dab import *
 from feature_extraction import *
 from cluster_division import *
@@ -54,13 +54,13 @@ if flag == 0:
 if flag <= 1:
     if flag == 1:
         slide_list = os.path.join(outpath, 'list_{}_{}.p'.format(level, tile_size))
-        slide_list = pickle.load(slide_list)
+        slide_list = pickle_load(slide_list)
     classifiers, list_positive = detect_dab(slide_list, outpath, jobs=jobs, threshold=85)
 
 if flag <= 2:
     if flag == 2:
         list_positive = os.path.join(outpath, 'list_positive_{}_{}.p'.format(level, tile_size))
-        list_positive = pickle.load(list_positive)
+        list_positive = pickle_load(list_positive)
     if features_batch:
         features = feature_extraction_batch(list_positive, outpath, feature_method)
     features = feature_extraction(list_positive, outpath, feature_method)
@@ -68,15 +68,15 @@ if flag <= 2:
 if flag <= 3:
     if flag == 3:
         classifiers = os.path.join(outpath, 'class_{}_{}.p'.format(level, tile_size))
-        classifiers = pickle.load(classifiers)
+        classifiers = pickle_load(classifiers)
         features = os.path.join(outpath, 'features_{}_level{}.p'.format(feature_method, level))
-        features = pickle.load(features)
+        features = pickle_load(features)
     classifiers = cluster_division(features, classifiers, n_division, outpath, feature_method)
 
 if flag <= 4:
     if flag == 4:
         classifiers = os.path.join(outpath, 'class-{}-{}.p'.format(feature_method, level))
-        classifiers = pickle.load(classifiers)
+        classifiers = pickle_load(classifiers)
     outpath = os.path.join(outpath, 'Results_{}'.format(feature_method))
     try:
         os.mkdir(outpath)
