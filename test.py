@@ -34,7 +34,7 @@ parser.add_argument('-b', '--features_batch', action='store_true')
 args = parser.parse_args()
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICE"] = "1"
+os.environ["CUDA_VISIBLE_DEVICEs"] = args.device
 
 slides = args.slides
 outpath = args.outpath
