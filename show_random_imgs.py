@@ -20,11 +20,13 @@ def show_random_imgs(images, x, y, figsize=(10, 10), save_fig=False, name=''):
             k = randint(0, len(images)-1)
             image_data = os.path.basename(images[k])
             image_slide = image_data.split('#')[0]
-            image_number = image_slide.split('-')[0]
+            image_number = image_data.split('#')[1]
+            image_number = image_number.split('-')[0]
             im = imread(images[k])
             ax[i].imshow(im)
             ax[i].set_title(image_slide+'-'+image_number, fontdict={'fontsize': 6, 'fontweight': 'medium'})
-    fig.suptitle(name, va='baseline')
+    title = os.path.basename(name) + ': ' + str(len(images))
+    fig.suptitle(title, va='baseline')
     fig.tight_layout()
     plt.show()
     if save_fig:
