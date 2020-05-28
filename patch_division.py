@@ -91,7 +91,7 @@ def get_patches(slidepath, outpath, level=10, tissue_ratio=0.25, size=256):
     print('Total of {} tiles with tissue ratio >{} in slide {}'.format(n, tissue_ratio, slidepath))
     print()
 
-    return n, outpath
+    return n
 
 
 def pickle_save(file, path, name):
@@ -128,7 +128,7 @@ def patch_division(slides, outpath, level, tile_size=256, tissue_ratio=0.25, job
     slides = os.path.join(slides, '*.PDL1.mrxs')
     slide_list = []
     start = time.time()
-    Parallel(n_jobs=jobs)(delayed(get_patches)(s, outpath, level, tissue_ratio, tile_size) for s in glob.glob(slides))
+    n = Parallel(n_jobs=jobs)(delayed(get_patches)(s, outpath, level, tissue_ratio, tile_size) for s in glob.glob(slides))
     end = time.time()
     print('Total time patch extraction: {:.4f} s'.format(end-start))
     for s in glob.glob(slides):
@@ -142,6 +142,9 @@ def patch_division(slides, outpath, level, tile_size=256, tissue_ratio=0.25, job
 
     pickle_save(slide_list, outpath, 'list_{}_{}.p'.format(level, tile_size))
 
+    n = sum(n)
+    print('Total number of patches extracted {}'.format(n))
+    print()
     return slide_list
 
 
