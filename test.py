@@ -70,6 +70,8 @@ if flag <= 2:
     if flag == 2:
         list_positive = os.path.join(outpath, 'list_positive_{}_{}.p'.format(level, tile_size))
         list_positive = pickle_load(list_positive)
+        classifiers = os.path.join(outpath, 'class_{}_{}.p'.format(level, tile_size))
+        classifiers = pickle_load(classifiers)
     start = time.time()
     if features_batch:
         features = feature_extraction_batch(list_positive, outpath, feature_method)
