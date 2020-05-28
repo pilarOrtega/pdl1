@@ -367,8 +367,10 @@ def feature_extraction(list_positive, outpath, feature_method):
             index = final_imag_list.index(im)
             im_name = os.path.basename(im)
             data = os.path.splitext(im_name)[0]
+            slidename = data.split('#')[0]
+            data = data.split('#')[1]
             data = data.split('-')
-            row = {'Slidename': data[0], 'Number': data[1], 'X': data[3], 'Y': data[4]}
+            row = {'Slidename': slidename, 'Number': data[0], 'X': data[2], 'Y': data[3]}
             for i in range(shape_feat[1]):
                 row['feature_{}'.format(i)] = final_feat[index][i]
             writer.writerow(row)
