@@ -120,8 +120,10 @@ def save_cluster(classifiers, outpath, feature_method, x=4, y=8, figsize=(13, 7)
                 for im in clist:
                     im_name = os.path.basename(im[0])
                     data = os.path.splitext(im_name)[0]
+                    slidename = data.split('#')[0]
+                    data = data.split('#')[1]
                     data = data.split('-')
-                    row = {'Slidename': data[0], 'Number': data[1], 'X': data[3], 'Y': data[4], 'Cluster': im[1]}
+                    row = {'Slidename': slidename, 'Number': data[0], 'X': data[2], 'Y': data[3]}
                     writer.writerow(row)
 
     list_cluster = []
