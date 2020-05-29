@@ -2,7 +2,6 @@ import numpy
 from matplotlib import pyplot as plt
 import argparse
 import pickle
-from save_cluster import *
 from openslide import OpenSlide, deepzoom
 import csv
 from tqdm import tqdm
