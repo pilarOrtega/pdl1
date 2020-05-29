@@ -9,6 +9,7 @@ from show_random_imgs import *
 import pickle
 from joblib import Parallel, delayed
 import time
+from auxiliary_functions.get_clusterlist import *
 
 
 def save_cluster_folder(outpath, cluster_list, n_division, feature_method):
@@ -38,28 +39,6 @@ def save_cluster_folder(outpath, cluster_list, n_division, feature_method):
         image = imread(x[0])
         image_path = os.path.join(dir_list[index], image_name)
         imsave(image_path, image)
-
-
-def get_clusterlist(outpath, classifier, n_division):
-    cluster_list = []
-    image_list = glob.glob(os.path.join(outpath, '*.jpg'))
-    print('Get cluster list from {}'.format(outpath))
-    for im in tqdm(image_list):
-        image_name = os.path.basename(im)
-        image_name = image_name.split('#')[1]
-        number = image_name.split('-')
-        number = int(number[0])
-
-        if classifier[number][3] == 0:
-            continue
-
-        cluster = 0
-        for j in range(n_division):
-            exp = n_division - j - 1
-            cluster = cluster + classifier[number][j+4] * (2**exp)
-        cluster_list.append((im, cluster))
-
-    return cluster_list
 
 
 def class_to_cluster(classifier, level, cluster):
