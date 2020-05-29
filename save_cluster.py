@@ -21,7 +21,7 @@ def save_cluster_folder(outpath, cluster_list, n_division, feature_method):
 
     dir_list = []
     for i in range(2**n_division):
-        dir = os.path.join(clusters, '{}'.format(i))
+        dir = os.path.join(clusters, '{}_division_{}_{}'.format(feature_method, n_division, i))
         try:
             os.mkdir(dir)
             print('Directory', dir, 'created')
@@ -130,7 +130,7 @@ def save_cluster(classifiers, outpath, feature_method, x=4, y=8, figsize=(13, 7)
         for im in cluster_list:
             if im[1] == i:
                 list_images.append(im[0])
-        cluster_name = os.path.join(outpath, '{}_cluster_{}.png'.format(feature_method, i))
+        cluster_name = os.path.join(outpath, '{}_cluster_{}_ndivision_{}.png'.format(feature_method, i, n_division))
         list_cluster.append((cluster_name, list_images))
 
     start = time.time()
