@@ -31,8 +31,8 @@ feature_method_1 = feature_method_1 + '(2)'
 with open(classifiers_1, "rb") as f:
     classifiers_1 = pickle.load(f)
 
-with open(classifiers_1, "rb") as f:
-    classifiers_1 = pickle.load(f)
+with open(classifiers_2, "rb") as f:
+    classifiers_2 = pickle.load(f)
 
 
 extract_complete_clusterlist(classifiers_1, ndivision, outpath, feature_method_1)
