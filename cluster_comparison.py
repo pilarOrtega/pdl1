@@ -42,16 +42,19 @@ extract_complete_clusterlist(classifiers_2, ndivision, outpath, feature_method_2
 # Comparar clusters
 grid = numpy.zeros((2**ndivision, 2**ndivision))
 for i in range(2**ndivision):
-    cluster_1 = 'cluster_{}_{}_{}.p'.format(feature_method_1, ndivision, i)
-    cluster_1 = os.path.join(outpath, cluster_1)
-    with open(cluster_1, "rb") as f:
+    path_cluster_1 = 'cluster_{}_{}_{}.p'.format(feature_method_1, ndivision, i)
+    path_cluster_1 = os.path.join(outpath, path_cluster_1)
+    with open(path_cluster_1, "rb") as f:
         cluster_1 = pickle.load(f)
     for j in range(2**ndivision):
-        cluster_2 = 'cluster_{}_{}_{}.p'.format(feature_method_2, ndivision, j)
-        cluster_2 = os.path.join(outpath, cluster_2)
-        with open(cluster_2, "rb") as f:
+        path_cluster_2 = 'cluster_{}_{}_{}.p'.format(feature_method_2, ndivision, j)
+        path_cluster_2 = os.path.join(outpath, path_cluster_2)
+        with open(path_cluster_2, "rb") as f:
             cluster_2 = pickle.load(f)
         grid[i, j] = (len(cluster_1 & cluster_2)/len(cluster_1 | cluster_2))*100
+        os.remove(path_cluster_2)
+    os.remove(path_cluster_1)
+
 
 # Display grid
 fig = plt.figure()
