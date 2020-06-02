@@ -4,6 +4,7 @@ import os
 import numpy
 from matplotlib import pyplot as plt
 import argparse
+import shutil
 
 
 parser = argparse.ArgumentParser(description='Compares two classifiers between them')
@@ -34,27 +35,27 @@ with open(classifiers_1, "rb") as f:
 with open(classifiers_2, "rb") as f:
     classifiers_2 = pickle.load(f)
 
-
-extract_complete_clusterlist(classifiers_1, ndivision, outpath, feature_method_1)
-extract_complete_clusterlist(classifiers_2, ndivision, outpath, feature_method_2)
+outpath_temp = os.path.join(outpath, 'temp')
+os.mkdir(outpath_temp)
+extract_complete_clusterlist(classifiers_1, ndivision, outpath_temp, feature_method_1)
+extract_complete_clusterlist(classifiers_2, ndivision, outpath_temp, feature_method_2)
 
 
 # Comparar clusters
 grid = numpy.zeros((2**ndivision, 2**ndivision))
 for i in range(2**ndivision):
     path_cluster_1 = 'cluster_{}_{}_{}.p'.format(feature_method_1, ndivision, i)
-    path_cluster_1 = os.path.join(outpath, path_cluster_1)
+    path_cluster_1 = os.path.join(outpath_temp, path_cluster_1)
     with open(path_cluster_1, "rb") as f:
         cluster_1 = pickle.load(f)
     for j in range(2**ndivision):
         path_cluster_2 = 'cluster_{}_{}_{}.p'.format(feature_method_2, ndivision, j)
-        path_cluster_2 = os.path.join(outpath, path_cluster_2)
+        path_cluster_2 = os.path.join(outpath_temp, path_cluster_2)
         with open(path_cluster_2, "rb") as f:
             cluster_2 = pickle.load(f)
         grid[i, j] = (len(cluster_1 & cluster_2)/len(cluster_1 | cluster_2))*100
-        os.remove(path_cluster_2)
-    os.remove(path_cluster_1)
 
+shutil.rmtree(outpath_temp)
 
 # Display grid
 fig = plt.figure()
