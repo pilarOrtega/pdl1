@@ -43,6 +43,8 @@ extract_complete_clusterlist(classifiers_2, ndivision, outpath_temp, feature_met
 
 # Comparar clusters
 grid = numpy.zeros((2**ndivision, 2**ndivision))
+grid_1 = numpy.zeros((2**ndivision, 2**ndivision))
+grid_2 = numpy.zeros((2**ndivision, 2**ndivision))
 for i in range(2**ndivision):
     path_cluster_1 = 'cluster_{}_{}_{}.p'.format(feature_method_1, ndivision, i)
     path_cluster_1 = os.path.join(outpath_temp, path_cluster_1)
@@ -54,15 +56,24 @@ for i in range(2**ndivision):
         with open(path_cluster_2, "rb") as f:
             cluster_2 = pickle.load(f)
         grid[i, j] = (len(cluster_1 & cluster_2)/len(cluster_1 | cluster_2))*100
+        grid_1[i, j] = (len(cluster_1 & cluster_2)/len(cluster_1))*100
+        grid_2[i, j] = (len(cluster_1 & cluster_2)/len(cluster_2))*100
 
 shutil.rmtree(outpath_temp)
 
 # Display grid
-fig = plt.figure()
-plt.imshow(grid, cmap='hot')
+fig, axes = plt.subplots(1, 3, figsize=(13, 17))
+ax = axes.ravel()
+
+ax[0].imshow(grid, cmap='hot')
+ax[0].set_title('To union of clusters')
+ax[1].imshow(grid_1, cmap='hot')
+ax[1].set_title('To cluster 1')
+ax[2].imshow(grid_2, cmap='hot')
+ax[2].set_title('To cluster 2')
+ax.xlabel(feature_method_2)
+ax.ylabel(feature_method_1)
 plt.colorbar()
-plt.xlabel(feature_method_2)
-plt.ylabel(feature_method_1)
 fig.tight_layout()
 plt.show()
 name = os.path.join(outpath, 'compare_{}_{}.png'.format(feature_method_1, feature_method_2))
