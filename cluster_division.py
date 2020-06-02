@@ -12,7 +12,12 @@ from tqdm import tqdm
 
 
 def image_cluster(features, classifiers, n, method='Kmeans'):
+    """
+    Separates patches in two clusters according to the features given. It saves
+    the result in the classifiers array.
 
+    The classifiers array
+    """
     features, image_list = feature_list_division(features)
     slide_list = []
     for x in classifiers:
@@ -38,7 +43,6 @@ def image_cluster(features, classifiers, n, method='Kmeans'):
         image_name = image_name.split('#')[1]
         number = image_name.split('-')
         number = int(number[0])
-        image = imread(im)
         slide_path = os.path.dirname(im)
         index_slide = slide_list.index(os.path.basename(slide_path))
         if labels[index] == 1:
@@ -73,11 +77,30 @@ def pickle_save(file, path, name):
         pickle.dump(file, f)
 
 
-def cluster_division(features, classifiers_0, n_division, outpath, feature_method):
+def cluster_division(features, classifiers_0, n_division, outpath, feature_method, method = 'Top-down'):
+    """
+    Arguments:
+        - features:
+        - classifiers_0: list with lentgh equal to the number of slides studied.
+            Each element of the list contains three elements: (1) str, Slidename
+            (2) str, Path to the folder in which patches are stored (3) arr,
+            classification array with shape (n_patches, 4). These 4 columns
+            contains 1) Patch number 2) X coordenate 3) Y coordenate 4) 1 if
+            the patch is DAB positive or 0 otherwise
+    """
+    # Creates empty list in which the list of features is subsequentelly stored
+    # Initially, we store the first feature array, including all DAB positive
+    # patches
     param = []
     param.append(features)
-    k = 0
 
+    # We create a new classifiers list in which we introduce a new array for
+    # each slide with shape (n_samples, n_features) being n_features 4 +
+    # n_division. I.e. if we want to create a clustering hierarchy of 4 levels
+    # (16 clusters) we will have an array of size (n_samples, 8). Information
+    # for the first division will be stored in column 5 (0 or 1)
+    if method == 'Bottom-up':
+        n_division = 1
     classifiers = []
     for s in classifiers_0:
         n_samples = s[2].shape[0]
@@ -86,29 +109,49 @@ def cluster_division(features, classifiers_0, n_division, outpath, feature_metho
         c[:, : - n_division] = s[2]
         classifiers.append((s[0], s[1], c))
 
-    print('[INFO] Dividing patches into clusters')
-    print('Total of {} images to be divided in {} clusters'.format(len(features), 2**n_division))
-    print()
-    for i in range(n_division):
-        n_level = i + 4
-        for j in range(2**i):
-            index = j + 2**i - 1
-            curr_features = param[index]
-            classifiers, f1, f0 = image_cluster(curr_features, classifiers, n_level)
-            param.append(f1)
-            param.append(f0)
-            number_divisions = 2**i
-            print('Division completed - division {} out of {} in level {}'.format(j+1, number_divisions, i))
-            print('    {} images in cluster {}'.format(len(f1), 1))
-            print('    {} images in cluster {}'.format(len(f0), 0))
-            print()
+    if method == 'Top-down':
+        print('[INFO] Dividing patches into clusters')
+        print('Total of {} images to be divided in {} clusters'.format(len(features), 2**n_division))
+        print()
+        for i in range(n_division):
+            n_level = i + 4
+            for j in range(2**i):
+                index = j + 2**i - 1
+                curr_features = param[index]
+                classifiers, f1, f0 = image_cluster(curr_features, classifiers, n_level)
+                param.append(f1)
+                param.append(f0)
+                number_divisions = 2**i
+                print('Division completed - division {} out of {} in level {}'.format(j+1, number_divisions, i))
+                print('    {} images in cluster {}'.format(len(f1), 1))
+                print('    {} images in cluster {}'.format(len(f0), 0))
+                print()
+
+    if method == 'Bottom-up':
+        print('[INFO] Dividing patches into clusters')
+        print('Total of {} images to be divided in 18 clusters'.format(len(features)))
+        print()
+        features, image_list = feature_list_division(features)
+        cls = MiniBatchKMeans(n_clusters=2)
+        labels = cls.fit_predict(features)
+        score = davies_bouldin_score(features, labels)
+        print('Davies-Bouldin Score: {}'.format(score))
+        for im in tqdm(image_list):
+            index = image_list.index(im)
+            image_name = os.path.basename(im)
+            image_name = image_name.split('#')[1]
+            number = image_name.split('-')
+            number = int(number[0])
+            slide_path = os.path.dirname(im)
+            index_slide = slide_list.index(os.path.basename(slide_path))
+            classifiers[index_slide][2][number][n_division+4] =labels[index]
 
     name = outpath
     name = os.path.basename(name)
     name = os.path.splitext(name)[0]
     name = name.split('_')
     level = name[1]
-    pickle_save(classifiers, outpath, 'class-{}-{}.p'.format(feature_method, level))
+    pickle_save(classifiers, outpath, 'class-{}-{}-{}.p'.format(feature_method, level, method))
 
     print('[INFO] Saving csv files...')
     print()
@@ -137,11 +180,12 @@ def cluster_division(features, classifiers_0, n_division, outpath, feature_metho
 
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser(description='Script that discriminates patches positives to DAB.')
+    parser = argparse.ArgumentParser(description='Script that divides a set of patches into cluster hierarchically using KMeans.')
     parser.add_argument('-f', '--list_features', type=str, help='file with feature list')
     parser.add_argument('-c', '--classifiers', type=str, help='path to classification file')
     parser.add_argument('-n', '--n_division', type=int, default=4, help='number of divisions [Default: %(default)s]')
     parser.add_argument('-o', '--outpath', type=str, help='path to outfolder')
+    parser.add_argument('-m', '--method', type=str, choices=['Bottom-up', 'Top-down'])
 
     args = parser.parse_args()
 
@@ -157,4 +201,4 @@ if __name__ == "__main__":
     feature_method = os.path.splitext(feature_method)[0]
     feature_method = feature_method.split('_')[1]
 
-    classifiers = cluster_division(features, classifiers, n_division, outpath, feature_method)
+    classifiers = cluster_division(features, classifiers, n_division, outpath, feature_method, method = args.method)
