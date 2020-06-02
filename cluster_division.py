@@ -147,7 +147,7 @@ def cluster_division(features, classifiers_0, n_division, outpath, feature_metho
             number = int(number[0])
             slide_path = os.path.dirname(im)
             index_slide = slide_list.index(os.path.basename(slide_path))
-            classifiers[index_slide][2][number][n_division+4] =labels[index]
+            classifiers[index_slide][2][number][4] =labels[index]
 
     name = outpath
     name = os.path.basename(name)
