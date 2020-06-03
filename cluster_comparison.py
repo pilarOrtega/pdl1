@@ -10,7 +10,6 @@ import shutil
 parser = argparse.ArgumentParser(description='Compares two classifiers between them')
 parser.add_argument('-c1', '--classifier_1', type=str)
 parser.add_argument('-c2', '--classifier_2', type=str)
-parser.add_argument('-n', '--ndivision', type=int)
 parser.add_argument('-o', '--outpath', type=str, help='path to outfolder')
 args = parser.parse_args()
 # Function that gets the intersection between two clusters from different
@@ -18,7 +17,6 @@ args = parser.parse_args()
 
 classifiers_1 = args.classifier_1
 classifiers_2 = args.classifier_2
-ndivision = args.ndivision
 outpath = args.outpath
 
 feature_method_1 = os.path.basename(classifiers_1)
@@ -37,8 +35,8 @@ with open(classifiers_2, "rb") as f:
 
 outpath_temp = os.path.join(outpath, 'temp')
 os.mkdir(outpath_temp)
-n1 = extract_complete_clusterlist(classifiers_1, ndivision, outpath_temp, feature_method_1)
-n2 = extract_complete_clusterlist(classifiers_2, ndivision, outpath_temp, feature_method_2)
+n1 = extract_complete_clusterlist(classifiers_1, outpath_temp, feature_method_1)
+n2 = extract_complete_clusterlist(classifiers_2, outpath_temp, feature_method_2)
 n1 = int(n1)
 n2 = int(n2)
 
@@ -47,12 +45,12 @@ grid = numpy.zeros((n1, n2))
 grid_1 = numpy.zeros((n1, n2))
 grid_2 = numpy.zeros((n1, n2))
 for i in range(n1):
-    path_cluster_1 = 'cluster_{}_{}_{}.p'.format(feature_method_1, ndivision, i)
+    path_cluster_1 = 'cluster_{}_{}.p'.format(feature_method_1, i)
     path_cluster_1 = os.path.join(outpath_temp, path_cluster_1)
     with open(path_cluster_1, "rb") as f:
         cluster_1 = pickle.load(f)
     for j in range(n2):
-        path_cluster_2 = 'cluster_{}_{}_{}.p'.format(feature_method_2, ndivision, j)
+        path_cluster_2 = 'cluster_{}_{}.p'.format(feature_method_2, j)
         path_cluster_2 = os.path.join(outpath_temp, path_cluster_2)
         with open(path_cluster_2, "rb") as f:
             cluster_2 = pickle.load(f)

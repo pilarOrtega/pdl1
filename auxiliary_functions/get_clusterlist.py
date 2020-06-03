@@ -32,7 +32,7 @@ def get_clusterlist(outpath, classifier, n_division):
 
     return cluster_list
 
-def extract_complete_clusterlist(classifier, ndivision, outpath, feature_method):
+def extract_complete_clusterlist(classifier, outpath, feature_method):
 
     # Creamos una lista con todas las imagenes y su cluster
     print('Getting complete clusterlist for {}'.format(feature_method))
@@ -46,7 +46,7 @@ def extract_complete_clusterlist(classifier, ndivision, outpath, feature_method)
     # Creamos un set de cada cluster
     for i in range(int(nclusters)):
         cluster = {x[0] for x in clusterlist if x[1] == i}
-        name = 'cluster_{}_{}_{}.p'.format(feature_method, ndivision, i)
+        name = 'cluster_{}_{}.p'.format(feature_method, i)
         pickle_save(cluster, outpath, name)
 
     return nclusters
