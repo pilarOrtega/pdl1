@@ -65,6 +65,7 @@ if __name__ == "__main__":
     parser.add_argument('-ts', '--tile_size', type=int, default=256, help='tile heigth and width in pixels [Default: %(default)s]')
     parser.add_argument('-s', '--slide_folder', type=str, default=0.5, help='path to slide folder')
     parser.add_argument('-n', '--n_division', type=int, default=0, help='number of divisions')
+    parser.add_argument('-m', '--method', type=str, choices=['Bottom-up', 'Top-down'])
     parser.add_argument('-f', '--feature_method', type=str)
 
     args = parser.parse_args()
@@ -72,4 +73,4 @@ if __name__ == "__main__":
     with open(args.classifiers, "rb") as f:
         classifiers = pickle.load(f)
 
-    show_preview(classifiers, args.level, args.tile_size, args.slide_folder, args.outpath, args.feature_method, args.n_division)
+    show_preview(classifiers, args.level, args.tile_size, args.slide_folder, args.outpath, args.feature_method, n_division=args.n_division, method=args.method)

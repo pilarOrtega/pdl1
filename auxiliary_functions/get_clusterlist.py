@@ -22,9 +22,12 @@ def get_clusterlist(outpath, classifier, n_division):
             continue
 
         cluster = 0
-        for j in range(n_division):
-            exp = n_division - j - 1
-            cluster = cluster + classifier[number][j+4] * (2**exp)
+        if n_division == 1:
+            cluster = classifier[number][4]
+        else:
+            for j in range(n_division):
+                exp = n_division - j - 1
+                cluster = cluster + classifier[number][j+4] * (2**exp)
         cluster_list.append((im, cluster))
 
     return cluster_list
