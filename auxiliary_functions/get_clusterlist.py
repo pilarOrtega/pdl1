@@ -40,7 +40,8 @@ def extract_complete_clusterlist(classifier, ndivision, outpath, feature_method)
         n_division = (c[2].shape[1]) - 4
         clusterlist.extend(get_clusterlist(c[1], c[2], ndivision))
 
-    nclusters = max([x[1] for x in cluster_list]) + 1
+    nclusters = max([x[1] for x in clusterlist]) + 1
+    print('nclusters: {}'.format(nclusters))
     # Creamos un set de cada cluster
     for i in range(nclusters):
         cluster = {x[0] for x in clusterlist if x[1] == i}
