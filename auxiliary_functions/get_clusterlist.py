@@ -43,7 +43,7 @@ def extract_complete_clusterlist(classifier, ndivision, outpath, feature_method)
     nclusters = max([x[1] for x in clusterlist]) + 1
     print('nclusters: {}'.format(nclusters))
     # Creamos un set de cada cluster
-    for i in range(nclusters):
+    for i in range(int(nclusters)):
         cluster = {x[0] for x in clusterlist if x[1] == i}
         name = 'cluster_{}_{}_{}.p'.format(feature_method, ndivision, i)
         pickle_save(cluster, outpath, name)
