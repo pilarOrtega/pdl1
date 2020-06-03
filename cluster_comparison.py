@@ -37,20 +37,20 @@ with open(classifiers_2, "rb") as f:
 
 outpath_temp = os.path.join(outpath, 'temp')
 os.mkdir(outpath_temp)
-extract_complete_clusterlist(classifiers_1, ndivision, outpath_temp, feature_method_1)
-extract_complete_clusterlist(classifiers_2, ndivision, outpath_temp, feature_method_2)
+n1 = extract_complete_clusterlist(classifiers_1, ndivision, outpath_temp, feature_method_1)
+n2 = extract_complete_clusterlist(classifiers_2, ndivision, outpath_temp, feature_method_2)
 
 
 # Comparar clusters
-grid = numpy.zeros((2**ndivision, 2**ndivision))
-grid_1 = numpy.zeros((2**ndivision, 2**ndivision))
-grid_2 = numpy.zeros((2**ndivision, 2**ndivision))
-for i in range(2**ndivision):
+grid = numpy.zeros((n1, n2))
+grid_1 = numpy.zeros((n1, n2))
+grid_2 = numpy.zeros((n1, n2))
+for i in range(n1):
     path_cluster_1 = 'cluster_{}_{}_{}.p'.format(feature_method_1, ndivision, i)
     path_cluster_1 = os.path.join(outpath_temp, path_cluster_1)
     with open(path_cluster_1, "rb") as f:
         cluster_1 = pickle.load(f)
-    for j in range(2**ndivision):
+    for j in range(n2):
         path_cluster_2 = 'cluster_{}_{}_{}.p'.format(feature_method_2, ndivision, j)
         path_cluster_2 = os.path.join(outpath_temp, path_cluster_2)
         with open(path_cluster_2, "rb") as f:
