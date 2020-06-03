@@ -35,6 +35,7 @@ def get_clusterlist(outpath, classifier, n_division):
 def extract_complete_clusterlist(classifier, ndivision, outpath, feature_method):
 
     # Creamos una lista con todas las imagenes y su cluster
+    print('Getting complete clusterlist for {}'.format(feature_method))
     clusterlist = []
     for c in classifier:
         n_division = (c[2].shape[1]) - 4

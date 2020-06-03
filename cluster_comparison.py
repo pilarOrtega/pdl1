@@ -39,7 +39,8 @@ outpath_temp = os.path.join(outpath, 'temp')
 os.mkdir(outpath_temp)
 n1 = extract_complete_clusterlist(classifiers_1, ndivision, outpath_temp, feature_method_1)
 n2 = extract_complete_clusterlist(classifiers_2, ndivision, outpath_temp, feature_method_2)
-
+n1 = int(n1)
+n2 = int(n2)
 
 # Comparar clusters
 grid = numpy.zeros((n1, n2))
