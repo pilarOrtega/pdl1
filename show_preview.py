@@ -7,9 +7,10 @@ import csv
 from tqdm import tqdm
 from joblib import Parallel, delayed
 import time
+import os
 
 
-def get_preview(s, level, size, slide_folder, n_division):
+def get_preview(s, level, size, slide_folder, n_division, method='Top-down'):
     result = []
     slidename = s[0]
     slidepath = os.path.join(slide_folder, slidename)
@@ -24,26 +25,29 @@ def get_preview(s, level, size, slide_folder, n_division):
         if x[3] == 0:
             preview[im_x][im_y] = 1
         else:
-            cluster = 0
-            for j in range(n_division):
-                exp = n_division - j - 1
-                cluster = cluster + x[j+4] * (2**exp)
+            if method == 'Top-down':
+                cluster = 0
+                for j in range(n_division):
+                    exp = n_division - j - 1
+                    cluster = cluster + x[j+4] * (2**exp)
+            if method == 'Bottom-up':
+                cluster = x[4]
             preview[im_x][im_y] = cluster + 2
     result.extend((slidename, preview))
     return result
 
 
-def show_preview(classifiers, level, size, slide_folder, outpath, feature_method, n_division=0):
+def show_preview(classifiers, level, size, slide_folder, outpath, feature_method, n_division=0, method='Top-down'):
     if n_division == 0:
         n_division = (s[2].shape[1]) - 4
 
     start = time.time()
-    previews = Parallel(n_jobs=4)(delayed(get_preview)(s, level, size, slide_folder, n_division) for s in tqdm(classifiers))
+    previews = Parallel(n_jobs=4)(delayed(get_preview)(s, level, size, slide_folder, n_division, method=method) for s in tqdm(classifiers))
     end = time.time()
     print('Total time get previews: {:.4f} s'.format(end-start))
 
     for im in previews:
-        slidename = '{}-{}-level{}-ts{}-{}.png'.format(im[0], feature_method, level, size, n_division)
+        slidename = '{}-{}-level{}-ts{}-{}-{}.png'.format(im[0], feature_method, level, size, n_division, method)
         name = os.path.join(outpath, slidename)
         fig = plt.figure()
         plt.imshow(im[1], cmap='tab20b')
