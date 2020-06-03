@@ -100,7 +100,7 @@ if flag <= 4:
     if flag == 4:
         classifiers = os.path.join(outpath, 'class-{}-{}-{}.p'.format(feature_method, level, method))
         classifiers = pickle_load(classifiers)
-    outpath = os.path.join(outpath, 'Results_{}_{}_{}'.format(feature_method, method))
+    outpath = os.path.join(outpath, 'Results_{}_{}'.format(feature_method, method))
     try:
         os.mkdir(outpath)
         print("Directory", outpath, "created")
