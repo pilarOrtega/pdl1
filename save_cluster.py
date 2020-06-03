@@ -106,7 +106,8 @@ def save_cluster(classifiers, outpath, feature_method, x=4, y=8, figsize=(13, 7)
                     writer.writerow(row)
 
     list_cluster = []
-    for i in range(2**n_division):
+    nclusters = max(x[1] for x in cluster_list) + 1
+    for i in range(nclusters):
         list_images = []
         for im in cluster_list:
             if im[1] == i:
