@@ -38,7 +38,7 @@ def extract_complete_clusterlist(classifier, ndivision, outpath, feature_method)
     print('Getting complete clusterlist for {}'.format(feature_method))
     clusterlist = []
     for c in classifier:
-        n_division = (c[2].shape[1]) - 4
+        ndivision = (c[2].shape[1]) - 4
         clusterlist.extend(get_clusterlist(c[1], c[2], ndivision))
 
     nclusters = max([x[1] for x in clusterlist]) + 1
