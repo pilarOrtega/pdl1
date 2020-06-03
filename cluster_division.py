@@ -135,7 +135,7 @@ def cluster_division(features, classifiers_0, n_division, outpath, feature_metho
         slide_list = []
         for x in classifiers:
             slide_list.append(x[0])
-        cls = MiniBatchKMeans(n_clusters=2)
+        cls = MiniBatchKMeans(n_clusters=18)
         labels = cls.fit_predict(features)
         score = davies_bouldin_score(features, labels)
         print('Davies-Bouldin Score: {}'.format(score))
