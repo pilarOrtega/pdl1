@@ -49,4 +49,4 @@ def extract_complete_clusterlist(classifier, outpath, feature_method):
         name = 'cluster_{}_{}.p'.format(feature_method, i)
         pickle_save(cluster, outpath, name)
 
-    return nclusters
+    return clusterlist, nclusters
