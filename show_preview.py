@@ -74,4 +74,3 @@ if __name__ == "__main__":
         classifiers = pickle.load(f)
 
     show_preview(classifiers, args.level, args.tile_size, args.slide_folder, args.outpath, args.feature_method, n_division=args.n_division, method=args.method)
-BottomUp
