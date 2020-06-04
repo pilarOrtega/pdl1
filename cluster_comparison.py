@@ -86,8 +86,10 @@ plt.colorbar(im2, ax=ax[2], fraction=0.046, pad=0.04)
 for i in range(3):
     ax[i].set_xlabel(feature_method_2)
     ax[i].set_ylabel(feature_method_1)
-fig.suptitle('Score {}'.format(score), va = 'baseline')
+fig.suptitle('Score {}'.format(score), va = 'baseline', fontsize=16)
 fig.tight_layout()
+fig.subplots_adjust(top=0.88)
+
 plt.show()
 name = os.path.join(outpath, 'compare_{}_{}.png'.format(feature_method_1, feature_method_2))
 fig.savefig(name, bbox_inches='tight', dpi=fig.dpi)
@@ -98,6 +100,7 @@ pairs_grid1 = [(i, grid_1[i].argmax(),  max(grid_1[i])) for i in range(grid_1.sh
 pairs_grid2 = [(i, grid_2[:,i].argmax(),  max(grid_2[:,i])) for i in range(grid_2.shape[1])]
 
 print('*** View max values ***')
+print()
 print('To union of clusters:')
 t = PrettyTable([feature_method_1, feature_method_2, 'Percentage'])
 for i in range(len(pairs_grid)):
@@ -111,7 +114,7 @@ for i in range(len(pairs_grid)):
 print(t)
 print()
 print('To cluster {}:'.format(feature_method_2))
-t = PrettyTable([feature_method_2, feature_method_3, 'Percentage'])
+t = PrettyTable([feature_method_2, feature_method_1, 'Percentage'])
 for i in range(len(pairs_grid)):
     t.add_row([pairs_grid2[i][0], pairs_grid2[i][1], pairs_grid2[i][2]])
 print(t)
