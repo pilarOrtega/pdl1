@@ -23,11 +23,11 @@ outpath = args.outpath
 
 feature_method_1 = os.path.basename(classifiers_1)
 feature_method_1 = feature_method_1.split('-')
-feature_method_1 = feature_method_1[1] + feature_method_1[2] + '(1)'
+feature_method_1 = feature_method_1[1] + feature_method_1[3] + '(1)'
 
 feature_method_2 = os.path.basename(classifiers_2)
 feature_method_2 = feature_method_2.split('-')
-feature_method_2 = feature_method_2[1] + feature_method_2[2] + '(2)'
+feature_method_2 = feature_method_2[1] + feature_method_2[3] + '(2)'
 
 with open(classifiers_1, "rb") as f:
     classifiers_1 = pickle.load(f)
@@ -99,19 +99,19 @@ pairs_grid2 = [(i, grid_2[:,i].argmax(),  max(grid_2[:,i])) for i in range(grid_
 
 print('*** View max values ***')
 print('To union of clusters:')
-t = PrettyTable([feature_method_1, feature_method_2, Percentage])
+t = PrettyTable([feature_method_1, feature_method_2, 'Percentage'])
 for i in range(len(pairs_grid)):
     t.add_row([pairs_grid[i][0], pairs_grid[i][1], pairs_grid[i][2]])
 print(t)
 print()
 print('To cluster {}:'.format(feature_method_1))
-t = PrettyTable([feature_method_1, feature_method_2, Percentage])
+t = PrettyTable([feature_method_1, feature_method_2, 'Percentage'])
 for i in range(len(pairs_grid)):
     t.add_row([pairs_grid1[i][0], pairs_grid1[i][1], pairs_grid1[i][2]])
 print(t)
 print()
 print('To cluster {}:'.format(feature_method_2))
-t = PrettyTable([feature_method_2, feature_method_3, Percentage])
+t = PrettyTable([feature_method_2, feature_method_3, 'Percentage'])
 for i in range(len(pairs_grid)):
     t.add_row([pairs_grid2[i][0], pairs_grid2[i][1], pairs_grid2[i][2]])
 print(t)
