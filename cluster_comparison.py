@@ -23,11 +23,11 @@ outpath = args.outpath
 
 feature_method_1 = os.path.basename(classifiers_1)
 feature_method_1 = feature_method_1.split('-')
-feature_method_1 = feature_method_1[1] + feature_method_1[3] + '(1)'
+feature_method_1 = feature_method_1[1] + feature_method_1[3] + '1'
 
 feature_method_2 = os.path.basename(classifiers_2)
 feature_method_2 = feature_method_2.split('-')
-feature_method_2 = feature_method_2[1] + feature_method_2[3] + '(2)'
+feature_method_2 = feature_method_2[1] + feature_method_2[3] + '2'
 
 with open(classifiers_1, "rb") as f:
     classifiers_1 = pickle.load(f)
