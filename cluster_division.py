@@ -129,13 +129,13 @@ def cluster_division(features, classifiers_0, n_division, outpath, feature_metho
 
     if method == 'BottomUp':
         print('[INFO] Dividing patches into clusters')
-        print('Total of {} images to be divided in 18 clusters'.format(len(features)))
+        print('Total of {} images to be divided in 16 clusters'.format(len(features)))
         print()
         features, image_list = feature_list_division(features)
         slide_list = []
         for x in classifiers:
             slide_list.append(x[0])
-        cls = MiniBatchKMeans(n_clusters=18)
+        cls = MiniBatchKMeans(n_clusters=16)
         labels = cls.fit_predict(features)
         score = davies_bouldin_score(features, labels)
         print('Davies-Bouldin Score: {}'.format(score))

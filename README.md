@@ -42,7 +42,7 @@ possible feature methods in total,, namely *Dense, DenseDAB, Daisy,* and
 subdivisions that will be made (by default set to 4). In case of BottomUp, this
 parameter is not necessary and is set to 1.
 - **Method**: BottomUp or TopDown. The first executes a K-Means clustering
-with k=18 (with the aim of later regrouping clusters in a hierarchical way) while
+with k=16 (with the aim of later regrouping clusters in a hierarchical way) while
 TopDown executes k-means with k=2 recursively (up to 2**ndivision clusters)
 - **Flag**: Integer from 0 to 4, it sets the start of the execution in a
 specific block:
