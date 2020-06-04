@@ -38,12 +38,12 @@ that can be used, either in all RGB channels or only in the DAB channel - 8
 possible feature methods in total,, namely *Dense, DenseDAB, Daisy,* and
 *DaisyDAB,* which are classical methods and *Xception, XceptionDAB, VGG16* and
 *VGG16DAB*, based on Xception and VGG16 pretrained nn respectively.
-- **N division**: In the case of method Top-down, it is the number of cluster
-subdivisions that will be made (by default set to 4). In case of Bottom-up, this
+- **N division**: In the case of method TopDown, it is the number of cluster
+subdivisions that will be made (by default set to 4). In case of BottomUp, this
 parameter is not necessary and is set to 1.
-- **Method**: Bottom-up or Top-down. The first executes a K-Means clustering
+- **Method**: BottomUp or TopDown. The first executes a K-Means clustering
 with k=18 (with the aim of later regrouping clusters in a hierarchical way) while
-Top-down executes k-means with k=2 recursively (up to 2**ndivision clusters)
+TopDown executes k-means with k=2 recursively (up to 2**ndivision clusters)
 - **Flag**: Integer from 0 to 4, it sets the start of the execution in a
 specific block:
   0. Flag by default, starts in block **patch_division**

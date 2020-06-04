@@ -25,7 +25,7 @@ parser.add_argument('-tr', '--tissue_ratio', type=float, default=0.5, help='tiss
 parser.add_argument('-ts', '--tile_size', type=int, default=224, help='tile heigth and width in pixels [Default: %(default)s]')
 parser.add_argument('-f', '--feature_method', type=str, default='Dense', help='features extracted from individual patches [Default: %(default)s]')
 parser.add_argument('-n', '--n_division', type=int, default=4, help='number of divisions [Default: %(default)s]')
-parser.add_argument('-m', '--method', type=str, choices=['Bottom-up', 'Top-down'])
+parser.add_argument('-m', '--method', type=str, choices=['BottomUp', 'TopDown'])
 parser.add_argument('--flag', type=int, default=0, help='Step [Default: %(default)s]')
 parser.add_argument('-d', '--device', default="0", help='GPU used (0 or 1) [Default: %(default)s]')
 parser.add_argument('-j', '--jobs', type=int)
@@ -49,7 +49,7 @@ jobs = args.jobs
 features_batch = args.features_batch
 flag = args.flag
 method = args.method
-if method == 'Bottom-up':
+if method == 'BottomUp':
     n_division = 1
 # Flag is an argument that determines in which step start the execution. It is
 

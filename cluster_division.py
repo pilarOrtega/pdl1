@@ -77,7 +77,7 @@ def pickle_save(file, path, name):
         pickle.dump(file, f)
 
 
-def cluster_division(features, classifiers_0, n_division, outpath, feature_method, method = 'Top-down'):
+def cluster_division(features, classifiers_0, n_division, outpath, feature_method, method = 'TopDown'):
     """
     Arguments:
         - features:
@@ -99,7 +99,7 @@ def cluster_division(features, classifiers_0, n_division, outpath, feature_metho
     # n_division. I.e. if we want to create a clustering hierarchy of 4 levels
     # (16 clusters) we will have an array of size (n_samples, 8). Information
     # for the first division will be stored in column 5 (0 or 1)
-    if method == 'Bottom-up':
+    if method == 'BottomUp':
         n_division = 1
     classifiers = []
     for s in classifiers_0:
@@ -109,7 +109,7 @@ def cluster_division(features, classifiers_0, n_division, outpath, feature_metho
         c[:, : - n_division] = s[2]
         classifiers.append((s[0], s[1], c))
 
-    if method == 'Top-down':
+    if method == 'TopDown':
         print('[INFO] Dividing patches into clusters')
         print('Total of {} images to be divided in {} clusters'.format(len(features), 2**n_division))
         print()
@@ -127,7 +127,7 @@ def cluster_division(features, classifiers_0, n_division, outpath, feature_metho
                 print('    {} images in cluster {}'.format(len(f0), 0))
                 print()
 
-    if method == 'Bottom-up':
+    if method == 'BottomUp':
         print('[INFO] Dividing patches into clusters')
         print('Total of {} images to be divided in 18 clusters'.format(len(features)))
         print()
@@ -188,7 +188,7 @@ if __name__ == "__main__":
     parser.add_argument('-c', '--classifiers', type=str, help='path to classification file')
     parser.add_argument('-n', '--n_division', type=int, default=4, help='number of divisions [Default: %(default)s]')
     parser.add_argument('-o', '--outpath', type=str, help='path to outfolder')
-    parser.add_argument('-m', '--method', type=str, choices=['Bottom-up', 'Top-down'])
+    parser.add_argument('-m', '--method', type=str, choices=['BottomUp', 'TopDown'])
 
     args = parser.parse_args()
 

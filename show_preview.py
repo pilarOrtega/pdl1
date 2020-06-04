@@ -10,7 +10,7 @@ import time
 import os
 
 
-def get_preview(s, level, size, slide_folder, n_division, method='Top-down'):
+def get_preview(s, level, size, slide_folder, n_division, method='TopDown'):
     result = []
     slidename = s[0]
     slidepath = os.path.join(slide_folder, slidename)
@@ -25,19 +25,19 @@ def get_preview(s, level, size, slide_folder, n_division, method='Top-down'):
         if x[3] == 0:
             preview[im_x][im_y] = 1
         else:
-            if method == 'Top-down':
+            if method == 'TopDown':
                 cluster = 0
                 for j in range(n_division):
                     exp = n_division - j - 1
                     cluster = cluster + x[j+4] * (2**exp)
-            if method == 'Bottom-up':
+            if method == 'BottomUp':
                 cluster = x[4]
             preview[im_x][im_y] = cluster + 2
     result.extend((slidename, preview))
     return result
 
 
-def show_preview(classifiers, level, size, slide_folder, outpath, feature_method, n_division=0, method='Top-down'):
+def show_preview(classifiers, level, size, slide_folder, outpath, feature_method, n_division=0, method='TopDown'):
     if n_division == 0:
         n_division = (s[2].shape[1]) - 4
 
@@ -65,7 +65,7 @@ if __name__ == "__main__":
     parser.add_argument('-ts', '--tile_size', type=int, default=256, help='tile heigth and width in pixels [Default: %(default)s]')
     parser.add_argument('-s', '--slide_folder', type=str, default=0.5, help='path to slide folder')
     parser.add_argument('-n', '--n_division', type=int, default=0, help='number of divisions')
-    parser.add_argument('-m', '--method', type=str, choices=['Bottom-up', 'Top-down'])
+    parser.add_argument('-m', '--method', type=str, choices=['BottomUp', 'TopDown'])
     parser.add_argument('-f', '--feature_method', type=str)
 
     args = parser.parse_args()
@@ -74,3 +74,4 @@ if __name__ == "__main__":
         classifiers = pickle.load(f)
 
     show_preview(classifiers, args.level, args.tile_size, args.slide_folder, args.outpath, args.feature_method, n_division=args.n_division, method=args.method)
+BottomUp
