@@ -86,7 +86,7 @@ plt.colorbar(im2, ax=ax[2], fraction=0.046, pad=0.04)
 for i in range(3):
     ax[i].set_xlabel(feature_method_2)
     ax[i].set_ylabel(feature_method_1)
-fig.suptitle('Score {}'.format(score), va = 'baseline', fontsize=16)
+fig.suptitle('Score {}'.format(score), fontsize=16)
 fig.tight_layout()
 fig.subplots_adjust(top=0.88)
 
