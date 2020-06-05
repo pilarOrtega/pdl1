@@ -14,8 +14,8 @@ def get_clusterlist(outpath, classifier, n_division):
     #print('Get cluster list from {}'.format(outpath))
     for im in image_list:
         image_name = os.path.basename(im)
-        image_name = image_name.split('#')[1]
-        number = image_name.split('-')
+        number = image_name.split('#')[1]
+        number = number.split('-')
         number = int(number[0])
 
         if classifier[number][3] == 0:
