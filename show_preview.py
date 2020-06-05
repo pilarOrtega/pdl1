@@ -40,7 +40,7 @@ def show_preview(classifiers, level, size, slide_folder, outpath, feature_method
         n_division = (s[2].shape[1]) - 4
 
     start = time.time()
-    previews = Parallel(n_jobs=4)(delayed(get_preview)(s[0], s[2], level, size, slide_folder, n_division, method=method) for s in tqdm(classifiers))
+    previews = Parallel(n_jobs=1)(delayed(get_preview)(s[0], s[2], level, size, slide_folder, n_division, method=method) for s in tqdm(classifiers))
     end = time.time()
     print('Total time get previews: {:.4f} s'.format(end-start))
 
