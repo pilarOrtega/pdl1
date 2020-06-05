@@ -10,11 +10,9 @@ import time
 import os
 
 
-def get_preview(s, level, size, slide_folder, n_division, method='TopDown'):
+def get_preview(slidename, classifier, level, size, slide_folder, n_division, method='TopDown'):
     result = []
-    slidename = s[0]
     slidepath = os.path.join(slide_folder, slidename)
-    classifier = s[2]
     slide = OpenSlide(slidepath)
     slide_dz = deepzoom.DeepZoomGenerator(slide, tile_size=(size - 2), overlap=1)
     tiles = slide_dz.level_tiles[level]
@@ -42,7 +40,7 @@ def show_preview(classifiers, level, size, slide_folder, outpath, feature_method
         n_division = (s[2].shape[1]) - 4
 
     start = time.time()
-    previews = Parallel(n_jobs=4)(delayed(get_preview)(s, level, size, slide_folder, n_division, method=method) for s in tqdm(classifiers))
+    previews = Parallel(n_jobs=4)(delayed(get_preview)(s[0], s[2], level, size, slide_folder, n_division, method=method) for s in tqdm(classifiers))
     end = time.time()
     print('Total time get previews: {:.4f} s'.format(end-start))
 
