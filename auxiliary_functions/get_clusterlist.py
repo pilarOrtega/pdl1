@@ -28,7 +28,7 @@ def get_clusterlist(outpath, classifier, n_division):
             for j in range(n_division):
                 exp = n_division - j - 1
                 cluster = cluster + classifier[number][j+4] * (2**exp)
-        cluster_list.append((image_name, cluster))
+        cluster_list.append((im, cluster))
 
     return cluster_list
 
