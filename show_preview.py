@@ -51,7 +51,7 @@ def show_preview(classifiers, level, size, slide_folder, outpath, feature_method
         plt.imshow(im[1], cmap='tab20b')
         plt.colorbar()
         fig.savefig(name, bbox_inches='tight', dpi=fig.dpi)
-        plt.close()
+        #plt.close()
 
 
 if __name__ == "__main__":
