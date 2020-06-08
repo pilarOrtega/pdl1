@@ -361,10 +361,10 @@ def feature_extraction(list_positive, outpath, feature_method):
 
     start = time.time()
     # Extract features from positive images
-    if feature_method in ['Dense', 'DenseDAB', 'Daisy', 'DaisyDAB']:
+    if feature_method in ['Dense', 'DenseDAB', 'DenseH', 'Daisy', 'DaisyDAB', 'DaisyH']:
         features = get_features(list_positive, nclusters=256, method=feature_method)
 
-    if feature_method in ['VGG16', 'VGG16DAB', 'Xception', 'XceptionDAB']:
+    if feature_method in ['VGG16', 'VGG16DAB', 'VGG16H', 'Xception', 'XceptionDAB', 'XceptionH']:
         features = get_features_CNN(list_positive, model=feature_method)
     end = time.time()
     print('Feature extraction completed in time {:.4f} s'.format(end-start))
