@@ -116,7 +116,7 @@ def save_cluster(classifiers, outpath, feature_method, x=4, y=8, figsize=(13, 7)
         list_cluster.append((cluster_name, list_images))
 
     start = time.time()
-    Parallel(n_jobs=1)(delayed(show_random_imgs)(l[1], x, y, figsize, save_fig=True, name=l[0]) for l in tqdm(list_cluster))
+    Parallel(n_jobs=4)(delayed(show_random_imgs)(l[1], x, y, figsize, save_fig=True, name=l[0]) for l in tqdm(list_cluster))
     end = time.time()
     print('Total time get images: {:.4f} s'.format(end-start))
 
