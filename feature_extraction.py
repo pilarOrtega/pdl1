@@ -71,7 +71,7 @@ def hof_dense(im, kmeans, nclusters, dab=False):
     return features
 
 
-def hof_daisy(im, kmeans, nclusters, dab=False):
+def hof_daisy(im, kmeans, nclusters, method='Daisy'):
     """
     Function that gets the histogram of features (HoF) of a given image im for
     daisy features.
@@ -88,10 +88,13 @@ def hof_daisy(im, kmeans, nclusters, dab=False):
     """
     features = []
     image = imread(im)
-    if dab:
+    if method == 'DaisyDAB':
         image = numpy.asarray(rgb2hed(image))
         image = image[:, :, 2]
-    else:
+    if method == 'DaisyH':
+        image = numpy.asarray(rgb2hed(image))
+        image = image[:, :, 0]
+    if method == 'Daisy':
         image = numpy.asarray(rgb2grey(image))
     daisyzy = daisy(image, step=1, radius=8, rings=3)
     # daisy has shape P, Q, R
@@ -173,7 +176,29 @@ def get_features(image_list, nclusters=256, method='Dense'):
         print()
         return features
 
-    elif method == 'Daisy' or method == 'DaisyDAB':
+    if method == 'DenseH':
+        patch_shape = (8, 8)
+
+        print('Step 1: KMeans fitting')
+        # Fits k-means in 1/50 of the images
+        for i in tqdm(range(0, len(image_list), 50)):
+            image = imread(image_list[i])
+            image = numpy.asarray(rgb2hed(image))
+            image = image[:, :, 0]
+            image = image.astype(float)
+            patches = view_as_windows(image, patch_shape)
+            patches_reshaped = get_patch_reshaped(patches, patch_shape)
+            kmeans.partial_fit(patches_reshaped)
+
+        # This loop gets again the features of each tile and gets a list of the histograms of each individual tile
+        print('Step 2: Histogram of features extraction')
+        features = Parallel(n_jobs=-2)(delayed(hof_dense)(im, kmeans, nclusters, dab=True) for im in tqdm(image_list))
+
+        print('Feature extraction completed')
+        print()
+        return features
+
+    elif method in ['Daisy', 'DaisyDAB', 'DaisyH']:
         patch_shape = (8, 8)
         p = 0
         q = 0
@@ -188,6 +213,9 @@ def get_features(image_list, nclusters=256, method='Dense'):
             if method == 'DaisyDAB':
                 image = numpy.asarray(rgb2hed(image))
                 image = image[:, :, 2]
+            if method == 'DaisyH':
+                image = numpy.asarray(rgb2hed(image))
+                image = image[:, :, 0]
             daisyzy = daisy(image, step=1, radius=8, rings=3)
             # daisy has shape P, Q, R
             p = daisyzy.shape[0]
@@ -200,11 +228,7 @@ def get_features(image_list, nclusters=256, method='Dense'):
 
         start2 = time.time()
         print('Step 2: Histogram of features extraction')
-        if method == 'Daisy':
-            features = Parallel(n_jobs=-2)(delayed(hof_daisy)(im, kmeans, nclusters) for im in tqdm(image_list))
-
-        if method == 'DaisyDAB':
-            features = Parallel(n_jobs=-2)(delayed(hof_daisy)(im, kmeans, nclusters, dab=True) for im in tqdm(image_list))
+        features = Parallel(n_jobs=-2)(delayed(hof_daisy)(im, kmeans, nclusters, method=method) for im in tqdm(image_list))
         end2 = time.time()
         print('Total time KMeans fitting: {:.4f} s'.format(end2-start2))
 
@@ -216,18 +240,23 @@ def get_features(image_list, nclusters=256, method='Dense'):
         return
 
 
-def imagetoDAB(image):
+def imagetoDAB(image, h=False):
     """
     Transforms a RGB image into a 3 channel image in which all 3 channels are
     channel DAB from color space HED.
     """
     image_hed = rgb2hed(image)
     d = image_hed[:, :, 2]
+    h = image_hed[:, :, 0]
     img_dab = np.zeros_like(image)
+    if h:
+        img_dab[:, :, 0] = h
+        img_dab[:, :, 1] = h
+        img_dab[:, :, 2] = h
+        return img_dab
     img_dab[:, :, 0] = d
     img_dab[:, :, 1] = d
     img_dab[:, :, 2] = d
-
     return img_dab
 
 
@@ -243,7 +272,7 @@ def get_features_CNN(image_list, model='VGG16'):
         - features: list, contains tuples with image path + histogram of features
     """
     features = []
-    if model in ['VGG16', 'VGG16DAB']:
+    if model in ['VGG16', 'VGG16DAB', 'VGG16H']:
         print('Loading network...')
         model = VGG16(weights='imagenet', include_top=False, pooling='avg')
         model.summary()
@@ -252,6 +281,8 @@ def get_features_CNN(image_list, model='VGG16'):
             image = imread(im)
             if model == 'VGG16DAB':
                 image = imagetoDAB(image)
+            if model == 'VGG16H':
+                image = imagetoDAB(image, h=True)
             image = numpy.asarray(image)
             image = numpy.expand_dims(image, axis=0)
             image = imagenet_utils.preprocess_input(image)
@@ -259,7 +290,7 @@ def get_features_CNN(image_list, model='VGG16'):
             curr_feat = curr_feat.flatten()
             features.append((im, curr_feat))
 
-    if model in ['Xception', 'XceptionDAB']:
+    if model in ['Xception', 'XceptionDAB', 'XceptionH']:
         print('Loading network...')
         model = Xception(weights='imagenet', include_top=False, pooling='avg')
         model.summary()
@@ -268,6 +299,8 @@ def get_features_CNN(image_list, model='VGG16'):
             image = imread(im)
             if model == 'XceptionDAB':
                 image = imagetoDAB(image)
+            if model == 'XceptionH':
+                image = imagetoDAB(image, h=True)
             image = numpy.asarray(image)
             image = numpy.expand_dims(image, axis=0)
             image = preprocess_input(image)
@@ -386,7 +419,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Script that obtains the histogram of features of a set of images using different methods')
     parser.add_argument('-l', '--list_positive', type=str, help='file with slide list')
     parser.add_argument('-o', '--outpath', type=str, help='path to outfolder')
-    parser.add_argument('-f', '--feature_method', type=str, choices=['Dense', 'DenseDAB', 'Daisy', 'DaisyDAB', 'VGG16', 'VGG16', 'Xception', 'XceptionDAB'], help='feature method')
+    parser.add_argument('-f', '--feature_method', type=str, help='feature method')
     parser.add_argument('-d', '--device', default="0", type=str, help='GPU device to use [Default: %(default)s]')
     args = parser.parse_args()
 
