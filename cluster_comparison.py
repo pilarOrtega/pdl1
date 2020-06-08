@@ -60,7 +60,7 @@ def cluster_comparison(classifiers_1, classifiers_2, outpath):
     shutil.rmtree(outpath_temp)
 
     # Display grid
-    fig, axes = plt.subplots(1, 3, figsize=(13, 17))
+    fig, axes = plt.subplots(1, 3, figsize=(13, 5))
     ax = axes.ravel()
 
     im0 = ax[0].imshow(grid, cmap='hot')
@@ -75,7 +75,7 @@ def cluster_comparison(classifiers_1, classifiers_2, outpath):
     for i in range(3):
         ax[i].set_xlabel(feature_method_2)
         ax[i].set_ylabel(feature_method_1)
-    fig.suptitle('Score {}'.format(score), fontsize=16)
+    fig.suptitle('Score {}'.format(score), fontsize=16, y=0.92)
     fig.tight_layout()
     fig.subplots_adjust(top=0.88)
 
