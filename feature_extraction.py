@@ -323,7 +323,7 @@ def feature_reduction(list_features):
     print('Number of features reduced from {} to {}'.format(initial_features, pca_features))
     print()
     # StandardScaler normalizes the data
-    features_scaled = StandardScaler().fit_transform(pca_features)
+    features_scaled = StandardScaler().fit_transform(features_pca)
     # List comprehension
     result = [(image_list[i], features_scaled[i]) for i in range(len(image_list))]
     # result = []
