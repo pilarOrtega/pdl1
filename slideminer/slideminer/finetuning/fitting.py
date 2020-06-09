@@ -210,7 +210,6 @@ def color_cycle(size):
 
 def domain_adaption(datafolder,
                     outdir,
-                    device,
                     imsize,
                     epochs=20,
                     iterations=5,
@@ -225,9 +224,6 @@ def domain_adaption(datafolder,
     Usually a network previously trained on imagenet.
     See keras applications.
     """
-    os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-    os.environ["CUDA_VISIBLE_DEVICES"] = device
-
     model_dir = os.path.join(outdir, 'model')
     weights_dir = os.path.join(outdir, 'weights')
     info_dir = os.path.join(outdir, 'info')

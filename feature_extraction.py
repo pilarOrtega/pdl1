@@ -16,6 +16,7 @@ import csv
 from joblib import Parallel, delayed
 import time
 from numba import jit, njit
+from slideminer.finetuning.fitting import *
 
 
 # Importing Keras libraries
@@ -238,7 +239,7 @@ def imagetoDAB(image, h=False):
     return img_dab
 
 
-def get_features_CNN(image_list, model='VGG16'):
+def get_features_CNN(image_list, outpath, model='VGG16'):
     """
     Extracts image features using CNN
 
@@ -270,7 +271,11 @@ def get_features_CNN(image_list, model='VGG16'):
 
     if model in ['Xception', 'XceptionDAB', 'XceptionH']:
         print('Loading network...')
-        model = Xception(weights='imagenet', include_top=False, pooling='avg')
+
+        outdir = os.path.join(outpath, model)
+        domain_adaption(image_list, outdir, 224)
+        weights_dir = os.path.join(outdir, 'weights')
+        model = load_model(outdir, 5)
         model.summary()
 
         for im in tqdm(image_list):
@@ -282,9 +287,10 @@ def get_features_CNN(image_list, model='VGG16'):
             image = numpy.asarray(image)
             image = numpy.expand_dims(image, axis=0)
             image = preprocess_input(image)
-            curr_feat = model.predict(image)
-            curr_feat = curr_feat.flatten()
-            features.append((im, curr_feat))
+            if image.shape == (224, 224, 3):
+                curr_feat = model.predict(image)
+                curr_feat = curr_feat.flatten()
+                features.append((im, curr_feat))
 
     return features
 
@@ -343,7 +349,7 @@ def feature_extraction(list_positive, outpath, feature_method):
         features = get_features(list_positive, nclusters=256, method=feature_method)
 
     if feature_method in ['VGG16', 'VGG16DAB', 'VGG16H', 'Xception', 'XceptionDAB', 'XceptionH']:
-        features = get_features_CNN(list_positive, model=feature_method)
+        features = get_features_CNN(list_positive, outpath, model=feature_method)
     end = time.time()
     print('Feature extraction completed in time {:.4f} s'.format(end-start))
 
