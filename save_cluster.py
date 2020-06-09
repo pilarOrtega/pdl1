@@ -12,7 +12,7 @@ import time
 from auxiliary_functions.get_clusterlist import *
 
 
-def save_cluster_folder(outpath, cluster_list, n_division, feature_method):
+def save_cluster_folder(outpath, cluster_list, feature_method):
     clusters = os.path.join(outpath, 'clusters_{}'.format(feature_method))
     try:
         os.mkdir(clusters)
@@ -21,8 +21,9 @@ def save_cluster_folder(outpath, cluster_list, n_division, feature_method):
         print("Directory", clusters, "already exists")
 
     dir_list = []
-    for i in range(2**n_division):
-        dir = os.path.join(clusters, '{}_division_{}_{}'.format(feature_method, n_division, i))
+    nclusters = max([x[1] for x in cluster_list]) + 1
+    for i in range(int(nclusters)):
+        dir = os.path.join(clusters, '{}_cluster_{}'.format(feature_method, i))
         try:
             os.mkdir(dir)
             print('Directory', dir, 'created')
@@ -83,27 +84,6 @@ def save_cluster(classifiers, outpath, feature_method, x=4, y=8, figsize=(13, 7)
         n_division = (c[2].shape[1]) - 4
         clist = get_clusterlist(c[1], c[2], n_division)
         cluster_list.extend(clist)
-        if save_folder:
-            print('Saving images from slide ' + c[1])
-            print()
-            save_cluster_folder(c[1], clist, n_division, feature_method)
-            csv_file_cluster_list = os.path.join(c[1], 'cluster_list_{}.csv'.format(feature_method))
-            csv_columns = ["Slidename"]
-            csv_columns.append('Number')
-            csv_columns.append('X')
-            csv_columns.append('Y')
-            csv_columns.append('Cluster')
-            with open(csv_file_cluster_list, 'w') as csv_file:
-                writer = csv.DictWriter(csv_file, csv_columns)
-                writer.writeheader()
-                for im in clist:
-                    im_name = os.path.basename(im[0])
-                    data = os.path.splitext(im_name)[0]
-                    slidename = data.split('#')[0]
-                    data = data.split('#')[1]
-                    data = data.split('-')
-                    row = {'Slidename': slidename, 'Number': data[0], 'X': data[2], 'Y': data[3]}
-                    writer.writerow(row)
 
     list_cluster = []
     nclusters = max([x[1] for x in cluster_list]) + 1
@@ -119,6 +99,28 @@ def save_cluster(classifiers, outpath, feature_method, x=4, y=8, figsize=(13, 7)
     Parallel(n_jobs=1)(delayed(show_random_imgs)(l[1], x, y, figsize, save_fig=True, name=l[0]) for l in tqdm(list_cluster))
     end = time.time()
     print('Total time get images: {:.4f} s'.format(end-start))
+
+    if save_folder:
+        print('Saving images from slide ' + c[1])
+        print()
+        save_cluster_folder(outpath, cluster_list, feature_method)
+        csv_file_cluster_list = os.path.join(c[1], 'cluster_list_{}.csv'.format(feature_method))
+        csv_columns = ["Slidename"]
+        csv_columns.append('Number')
+        csv_columns.append('X')
+        csv_columns.append('Y')
+        csv_columns.append('Cluster')
+        with open(csv_file_cluster_list, 'w') as csv_file:
+            writer = csv.DictWriter(csv_file, csv_columns)
+            writer.writeheader()
+            for im in cluster_list:
+                im_name = os.path.basename(im[0])
+                data = os.path.splitext(im_name)[0]
+                slidename = data.split('#')[0]
+                data = data.split('#')[1]
+                data = data.split('-')
+                row = {'Slidename': slidename, 'Number': data[0], 'X': data[2], 'Y': data[3]}
+                writer.writerow(row)
 
     return cluster_list
 
