@@ -62,6 +62,12 @@ feature extraction in batches (feature_extraction_batch)
 
 ### Patch division
 
+This blocks gets the slides with the format PDL1.mrxs found in `Slides` path and
+divides them in patches. It uses the package OpenSlide and DeepZoom to open each
+.mrxs slide and get to the image pyramid level to extract the patches.  
+
+
+
 ### DAB detect
 
 ### Feature extraction

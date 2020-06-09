@@ -16,7 +16,7 @@ import csv
 from joblib import Parallel, delayed
 import time
 from numba import jit, njit
-import slideminer.finetuning.fitting as ft
+from fitting import *
 
 
 # Importing Keras libraries
@@ -273,7 +273,7 @@ def get_features_CNN(image_list, outpath, model='VGG16'):
         print('Loading network...')
 
         outdir = os.path.join(outpath, model)
-        ft.domain_adaption(image_list, outdir, "1", 224, pdl1=True)
+        domain_adaption(image_list, outdir, 224, pdl1=True)
         weights_dir = os.path.join(outdir, 'weights')
         model = load_model(outdir, 5)
         model.summary()
