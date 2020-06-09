@@ -16,7 +16,7 @@ import csv
 from joblib import Parallel, delayed
 import time
 from numba import jit, njit
-from slideminer.slideminer.finetunning.fitting import *
+from slideminer.finetunning.fitting import *
 
 
 # Importing Keras libraries
