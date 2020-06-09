@@ -273,12 +273,15 @@ def domain_adaption(datafolder,
     ########################################################
     if pdl1:
         # Adapted way to load the data according to existing folders in PDL1 projects
+        numpy.random.shuffle(datafolder)
+        list_images = datafolder[0:datalim]
         data = []
         print("-" * 20)
         print("Loading data:")
         print("-" * 20)
-        for im in tqdm(datafolder):
+        for im in tqdm(list_images):
             data.append(imread(im))
+        print(data[0])
         unlabeled_images = xce.preprocess_input(numpy.array(data))
     else:
         unlabeled_images = load_data(datafolder, datalim)
