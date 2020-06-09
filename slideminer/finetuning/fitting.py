@@ -210,6 +210,7 @@ def color_cycle(size):
 
 def domain_adaption(datafolder,
                     outdir,
+                    device,
                     imsize,
                     epochs=20,
                     iterations=5,
@@ -217,14 +218,16 @@ def domain_adaption(datafolder,
                     threshold=0.75,
                     datalim=25000,
                     batchsize=16,
-                    metric_learning=True,
-                    pdl1=False):
+                    metric_learning=True):
     """
     Adapt a neural network to a new kind of images.
 
     Usually a network previously trained on imagenet.
     See keras applications.
     """
+    os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+    os.environ["CUDA_VISIBLE_DEVICES"] = device
+
     model_dir = os.path.join(outdir, 'model')
     weights_dir = os.path.join(outdir, 'weights')
     info_dir = os.path.join(outdir, 'info')
@@ -245,7 +248,8 @@ def domain_adaption(datafolder,
                                  horizontal_flip=False,
                                  vertical_flip=False,
                                  rescale=None,
-                                 data_format=K.image_data_format())
+                                 data_format=K.image_data_format(),
+                                 pdl1=False)
 
     # create directories
     ###############################
