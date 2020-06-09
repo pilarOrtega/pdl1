@@ -37,7 +37,7 @@ def get_patch_reshaped(patches, patch_shape):
     return patches_reshaped
 
 
-def hof_dense(im, kmeans, nclusters, dab=False):
+def hof_dense(im, kmeans, nclusters, method='DenseDAB'):
     """
     Function that gets the histogram of features (HoF) of a given image im for
     dense features.
@@ -54,10 +54,14 @@ def hof_dense(im, kmeans, nclusters, dab=False):
     """
     features = []
     image = imread(im)
-    if dab:
+    if method == 'DenseDAB':
         patch_shape = (8, 8)
         image = rgb2hed(image)
         image = image[:, :, 2]
+    elif method == 'DenseH':
+        patch_shape = (8, 8)
+        image = rgb2hed(image)
+        image = image[:, :, 0]
     else:
         patch_shape = (8, 8, 3)
     image = numpy.asarray(image)
@@ -133,67 +137,39 @@ def get_features(image_list, nclusters=256, method='Dense'):
     image_list_path = os.path.dirname(image_list_path)
     print('Extracting features ({} method) from images in '.format(method) + image_list_path)
 
-    if method == 'Dense':
-        patch_shape = (8, 8, 3)
+    if method in ['Dense', 'DenseDAB', 'DenseH']:
 
+        start1 = time.time()
         print('Step 1: KMeans fitting')
         # Fits k-means in 1/50 of the images
         for i in tqdm(range(0, len(image_list), 50)):
             image = imread(image_list[i])
-            image = numpy.asarray(image)
+            if method == 'Dense':
+                patch_shape = (8, 8, 3)
+                image = numpy.asarray(image)
+            if method == 'DenseDAB':
+                patch_shape = (8, 8)
+                image = numpy.asarray(rgb2hed(image))
+                image = image[:, :, 2]
+            if method == 'DenseH':
+                patch_shape = (8, 8)
+                image = numpy.asarray(rgb2hed(image))
+                image = image[:, :, 0]
             image = image.astype(float)
             patches = view_as_windows(image, patch_shape)
             patches_reshaped = get_patch_reshaped(patches, patch_shape)
             kmeans.partial_fit(patches_reshaped)
+        end1 = time.time()
+        print('Total time KMeans fitting: {:.4f} s'.format(end1-start1))
 
+        start2 = time.time()
         # This loop gets again the features of each tile and gets a list of the histograms of each individual tile
         print('Step 2: Histogram of features extraction')
-        features = Parallel(n_jobs=-2)(delayed(hof_dense)(im, kmeans, nclusters) for im in tqdm(image_list))
+        features = Parallel(n_jobs=-2)(delayed(hof_dense)(im, kmeans, nclusters, method=method) for im in tqdm(image_list))
+        end2 = time.time()
+        print('Total time KMeans fitting: {:.4f} s'.format(end2-start2))
 
-        print('Feature extraction completed')
         print()
-        return features
-
-    if method == 'DenseDAB':
-        patch_shape = (8, 8)
-
-        print('Step 1: KMeans fitting')
-        # Fits k-means in 1/50 of the images
-        for i in tqdm(range(0, len(image_list), 50)):
-            image = imread(image_list[i])
-            image = numpy.asarray(rgb2hed(image))
-            image = image[:, :, 2]
-            image = image.astype(float)
-            patches = view_as_windows(image, patch_shape)
-            patches_reshaped = get_patch_reshaped(patches, patch_shape)
-            kmeans.partial_fit(patches_reshaped)
-
-        # This loop gets again the features of each tile and gets a list of the histograms of each individual tile
-        print('Step 2: Histogram of features extraction')
-        features = Parallel(n_jobs=-2)(delayed(hof_dense)(im, kmeans, nclusters, dab=True) for im in tqdm(image_list))
-
-        print('Feature extraction completed')
-        print()
-        return features
-
-    if method == 'DenseH':
-        patch_shape = (8, 8)
-
-        print('Step 1: KMeans fitting')
-        # Fits k-means in 1/50 of the images
-        for i in tqdm(range(0, len(image_list), 50)):
-            image = imread(image_list[i])
-            image = numpy.asarray(rgb2hed(image))
-            image = image[:, :, 0]
-            image = image.astype(float)
-            patches = view_as_windows(image, patch_shape)
-            patches_reshaped = get_patch_reshaped(patches, patch_shape)
-            kmeans.partial_fit(patches_reshaped)
-
-        # This loop gets again the features of each tile and gets a list of the histograms of each individual tile
-        print('Step 2: Histogram of features extraction')
-        features = Parallel(n_jobs=-2)(delayed(hof_dense)(im, kmeans, nclusters, dab=True) for im in tqdm(image_list))
-
         print('Feature extraction completed')
         print()
         return features
@@ -232,6 +208,8 @@ def get_features(image_list, nclusters=256, method='Dense'):
         end2 = time.time()
         print('Total time KMeans fitting: {:.4f} s'.format(end2-start2))
 
+        print()
+        print('Feature extraction completed')
         print()
         return features
 
