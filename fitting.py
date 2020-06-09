@@ -25,12 +25,12 @@ from keras.preprocessing.image import ImageDataGenerator
 from keras import backend as K
 from tqdm import tqdm
 from keras.optimizers import Adam
-from ..description import networks
+from description import networks
 from keras.layers import Lambda, Dropout
 from keras.constraints import unit_norm
 from keras.callbacks import Callback
 from itertools import combinations
-from ..data.datagen import SingleClassBatchGeneratorFromFolder
+from data.datagen import SingleClassBatchGeneratorFromFolder
 
 
 class Error(Exception):
