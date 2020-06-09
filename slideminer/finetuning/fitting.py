@@ -273,13 +273,11 @@ def domain_adaption(datafolder,
     ########################################################
     if pdl1:
         # Adapted way to load the data according to existing folders in PDL1 projects
-        with open(datafolder, "rb") as f:
-            list_images = pickle.load(f)
         data = []
         print("-" * 20)
         print("Loading data:")
         print("-" * 20)
-        for im in tqdm(list_images):
+        for im in tqdm(datafolder):
             data.append(imread(im))
         unlabeled_images = xce.preprocess_input(numpy.array(data))
     else:
