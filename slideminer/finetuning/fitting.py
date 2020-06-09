@@ -280,7 +280,9 @@ def domain_adaption(datafolder,
         print("Loading data:")
         print("-" * 20)
         for im in tqdm(list_images):
-            data.append(imread(im))
+            image = imread(im)
+            if image.shape == (224, 224, 3):
+                data.append(image)
         print(data[0])
         unlabeled_images = xce.preprocess_input(numpy.array(data))
     else:
