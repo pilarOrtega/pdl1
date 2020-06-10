@@ -64,7 +64,34 @@ feature extraction in batches (feature_extraction_batch)
 
 This blocks gets the slides with the format PDL1.mrxs found in `Slides` path and
 divides them in patches. It uses the package OpenSlide and DeepZoom to open each
-.mrxs slide and get to the image pyramid level to extract the patches.  
+.mrxs slide and get to the image pyramid level to extract the patches. This
+block will return and save:
+- A slide list which contains all the slides which are divided plus their path.
+This will be saved in `outpath` as `list_{level}_{ts}.p` and returned by the
+function
+- A preview of each slide, saved in `outpath` as `{slidename}.png`
+- A folder containing the patches. The folder has the same name as the slide,
+and the patches are saved with the format `{slide}#{n}-level{}-{i}-{j}.jpg` (
+being n the index of the patch and i, j its coordenates in x, y)
+
+The parameters required are:
+- The path to the folder where all slides are saved.
+- The outpath
+- The deepzoom level desired (default 16)
+- Tile size and tissue ratio (224 and 0.5 respectively)
+- Number of jobs to be used in parallel
+
+***Note about Pyramid levels and DeepZoom***
+While normally level 0 of the pyramid holds the higher resolution, deepzoom levels
+are ordered from smaller to bigger. Therefore, level 0 has dimensions 1x1 pixels
+and higher levels grow in resolution until the complete image resolution.
+![](https://github.com/pilarOrtega/pdl1/blob/master/images/patch_division.png)
+
+When we specify a tile size of 224x224
+
+Functions:
+- **get_patches**:
+- **patch_division**: Main function
 
 
 
