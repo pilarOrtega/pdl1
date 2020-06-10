@@ -46,13 +46,13 @@ with k=16 (with the aim of later regrouping clusters in a hierarchical way) whil
 TopDown executes k-means with k=2 recursively (up to 2**ndivision clusters)
 - **Flag**: Integer from 0 to 4, it sets the start of the execution in a
 specific block:
-  - 0. Flag by default, starts in block **patch_division**
-  - 1. Starts in block **detect_dab**. Loads file `list_{level}_{ts}.p`.
-  - 2. Starts in block **feature_extraction**. Loads files `list_positive_{level}_{ts}.p`
+  - 0: Flag by default, starts in block **patch_division**
+  - 1: Starts in block **detect_dab**. Loads file `list_{level}_{ts}.p`.
+  - 2: Starts in block **feature_extraction**. Loads files `list_positive_{level}_{ts}.p`
   and `class_{level}_{ts}.p`.
-  - 3. Starts in block **cluster_division**. Loads files `features_{feature_method}_level{level}.p`
+  - 3: Starts in block **cluster_division**. Loads files `features_{feature_method}_level{level}.p`
   and `class_{level}_{ts}.p`.
-  - 4. Starts in visualization block. Loads file `class-{feature_method}-{level}-{method}.p`  
+  - 4: Starts in visualization block. Loads file `class-{feature_method}-{level}-{method}.p`  
 - **Device**: Choose the GPU device to use, "0" or "1" (string - "0" by default)
 - **Jobs**: Number of CPU jobs to be used in parallelized parts of the code
 - **-b**: In case there are too many patches, it is possible to run the
@@ -72,7 +72,7 @@ function
 - A preview of each slide, saved in `outpath` as `{slidename}.png`
 - A folder containing the patches. The folder has the same name as the slide,
 and the patches are saved with the format `{slide}#{n}-level{}-{i}-{j}.jpg` (
-being n the index of the patch and i, j its coordenates in x, y)
+being n the index of the patch and i, j its coordenates in x, y).
 
 The parameters required are:
 - The path to the folder where all slides are saved.
@@ -81,19 +81,25 @@ The parameters required are:
 - Tile size and tissue ratio (224 and 0.5 respectively)
 - Number of jobs to be used in parallel
 
-***Note about Pyramid levels and DeepZoom***
+***Note about Pyramid levels and DeepZoom*** \\
 
 While normally level 0 of the pyramid holds the higher resolution, deepzoom levels
 are ordered from smaller to bigger. Therefore, level 0 has dimensions 1x1 pixels
 and higher levels grow in resolution until the complete image resolution.
+
 ![](https://github.com/pilarOrtega/pdl1/blob/master/images/patch_division.png)
 
-When we specify a tile size of 224x224
+In this example we display the preview of a slide in level 13 (which is level 5
+of OpenSlide). The number of patches is 13x29, each one covering a surface of
+224x224 pixels. The red patches are those which do not include any information
+and are not saved (their tissue ratio is lower than the defined). The table
+shows a correspondence between DeepZoom level, size and number of patches. \\
 
 Functions:
-- **get_patches**:
-- **patch_division**: Main function
-
+- **get_patches**: Given a slide, extracts the patches of the given level and
+size and saves in folder those which fulfil the conditions.
+- **patch_division**: Main function, calls `get_patches` recursively for all
+slides
 
 
 ### DAB detect
