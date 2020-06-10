@@ -77,7 +77,7 @@ def pickle_save(file, path, name):
         pickle.dump(file, f)
 
 
-def cluster_division(features, classifiers_0, n_division, outpath, feature_method, method='TopDown', ncluster=16):
+def cluster_division(features, classifiers_0, n_division, outpath, feature_method, method='TopDown', ncluster=16, save=False):
     """
     Arguments:
         - features:
@@ -129,7 +129,7 @@ def cluster_division(features, classifiers_0, n_division, outpath, feature_metho
 
     if method == 'BottomUp':
         print('[INFO] Dividing patches into clusters')
-        print('Total of {} images to be divided in 16 clusters'.format(len(features)))
+        print('Total of {} images to be divided in {} clusters'.format(len(features), ncluster))
         print()
         features, image_list = feature_list_division(features)
         slide_list = []
@@ -156,27 +156,28 @@ def cluster_division(features, classifiers_0, n_division, outpath, feature_metho
     level = name[1]
     pickle_save(classifiers, outpath, 'class-{}-{}-{}.p'.format(feature_method, level, method))
 
-    print('[INFO] Saving csv files...')
-    print()
-    for x in classifiers:
-        csv_cluster = '{}-{}-level{}.csv'.format(x[0], feature_method, level)
-        c = x[2]
-        csv_file_path_cluster = os.path.join(outpath, csv_cluster)
-        csv_columns = ["Patch_number"]
-        csv_columns.append('X')
-        csv_columns.append('Y')
-        csv_columns.append('Positive')
-        for i in range(n_division):
-            csv_columns.append('Level_{}'.format(i))
+    if save:
+        print('[INFO] Saving csv files...')
+        print()
+        for x in classifiers:
+            csv_cluster = '{}-{}-level{}.csv'.format(x[0], feature_method, level)
+            c = x[2]
+            csv_file_path_cluster = os.path.join(outpath, csv_cluster)
+            csv_columns = ["Patch_number"]
+            csv_columns.append('X')
+            csv_columns.append('Y')
+            csv_columns.append('Positive')
+            for i in range(n_division):
+                csv_columns.append('Level_{}'.format(i))
 
-        with open(csv_file_path_cluster, 'w') as csv_file:
-            writer = csv.DictWriter(csv_file, csv_columns)
-            writer.writeheader()
-            for i in range(c.shape[0]):
-                row = {'Patch_number': c[i][0], 'X': c[i][1], 'Y': c[i][2], 'Positive': c[i][3]}
-                for j in range(n_division):
-                    row["Level_{}".format(j)] = c[i][j+4]
-                writer.writerow(row)
+            with open(csv_file_path_cluster, 'w') as csv_file:
+                writer = csv.DictWriter(csv_file, csv_columns)
+                writer.writeheader()
+                for i in range(c.shape[0]):
+                    row = {'Patch_number': c[i][0], 'X': c[i][1], 'Y': c[i][2], 'Positive': c[i][3]}
+                    for j in range(n_division):
+                        row["Level_{}".format(j)] = c[i][j+4]
+                    writer.writerow(row)
 
     return classifiers
 
