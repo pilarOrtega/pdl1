@@ -259,16 +259,6 @@ def domain_adaption(datafolder,
     os.makedirs(info_dir)
     ##################################################
 
-    # GPU for similarity matrix computation
-    ###################################################
-    center_t = tf.placeholder(tf.float32, (None, None))
-    other_t = tf.placeholder(tf.float32, (None, None))
-    center_t_norm = tf.nn.l2_normalize(center_t, dim=1)
-    other_t_norm = tf.nn.l2_normalize(other_t, dim=1)
-    similarity = tf.matmul(center_t_norm, other_t_norm,
-                           transpose_a=False, transpose_b=True)
-    ###########################################################
-
     # Gather images in a numpy array
     ########################################################
     if pdl1:
@@ -306,6 +296,17 @@ def domain_adaption(datafolder,
     # create a tensorflow session before we start
     K.clear_session()
     sess = tf.Session()
+
+    # GPU for similarity matrix computation
+    ###################################################
+    center_t = tf.placeholder(tf.float32, (None, None))
+    other_t = tf.placeholder(tf.float32, (None, None))
+    center_t_norm = tf.nn.l2_normalize(center_t, dim=1)
+    other_t_norm = tf.nn.l2_normalize(other_t, dim=1)
+    similarity = tf.matmul(center_t_norm, other_t_norm,
+                           transpose_a=False, transpose_b=True)
+    ###########################################################
+
 
     # Main Loop
     ###################################
