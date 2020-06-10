@@ -139,7 +139,7 @@ def cluster_division(features, classifiers_0, n_division, outpath, feature_metho
         labels = cls.fit_predict(features)
         score = davies_bouldin_score(features, labels)
         print('Davies-Bouldin Score: {}'.format(score))
-        for im in tqdm(image_list):
+        for im in image_list:
             index = image_list.index(im)
             image_name = os.path.basename(im)
             image_name = image_name.split('#')[1]
