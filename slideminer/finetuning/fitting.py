@@ -261,8 +261,8 @@ def domain_adaption(datafolder,
 
     # GPU for similarity matrix computation
     ###################################################
-    center_t = tf.placeholder(tf.float32, (None, None), name="center_t:0")
-    other_t = tf.placeholder(tf.float32, (None, None), name="other_t:0")
+    center_t = tf.placeholder(tf.float32, (None, None))
+    other_t = tf.placeholder(tf.float32, (None, None))
     center_t_norm = tf.nn.l2_normalize(center_t, dim=1)
     other_t_norm = tf.nn.l2_normalize(other_t, dim=1)
     similarity = tf.matmul(center_t_norm, other_t_norm,
@@ -335,7 +335,7 @@ def domain_adaption(datafolder,
         # compute similarity matrix
         print("-" * 20)
         print("similarity matrix:")
-        similarities = sess.run(similarity, {"center_t:0": centers, "other_t:0": features})
+        similarities = sess.run(similarity, {center_t: centers, other_t: features})
         print("similarity has shape: ", similarities.shape)
         print("similarity: ", similarities)
         print("-" * 20)
