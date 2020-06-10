@@ -46,13 +46,13 @@ with k=16 (with the aim of later regrouping clusters in a hierarchical way) whil
 TopDown executes k-means with k=2 recursively (up to 2**ndivision clusters)
 - **Flag**: Integer from 0 to 4, it sets the start of the execution in a
 specific block:
-  0. Flag by default, starts in block **patch_division**
-  1. Starts in block **detect_dab**. Loads file `list_{level}_{ts}.p`.
-  2. Starts in block **feature_extraction**. Loads files `list_positive_{level}_{ts}.p`
+  - 0. Flag by default, starts in block **patch_division**
+  - 1. Starts in block **detect_dab**. Loads file `list_{level}_{ts}.p`.
+  - 2. Starts in block **feature_extraction**. Loads files `list_positive_{level}_{ts}.p`
   and `class_{level}_{ts}.p`.
-  3. Starts in block **cluster_division**. Loads files `features_{feature_method}_level{level}.p`
+  - 3. Starts in block **cluster_division**. Loads files `features_{feature_method}_level{level}.p`
   and `class_{level}_{ts}.p`.
-  4. Starts in visualization block. Loads file `class-{feature_method}-{level}-{method}.p`  
+  - 4. Starts in visualization block. Loads file `class-{feature_method}-{level}-{method}.p`  
 - **Device**: Choose the GPU device to use, "0" or "1" (string - "0" by default)
 - **Jobs**: Number of CPU jobs to be used in parallelized parts of the code
 - **-b**: In case there are too many patches, it is possible to run the
@@ -82,6 +82,7 @@ The parameters required are:
 - Number of jobs to be used in parallel
 
 ***Note about Pyramid levels and DeepZoom***
+
 While normally level 0 of the pyramid holds the higher resolution, deepzoom levels
 are ordered from smaller to bigger. Therefore, level 0 has dimensions 1x1 pixels
 and higher levels grow in resolution until the complete image resolution.
