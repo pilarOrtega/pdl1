@@ -8,7 +8,7 @@ import shutil
 from sklearn.metrics.cluster import adjusted_rand_score
 from prettytable import PrettyTable
 
-def cluster_comparison(classifiers_1, classifiers_2, outpath):
+def cluster_comparison(classifiers_1, classifiers_2, outpath, pairs=True):
 
     feature_method_1 = os.path.basename(classifiers_1)
     feature_method_1 = feature_method_1.split('-')
@@ -84,29 +84,32 @@ def cluster_comparison(classifiers_1, classifiers_2, outpath):
     fig.savefig(name, bbox_inches='tight', dpi=fig.dpi)
     plt.close(fig)
 
-    pairs_grid = [(i, grid[i].argmax(),  max(grid[i])) for i in range(grid.shape[0])]
-    pairs_grid1 = [(i, grid_1[i].argmax(),  max(grid_1[i])) for i in range(grid_1.shape[0])]
-    pairs_grid2 = [(i, grid_2[:,i].argmax(),  max(grid_2[:,i])) for i in range(grid_2.shape[1])]
+    if pairs:
+        pairs_grid = [(i, grid[i].argmax(),  max(grid[i])) for i in range(grid.shape[0])]
+        pairs_grid1 = [(i, grid_1[i].argmax(),  max(grid_1[i])) for i in range(grid_1.shape[0])]
+        pairs_grid2 = [(i, grid_2[:,i].argmax(),  max(grid_2[:,i])) for i in range(grid_2.shape[1])]
 
-    print('*** View max values ***')
-    print()
-    print('To union of clusters:')
-    t = PrettyTable([feature_method_1, feature_method_2, 'Percentage'])
-    for i in range(len(pairs_grid)):
-        t.add_row([pairs_grid[i][0], pairs_grid[i][1], pairs_grid[i][2]])
-    print(t)
-    print()
-    print('To cluster {}:'.format(feature_method_1))
-    t = PrettyTable([feature_method_1, feature_method_2, 'Percentage'])
-    for i in range(len(pairs_grid1)):
-        t.add_row([pairs_grid1[i][0], pairs_grid1[i][1], pairs_grid1[i][2]])
-    print(t)
-    print()
-    print('To cluster {}:'.format(feature_method_2))
-    t = PrettyTable([feature_method_2, feature_method_1, 'Percentage'])
-    for i in range(len(pairs_grid2)):
-        t.add_row([pairs_grid2[i][0], pairs_grid2[i][1], pairs_grid2[i][2]])
-    print(t)
+        print('*** View max values ***')
+        print()
+        print('To union of clusters:')
+        t = PrettyTable([feature_method_1, feature_method_2, 'Percentage'])
+        for i in range(len(pairs_grid)):
+            t.add_row([pairs_grid[i][0], pairs_grid[i][1], pairs_grid[i][2]])
+        print(t)
+        print()
+        print('To cluster {}:'.format(feature_method_1))
+        t = PrettyTable([feature_method_1, feature_method_2, 'Percentage'])
+        for i in range(len(pairs_grid1)):
+            t.add_row([pairs_grid1[i][0], pairs_grid1[i][1], pairs_grid1[i][2]])
+        print(t)
+        print()
+        print('To cluster {}:'.format(feature_method_2))
+        t = PrettyTable([feature_method_2, feature_method_1, 'Percentage'])
+        for i in range(len(pairs_grid2)):
+            t.add_row([pairs_grid2[i][0], pairs_grid2[i][1], pairs_grid2[i][2]])
+        print(t)
+
+    return score
 
 
 if __name__ == "__main__":
