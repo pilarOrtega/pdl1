@@ -135,7 +135,7 @@ if __name__ == "__main__":
     parser.add_argument('-s', '--save_folder', action='store_true', help='saves patches in cluster folders')
     args = parser.parse_args()
 
-    classifiers = args.classifiers
+    classifiers = args.cluster_list
     outpath = args.outpath
     save_folder = args.save_folder
     feature_method = os.path.basename(classifiers)
