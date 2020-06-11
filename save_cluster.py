@@ -87,7 +87,7 @@ def save_cluster(cluster_list, outpath, feature_method, x=4, y=8, figsize=(13, 7
         for im in cluster_list:
             if im[1] == i:
                 list_images.append(im[0])
-        cluster_name = os.path.join(outpath, '{}_cluster_{}_ndivision_{}.png'.format(feature_method, i, n_division))
+        cluster_name = os.path.join(outpath, '{}_cluster_{}.png'.format(feature_method, i))
         list_cluster.append((cluster_name, list_images))
 
     start = time.time()
