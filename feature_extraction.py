@@ -286,9 +286,9 @@ def get_features_CNN(image_list, outpath, model='VGG16'):
             if model == 'XceptionH':
                 image = imagetoDAB(image, h=True)
             image = numpy.asarray(image)
-            image = numpy.expand_dims(image, axis=0)
-            image = preprocess_input(image)
             if image.shape == (224, 224, 3):
+                image = numpy.expand_dims(image, axis=0)
+                image = preprocess_input(image)
                 curr_feat = model.predict(image)
                 curr_feat = curr_feat.flatten()
                 features.append((im, curr_feat))
@@ -361,7 +361,7 @@ def feature_extraction(list_positive, outpath, feature_method):
     name = os.path.splitext(name)[0]
     name = name.split('_')
     level = name[1]
-    
+
     pickle_save(features, outpath, 'features_{}_level{}.p'.format(feature_method, level))
 
     start = time.time()
