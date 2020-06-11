@@ -354,13 +354,6 @@ def feature_extraction(list_positive, outpath, feature_method):
     end = time.time()
     print('Feature extraction completed in time {:.4f} s'.format(end-start))
 
-    pickle_save(features, outpath, 'features_{}_level{}.p'.format(feature_method, level))
-
-    start = time.time()
-    features = feature_reduction(features)
-    end = time.time()
-    print('Feature reduction completed in time {:.4f} s'.format(end-start))
-
     print('Saving features...')
     start = time.time()
     name = outpath
@@ -368,6 +361,13 @@ def feature_extraction(list_positive, outpath, feature_method):
     name = os.path.splitext(name)[0]
     name = name.split('_')
     level = name[1]
+    
+    pickle_save(features, outpath, 'features_{}_level{}.p'.format(feature_method, level))
+
+    start = time.time()
+    features = feature_reduction(features)
+    end = time.time()
+    print('Feature reduction completed in time {:.4f} s'.format(end-start))
 
     pickle_save(features, outpath, 'features_{}_level{}.p'.format(feature_method, level))
 
