@@ -78,12 +78,7 @@ def list_to_array(list):
     return list_array
 
 
-def save_cluster(classifiers, outpath, feature_method, x=4, y=8, figsize=(13, 7), save_folder=False):
-    cluster_list = []
-    for c in classifiers:
-        n_division = (c[2].shape[1]) - 4
-        clist = get_clusterlist(c[1], c[2], n_division)
-        cluster_list.extend(clist)
+def save_cluster(cluster_list, outpath, feature_method, x=4, y=8, figsize=(13, 7), save_folder=False):
 
     list_cluster = []
     nclusters = max([x[1] for x in cluster_list]) + 1
@@ -135,7 +130,7 @@ if __name__ == "__main__":
 
     # Manage parameters
     parser = argparse.ArgumentParser(description='Reads data from csv file and saves patches in corresponding clusters')
-    parser.add_argument('-c', '--classifiers', type=str, help='path to classifier file')
+    parser.add_argument('-c', '--cluster_list', type=str, help='path to cluster list file')
     parser.add_argument('-o', '--outpath', type=str, help='path to outfolder')
     parser.add_argument('-s', '--save_folder', action='store_true', help='saves patches in cluster folders')
     args = parser.parse_args()

@@ -107,4 +107,9 @@ if flag <= 4:
     except FileExistsError:
         print("Directory", outpath, "already exists")
     show_preview(classifiers, level, tile_size, slides, outpath, feature_method, n_division, method=method)
-    save_cluster(classifiers, outpath, feature_method)
+    cluster_list = []
+    for c in classifiers:
+        n_division = (c[2].shape[1]) - 4
+        clist = get_clusterlist(c[1], c[2], n_division)
+        cluster_list.extend(clist)
+    save_cluster(cluster_list, outpath, feature_method)
