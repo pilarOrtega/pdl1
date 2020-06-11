@@ -4,6 +4,7 @@ from feature_extraction import *
 from cluster_division import *
 from show_preview import *
 from save_cluster import *
+from auxiliary_functions.get_clusterlist import *
 import pickle
 import time
 
@@ -36,6 +37,14 @@ args = parser.parse_args()
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 os.environ["CUDA_VISIBLE_DEVICES"] = args.device
+
+gpus = tf.config.experimental.list_physical_devices('GPU')
+if gpus:
+  try:
+    for gpu in gpus:
+      tf.config.experimental.set_memory_growth(gpu, True)
+  except RuntimeError as e:
+    print(e)
 
 slides = args.slides
 outpath = args.outpath
@@ -107,9 +116,5 @@ if flag <= 4:
     except FileExistsError:
         print("Directory", outpath, "already exists")
     show_preview(classifiers, level, tile_size, slides, outpath, feature_method, n_division, method=method)
-    cluster_list = []
-    for c in classifiers:
-        n_division = (c[2].shape[1]) - 4
-        clist = get_clusterlist(c[1], c[2], n_division)
-        cluster_list.extend(clist)
+    cluster_list1 = extract_complete_clusterlist(classifiers, feature_method)
     save_cluster(cluster_list, outpath, feature_method)

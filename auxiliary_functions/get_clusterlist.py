@@ -32,7 +32,7 @@ def get_clusterlist(outpath, classifier, n_division):
 
     return cluster_list
 
-def extract_complete_clusterlist(classifier, outpath, feature_method):
+def extract_complete_clusterlist(classifier, feature_method):
 
     # Creamos una lista con todas las imagenes y su cluster
     print('Getting complete clusterlist for {}'.format(feature_method))
@@ -41,6 +41,11 @@ def extract_complete_clusterlist(classifier, outpath, feature_method):
         ndivision = (c[2].shape[1]) - 4
         clusterlist.extend(get_clusterlist(c[1], c[2], ndivision))
 
+    nclusters = max([x[1] for x in clusterlist]) + 1
+
+    return clusterlist, nclusters
+
+def create_cluster_set(clusterlist, outpath, feature_method):
     nclusters = max([x[1] for x in clusterlist]) + 1
     print('nclusters: {}'.format(nclusters))
     # Creamos un set de cada cluster

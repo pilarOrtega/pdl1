@@ -26,8 +26,10 @@ def cluster_comparison(classifiers_1, classifiers_2, outpath, pairs=True):
 
     outpath_temp = os.path.join(outpath, 'temp')
     os.mkdir(outpath_temp)
-    clusterlist1, n1 = extract_complete_clusterlist(classifiers_1, outpath_temp, feature_method_1)
-    clusterlist2, n2 = extract_complete_clusterlist(classifiers_2, outpath_temp, feature_method_2)
+    clusterlist1, n1 = extract_complete_clusterlist(classifiers_1, feature_method_1)
+    create_cluster_set(clusterlist1, outpath_temp, feature_method_1)
+    clusterlist2, n2 = extract_complete_clusterlist(classifiers_2, feature_method_2)
+    create_cluster_set(clusterlist2, outpath_temp, feature_method_2)
     n1 = int(n1)
     n2 = int(n2)
 
