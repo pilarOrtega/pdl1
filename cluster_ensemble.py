@@ -15,9 +15,9 @@ def cooperative_cluster(outpath, feature_method):
     outpath_temp = os.path.join(outpath, 'temp')
     try:
         os.mkdir(outpath_temp)
-        print("Directory", outpath, "created")
+        print("Directory", outpath_temp, "created")
     except FileExistsError:
-        print("Directory", outpath, "already exists")
+        print("Directory", outpath_temp, "already exists")
 
     cluster_runs = []
     for d in data:
@@ -30,7 +30,7 @@ def cooperative_cluster(outpath, feature_method):
 
     cluster_runs = numpy.asarray(cluster_runs)
     # Cluster run is an array shape (M,N), being M number of clustering methods and N number of samples
-    consensus_labels = CE.cluster_ensembles(cluster_runs, verbose = True, N_clusters_max = 50)
+    consensus_labels = CE.cluster_ensembles(cluster_runs, verbose = True, N_clusters_max = 16)
     clusterlist = [(images[i], consensus_labels[i]) for i in range(len(consensus_labels))]
 
     name = 'Cooperative_{}.p'.format(feature_method)
