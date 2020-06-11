@@ -27,7 +27,7 @@ def cooperative_cluster(data, feature_method):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Cooperative clustering')
     parser.add_argument('-o', '--outpath', type=str, help='path to outfolder')
-    parser.add_argument('-d', '--data', default='None', nargs='+' help='Add files to compare')
+    parser.add_argument('-d', '--data', default='None', nargs='+', help='Add files to compare')
     parser.add_argument('-f', '--feature_method', type=str, help='feature method')
     args = parser.parse_args()
 
