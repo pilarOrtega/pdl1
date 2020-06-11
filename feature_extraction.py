@@ -273,7 +273,8 @@ def get_features_CNN(image_list, outpath, model='VGG16'):
         print('Loading network...')
 
         outdir = os.path.join(outpath, model)
-        domain_adaption(image_list, outdir, 224, pdl1=True)
+        if not os.path.exists(outdir):
+            domain_adaption(image_list, outdir, 224, pdl1=True)
         weights_dir = os.path.join(outdir, 'weights')
         model = load_model(outdir, 5)
         model.summary()
@@ -352,6 +353,8 @@ def feature_extraction(list_positive, outpath, feature_method):
         features = get_features_CNN(list_positive, outpath, model=feature_method)
     end = time.time()
     print('Feature extraction completed in time {:.4f} s'.format(end-start))
+
+    pickle_save(features, outpath, 'features_{}_level{}.p'.format(feature_method, level))
 
     start = time.time()
     features = feature_reduction(features)
