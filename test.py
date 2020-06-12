@@ -116,5 +116,5 @@ if flag <= 4:
     except FileExistsError:
         print("Directory", outpath, "already exists")
     show_preview(classifiers, level, tile_size, slides, outpath, feature_method, n_division, method=method)
-    cluster_list1 = extract_complete_clusterlist(classifiers, feature_method)
+    cluster_list = extract_complete_clusterlist(classifiers, feature_method)
     save_cluster(cluster_list, outpath, feature_method)
