@@ -2,6 +2,7 @@ from PIL import ImageOps
 from openslide import OpenSlide, deepzoom
 from matplotlib import pyplot as plt
 import numpy
+import os
 
 def slide_preview(slide, slidename, outpath):
     """
