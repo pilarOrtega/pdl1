@@ -165,13 +165,44 @@ this to get 256 features**
 extractor providen in scikimage.feature package. It follows the same workflow
 done with "Dense", giving 255 raw features.  
 - **Xception**: The images are fed to the pretrained Xception CNN provided by
-keras. Initially, the Xception network was kept with the weights of the Imagenet
+keras. The features are obtained by eliminating the top layer of the network.
+Initially, the Xception network was kept with the weights of the Imagenet
 set, however, the `domain_adaption` function from `slideminer` changes the weights
-to adapt then to the type of images 
-- **VGG16**:
+to adapt them to the type of images. The final size of the vector of features is
+2048 .
+- **VGG16**: Following the same principle as with Xception, but this time with
+the VGG16 network. The number of features is 512.
 
 In addition, each type of feature can be applied to the complete RGB image, the
 H channel or the DAB channel.
+![](https://github.com/pilarOrtega/pdl1/blob/master/images/channels.png)
+
+All feature vectors will pass through a PCA to reduce the dimension.
+
+This block will return and save:
+- A list containing the reduced feature vector for each patch. Each element of
+the list is a tuple containing the string with the patch path and an array of
+features. This list is also saved as a .p and .csv file in `outpath`
+
+The parameters required are:
+- The list of positive patches
+- The outpath
+- The feature method, as a string. Options are 'Dense', 'DenseDAB', 'DenseH',
+'Daisy', 'DaisyDAB', 'DaisyH', 'Xception', 'XceptionDAB', 'XceptionH', 'VGG16',
+'VGG16DAB' or 'VGG16H'
+- The device to use, "0" or "1" (as a string) depending on the GPU card desired
+
+Functions:
+- **get_patch_reshaped**: Changes the shape of the patch to the shape specified
+- **hof_dense**: Gets the HoF of a given image for Dense features.
+- **hof_daisy**: Gets the HoF of a given image for Daisy features.
+- **get_features**: Gets the HoF of a list of patches for Dense and Daisy features
+- **get_features_CNN**: Gets the HoF of a list of patches for VGG16 and Xception
+features.
+- **feature_reduction**: Reduces the dimensions of the vector of features with
+a PCA (90% variability).
+- **feature_extraction**: Main fucntion. 
+
 ### Cluster division
 
 ###

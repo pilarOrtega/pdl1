@@ -17,6 +17,9 @@ from joblib import Parallel, delayed
 import time
 from numba import jit, njit
 from slideminer.finetuning.fitting import *
+from auxiliary_functions.pickle_functions import *
+from auxiliary_functions.feature_list_division import *
+from auxiliary_functions.imagetoDAB import *
 
 
 # Importing Keras libraries
@@ -219,26 +222,6 @@ def get_features(image_list, nclusters=256, method='Dense'):
         return
 
 
-def imagetoDAB(image, h=False):
-    """
-    Transforms a RGB image into a 3 channel image in which all 3 channels are
-    channel DAB from color space HED.
-    """
-    image_hed = rgb2hed(image)
-    d = image_hed[:, :, 2]
-    h = image_hed[:, :, 0]
-    img_dab = np.zeros_like(image)
-    if h:
-        img_dab[:, :, 0] = h
-        img_dab[:, :, 1] = h
-        img_dab[:, :, 2] = h
-        return img_dab
-    img_dab[:, :, 0] = d
-    img_dab[:, :, 1] = d
-    img_dab[:, :, 2] = d
-    return img_dab
-
-
 def get_features_CNN(image_list, outpath, model='VGG16'):
     """
     Extracts image features using CNN
@@ -317,28 +300,6 @@ def feature_reduction(list_features):
     #     result.append((image_list[i], features_scaled[i]))
 
     return result
-
-
-def pickle_save(file, path, name):
-    file_path = os.path.join(path, name)
-    with open(file_path, "wb") as f:
-        pickle.dump(file, f)
-
-
-def feature_list_division(list_features):
-    """
-    Gets a list with elements ('image_name', 'array of features') and returns a
-    numpy array with the features and a separate list with the image_names
-    """
-
-    features = []
-    image_list = []
-    for i in range(len(list_features)):
-        image_list.append(list_features[i][0])
-        features.append(list_features[i][1])
-    features = numpy.array(features)
-
-    return features, image_list
 
 
 def feature_extraction(list_positive, outpath, feature_method):
