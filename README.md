@@ -130,7 +130,7 @@ is composed by the slidename, the path to the slidefolder (folder containing the
 patches) and an array of shape nx4, being n the number of patches of the slide.
 In the last column of the array, 0/1 marks the absence or presence of DAB
 staining.
-![](https://github.com/pilarOrtega/pdl1/blob/master/images/class{level}_{ts}.png)
+![](https://github.com/pilarOrtega/pdl1/blob/master/images/class_{level}_{ts}.png)
 - A list with all the paths of the patches which show DAB staining. This list is
 also stored in `list_positive_{level}_{ts}.p`.
 
@@ -150,6 +150,28 @@ slide.
 
 ### Feature extraction
 
+``` shell
+python feature_extraction.py [-h] [-l LIST_POSITIVE] [-o OUTPATH]
+                             [-f FEATURE_METHOD] [-d DEVICE]
+```
+
+This block extracts the descriptors (features) of the patches which will later
+be used for unsupervised clustering. Different feature extraction methods are
+compared in this project (two classical and two based of CNN):
+- **Dense**: Extracts the features by getting 8x8 patches, passing them through
+a K-means of 256 components and extracting the histogram of features (255). **change
+this to get 256 features**
+- **Daisy**: Extracts the dense image descriptors by means of the Daisy feature
+extractor providen in scikimage.feature package. It follows the same workflow
+done with "Dense", giving 255 raw features.  
+- **Xception**: The images are fed to the pretrained Xception CNN provided by
+keras. Initially, the Xception network was kept with the weights of the Imagenet
+set, however, the `domain_adaption` function from `slideminer` changes the weights
+to adapt then to the type of images 
+- **VGG16**:
+
+In addition, each type of feature can be applied to the complete RGB image, the
+H channel or the DAB channel.
 ### Cluster division
 
 ###
