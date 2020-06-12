@@ -62,7 +62,12 @@ feature extraction in batches (feature_extraction_batch)
 
 ### Patch division
 
-This blocks gets the slides with the format PDL1.mrxs found in `Slides` path and
+``` shell
+python patch_division.py [-h] [-s SLIDES] [-o OUTPATH] [-l LEVEL]
+                         [-ts TILE_SIZE] [-tr TISSUE_RATIO] [-j JOBS]
+```
+
+This block gets the slides with the format PDL1.mrxs found in `Slides` path and
 divides them in patches. It uses the package OpenSlide and DeepZoom to open each
 .mrxs slide and get to the image pyramid level to extract the patches. This
 block will return and save:
@@ -81,7 +86,7 @@ The parameters required are:
 - Tile size and tissue ratio (224 and 0.5 respectively)
 - Number of jobs to be used in parallel
 
-***Note about Pyramid levels and DeepZoom*** \\
+***Note about Pyramid levels and DeepZoom***
 
 While normally level 0 of the pyramid holds the higher resolution, deepzoom levels
 are ordered from smaller to bigger. Therefore, level 0 has dimensions 1x1 pixels
@@ -93,7 +98,7 @@ In this example we display the preview of a slide in level 13 (which is level 5
 of OpenSlide). The number of patches is 13x29, each one covering a surface of
 224x224 pixels. The red patches are those which do not include any information
 and are not saved (their tissue ratio is lower than the defined). The table
-shows a correspondence between DeepZoom level, size and number of patches. \\
+shows a correspondence between DeepZoom level, size and number of patches.
 
 Functions:
 - **get_patches**: Given a slide, extracts the patches of the given level and
@@ -103,6 +108,45 @@ slides
 
 
 ### DAB detect
+
+``` shell
+python detect_dab.py [-h] [-l LIST_SLIDES] [-o OUTPATH] [-t THRESHOLD]
+                     [-j JOBS]
+```
+
+This block detects the presence of DAB tinction in the patches. It is based on
+the scikimage.color function `rgb2hed`. The function reads all the images in
+the list obtained from the previous block, transform them to HED color dimension
+(Hematoxilyn-Eosin-DAB) and gets the histogram for the DAB channel.
+
+Using this histogram, the algorithm discriminates between the patches with DAB
+presence and those without any DAB tinction. The sensitivity is adjusted by
+setting a threshold level chosen empirically.
+
+This block will return and save:
+- A classifier list which is also stored in `outpath` as `class_{level}_{ts}.p`.
+This list has a length equal to the number of slides. Each element on this list
+is composed by the slidename, the path to the slidefolder (folder containing the
+patches) and an array of shape nx4, being n the number of patches of the slide.
+In the last column of the array, 0/1 marks the absence or presence of DAB
+staining.
+![](https://github.com/pilarOrtega/pdl1/blob/master/images/class{level}_{ts}.png)
+- A list with all the paths of the patches which show DAB staining. This list is
+also stored in `list_positive_{level}_{ts}.p`.
+
+The parameters required are:
+- The slide list
+- The outpath
+- The threshold for DAB detection (default 85)
+- Number of jobs to be used in parallel
+
+Functions:
+- **dab**: Detects the presence of DAB staining in an image. Returns a boolean.
+- **dab_division**: Divides a list of patches into positive or negative to DAB.
+- **detect_dab_delayed**: Gets the dab division of patches and completes the
+classification array.
+- **detect_dab**: Main function, calls `detect_dab_delayed`in parallel for each
+slide.
 
 ### Feature extraction
 
