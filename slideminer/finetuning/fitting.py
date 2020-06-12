@@ -208,6 +208,26 @@ def color_cycle(size):
     return colors
 
 
+def imagetoDAB(image, h=False):
+    """
+    Transforms a RGB image into a 3 channel image in which all 3 channels are
+    channel DAB from color space HED.
+    """
+    image_hed = rgb2hed(image)
+    d = image_hed[:, :, 2]
+    h = image_hed[:, :, 0]
+    img_dab = np.zeros_like(image)
+    if h:
+        img_dab[:, :, 0] = h
+        img_dab[:, :, 1] = h
+        img_dab[:, :, 2] = h
+        return img_dab
+    img_dab[:, :, 0] = d
+    img_dab[:, :, 1] = d
+    img_dab[:, :, 2] = d
+    return img_dab
+
+
 def domain_adaption(datafolder,
                     outdir,
                     imsize,
@@ -218,7 +238,9 @@ def domain_adaption(datafolder,
                     datalim=25000,
                     batchsize=16,
                     metric_learning=True,
-                    pdl1=False):
+                    pdl1=False,
+                    dab=False,
+                    h=False):
     """
     Adapt a neural network to a new kind of images.
 
@@ -271,6 +293,11 @@ def domain_adaption(datafolder,
         print("-" * 20)
         for im in tqdm(list_images):
             image = imread(im)
+            if dab:
+                image = imagetoDAB(image)
+            if h:
+                image = imagetoDAB(image, h=True)
+            image = numpy.asarray(image)
             if image.shape == (224, 224, 3):
                 data.append(image)
         print(data[0])
