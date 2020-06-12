@@ -15,6 +15,7 @@ import argparse
 from joblib import Parallel, delayed
 import time
 from numba import jit
+from auxiliary_functions.pickle_functions import *
 
 
 def dab(image, thr=85, freq=10):
@@ -68,12 +69,6 @@ def divide_dab(path, threshold):
     print()
 
     return image_positive, image_negative, n
-
-
-def pickle_save(file, path, name):
-    file_path = os.path.join(path, name)
-    with open(file_path, "wb") as f:
-        pickle.dump(file, f)
 
 
 def detect_dab_delayed(slide, threshold):
