@@ -6,9 +6,9 @@ import Pysiderois_Arnaud.pysliderois.tissue as tissue
 import numpy
 import pickle
 import argparse
-from matplotlib import pyplot as plt
-from PIL import ImageOps
 from joblib import Parallel, delayed
+from auxiliary_functions.pickle_functions import *
+from auxiliary_functions.slide_preview import *
 import time
 
 
@@ -45,18 +45,9 @@ def get_patches(slidepath, outpath, level=10, tissue_ratio=0.25, size=256):
 
     # Gets the name and number of the slide
     slidename = os.path.basename(slidepath)
-    slidenumber = slidename.split('.')
-    slidenumber = slidenumber[2]
 
     # Saves a preview of the slide under 'slidename.png'
-    image = slide.read_region((0, 0), 7, slide.level_dimensions[7])
-    image = ImageOps.mirror(image)
-    image = numpy.array(image)[:, :, 0:3]
-    name = '{}.png'.format(slidename)
-    name = os.path.join(outpath, name)
-    fig = plt.figure()
-    plt.imshow(image)
-    fig.savefig(name, bbox_inches='tight', dpi=fig.dpi)
+    slide_preview(slide, slidename, outpath)
 
     # Asures that the chosen level is valid
     if level < slide_dz.level_count:
@@ -85,7 +76,7 @@ def get_patches(slidepath, outpath, level=10, tissue_ratio=0.25, size=256):
             mask = tissue.get_tissue_from_rgb(image, blacktol=10, whitetol=240)
             # Saves tile in outpath only if tissue ratio is higher than threshold
             if mask.sum() > tissue_ratio * tile.size[0] * tile.size[1]:
-                tile_path = os.path.join(outpath, '{}#{}-level{}-{}-{}.jpg'.format(slidenumber, n, level, i, j))
+                tile_path = os.path.join(outpath, '{}#{}-level{}-{}-{}.jpg'.format(slidename, n, level, i, j))
                 tile.save(tile_path)
                 n = n + 1
     print('Total of {} tiles with tissue ratio >{} in slide {}'.format(n, tissue_ratio, slidepath))
@@ -94,13 +85,7 @@ def get_patches(slidepath, outpath, level=10, tissue_ratio=0.25, size=256):
     return n
 
 
-def pickle_save(file, path, name):
-    file_path = os.path.join(path, name)
-    with open(file_path, "wb") as f:
-        pickle.dump(file, f)
-
-
-def patch_division(slides, outpath, level, tile_size=256, tissue_ratio=0.25, jobs=1):
+def patch_division(slides, outpath, level, tile_size=224, tissue_ratio=0.50, jobs=1):
     """
     Gets a set of slides (*.PDL1.mrxs) and divides each one of them into patches.
     The final patches are stored in a folder with the same name as the slide.
@@ -156,13 +141,10 @@ if __name__ == "__main__":
     parser.add_argument('-l', '--level', type=int, default=13, help='division level [Default: %(default)s]')
     parser.add_argument('-ts', '--tile_size', type=int, default=256, help='tile heigth and width in pixels [Default: %(default)s]')
     parser.add_argument('-tr', '--tissue_ratio', type=float, default=0.5, help='tissue ratio per patch [Default: %(default)s]')
-    parser.add_argument('-d', '--device', default='0')
     parser.add_argument('-j', '--jobs', type=int)
 
     args = parser.parse_args()
 
-    os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-    os.environ["CUDA_VISIBLE_DEVICE"] = args.device
     outpath = args.outpath
     tile_size = args.tile_size
     tissue_ratio = args.tissue_ratio
