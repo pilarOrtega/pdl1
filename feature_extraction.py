@@ -298,7 +298,8 @@ def get_features_CNN(image_list, outpath, model='VGG16'):
 
 def feature_reduction(list_features):
     features, image_list = feature_list_division(list_features)
-    pca = PCA(n_components=0.5)
+    # We take the features that explain 90% of the variance
+    pca = PCA(n_components=0.9)
     features_pca = pca.fit_transform(features)
     #features_tsne = TSNE(n_components=2, random_state=123).fit_transform(features_pca)
 
