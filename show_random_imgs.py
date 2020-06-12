@@ -20,6 +20,8 @@ def show_random_imgs(images, x, y, figsize=(10, 10), save_fig=False, name=''):
             k = randint(0, len(images)-1)
             image_data = os.path.basename(images[k])
             image_slide = image_data.split('#')[0]
+            image_slide = image_slide.split('_')[2]
+            image_slide = image_slide.split('.')[3]
             image_number = image_data.split('#')[1]
             image_number = image_number.split('-')[0]
             im = imread(images[k])
