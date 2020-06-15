@@ -217,12 +217,12 @@ def imagetoDAB(image, h=False):
     """
     image_hed = rgb2hed(image)
     d = image_hed[:, :, 2]
-    h = image_hed[:, :, 0]
+    he = image_hed[:, :, 0]
     img_dab = numpy.zeros_like(image)
     if h:
-        img_dab[:, :, 0] = h
-        img_dab[:, :, 1] = h
-        img_dab[:, :, 2] = h
+        img_dab[:, :, 0] = he
+        img_dab[:, :, 1] = he
+        img_dab[:, :, 2] = he
         return img_dab
     img_dab[:, :, 0] = d
     img_dab[:, :, 1] = d
