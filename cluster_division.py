@@ -9,6 +9,8 @@ from sklearn.cluster import MiniBatchKMeans
 from sklearn.metrics import davies_bouldin_score
 import pickle
 from tqdm import tqdm
+from auxiliary_functions.feature_list_division import *
+from auxiliary_functions.pickle_functions import *
 
 
 def image_cluster(features, classifiers, n, method='Kmeans'):
@@ -53,28 +55,6 @@ def image_cluster(features, classifiers, n, method='Kmeans'):
             features_0.append((im, features[index]))
 
     return classifiers, features_1, features_0
-
-
-def feature_list_division(list_features):
-    """
-    Gets a list with elements ('image_name', 'array of features') and returns a
-    numpy array with the features and a separate list with the image_names
-    """
-
-    features = []
-    image_list = []
-    for i in range(len(list_features)):
-        image_list.append(list_features[i][0])
-        features.append(list_features[i][1])
-    features = numpy.array(features)
-
-    return features, image_list
-
-
-def pickle_save(file, path, name):
-    file_path = os.path.join(path, name)
-    with open(file_path, "wb") as f:
-        pickle.dump(file, f)
 
 
 def cluster_division(features, classifiers_0, n_division, outpath, feature_method, method='TopDown', ncluster=16, save=False):
