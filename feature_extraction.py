@@ -257,7 +257,13 @@ def get_features_CNN(image_list, outpath, model='VGG16'):
 
         outdir = os.path.join(outpath, model)
         if not os.path.exists(outdir):
-            domain_adaption(image_list, outdir, 224, pdl1=True)
+            if model == 'Xception':
+                domain_adaption(image_list, outdir, 224, pdl1=True)
+            if model == 'XceptionDAB':
+                domain_adaption(image_list, outdir, 224, pdl1=True, dab=True)
+            if model == 'XceptionH':
+                domain_adaption(image_list, outdir, 224, pdl1=True, h=True)
+
         weights_dir = os.path.join(outdir, 'weights')
         model = load_model(outdir, 5)
         model.summary()
