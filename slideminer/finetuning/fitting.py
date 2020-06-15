@@ -31,6 +31,8 @@ from keras.constraints import unit_norm
 from keras.callbacks import Callback
 from itertools import combinations
 from ..data.datagen import SingleClassBatchGeneratorFromFolder
+from skimage.color import rgb2grey, rgb2hed
+
 
 
 class Error(Exception):
