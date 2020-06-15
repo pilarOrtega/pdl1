@@ -35,7 +35,7 @@ if __name__ == "__main__":
     feature_method = args.feature_method
     data = args.data
 
-    if len(data) == 1:
+    if data == 'None':
         data = os.path.join(outpath, '*-{}-*.p'.format(feature_method))
         data = glob.glob(data)
 
