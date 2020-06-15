@@ -10,6 +10,7 @@ def imagetoDAB(image, h=False):
     d = image_hed[:, :, 2]
     he = image_hed[:, :, 0]
     img_dab = numpy.zeros_like(image)
+    img_dab = img_dab.astype(numpy.float32)
     if h:
         img_dab[:, :, 0] = he
         img_dab[:, :, 1] = he
