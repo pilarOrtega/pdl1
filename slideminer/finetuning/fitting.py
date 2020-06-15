@@ -218,7 +218,7 @@ def imagetoDAB(image, h=False):
     image_hed = rgb2hed(image)
     d = image_hed[:, :, 2]
     h = image_hed[:, :, 0]
-    img_dab = np.zeros_like(image)
+    img_dab = numpy.zeros_like(image)
     if h:
         img_dab[:, :, 0] = h
         img_dab[:, :, 1] = h
