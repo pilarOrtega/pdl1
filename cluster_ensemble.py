@@ -6,7 +6,7 @@ import argparse
 from auxiliary_functions.get_clusterlist import *
 from auxiliary_functions.pickle_functions import *
 
-
+@profile
 def cooperative_cluster(data, feature_method):
     cluster_runs = []
     for d in data:
