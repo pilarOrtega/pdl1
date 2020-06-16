@@ -170,6 +170,7 @@ if __name__ == "__main__":
     parser.add_argument('-n', '--n_division', type=int, default=4, help='number of divisions [Default: %(default)s]')
     parser.add_argument('-o', '--outpath', type=str, help='path to outfolder')
     parser.add_argument('-m', '--method', type=str, choices=['BottomUp', 'TopDown'])
+    parser.add_argument('--nclusters', type=int, default=23)
 
     args = parser.parse_args()
 
@@ -185,4 +186,4 @@ if __name__ == "__main__":
     feature_method = os.path.splitext(feature_method)[0]
     feature_method = feature_method.split('_')[1]
 
-    classifiers = cluster_division(features, classifiers, n_division, outpath, feature_method, method = args.method)
+    classifiers = cluster_division(features, classifiers, n_division, outpath, feature_method, method = args.method, nclusters=args.nclusters)
