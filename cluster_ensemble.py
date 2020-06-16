@@ -5,6 +5,8 @@ import numpy
 import argparse
 from auxiliary_functions.get_clusterlist import *
 from auxiliary_functions.pickle_functions import *
+from memory_profiler import profile
+
 
 @profile
 def cooperative_cluster(data, feature_method):
