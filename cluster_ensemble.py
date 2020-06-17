@@ -5,6 +5,7 @@ import numpy
 import argparse
 from auxiliary_functions.get_clusterlist import *
 from auxiliary_functions.pickle_functions import *
+from auxiliary_functions.cl_to_class import *
 
 
 def cooperative_cluster(data, feature_method):
@@ -33,17 +34,28 @@ if __name__ == "__main__":
     parser.add_argument('-o', '--outpath', type=str, help='path to outfolder')
     parser.add_argument('-d', '--data', default='None', nargs='+', help='Add files to compare')
     parser.add_argument('-f', '--feature_method', type=str, help='feature method')
+    parser.add_argument('-c', '--classifier', default='None')
     args = parser.parse_args()
 
     outpath = args.outpath
     feature_method = args.feature_method
     data = args.data
+    classifier = args.classifier
 
     if data == 'None':
         data = os.path.join(outpath, '*-{}-*.p'.format(feature_method))
         data = glob.glob(data)
 
+    if classifier == 'None':
+        classifier = os.path.join(outpath, 'class_16_224.p')
+
+    classifier = pickle_load(classifier)
+
     clusterlist = cooperative_cluster(data, feature_method)
+    class_cooperative = cl_to_class(clusterlist, classifier)
 
     name = 'Cooperative_{}.p'.format(feature_method)
     pickle_save(clusterlist, outpath, name)
+
+    name = 'Class_cooperative_{}.p'.format(feature_method)
+    pickle_save(class_cooperaive, outpath, name)
