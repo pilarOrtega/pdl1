@@ -18,6 +18,9 @@ def cooperative_cluster(data, feature_method):
         cluster_runs.append(labels)
 
     cluster_runs = numpy.asarray(cluster_runs)
+    for i in range(cluster_runs.shape[0]):
+        for j in range(cluster_runs.shape[1]):
+            cluster_runs[i, j] = int(cluster_runs[i, j])
     # Cluster run is an array shape (M,N), being M number of clustering methods and N number of samples
     consensus_labels = CE.cluster_ensembles(cluster_runs, verbose = True, N_clusters_max = 16)
     clusterlist = [(images[i], consensus_labels[i]) for i in range(len(consensus_labels))]
