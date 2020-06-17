@@ -58,4 +58,4 @@ if __name__ == "__main__":
     pickle_save(clusterlist, outpath, name)
 
     name = 'Class_cooperative_{}.p'.format(feature_method)
-    pickle_save(class_cooperaive, outpath, name)
+    pickle_save(class_cooperative, outpath, name)
