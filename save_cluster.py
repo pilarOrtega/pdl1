@@ -132,15 +132,17 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Reads data from csv file and saves patches in corresponding clusters')
     parser.add_argument('-c', '--cluster_list', type=str, help='path to cluster list file')
     parser.add_argument('-o', '--outpath', type=str, help='path to outfolder')
+    parser.add_argument('-f', '--feature_method', default='None', type=str)
     parser.add_argument('-s', '--save_folder', action='store_true', help='saves patches in cluster folders')
     args = parser.parse_args()
 
     classifiers = args.cluster_list
     outpath = args.outpath
     save_folder = args.save_folder
-    feature_method = os.path.basename(classifiers)
-    feature_method = os.path.splitext(classifiers)[0]
-    feature_method = feature_method.split('-')[1]
+    if feature_method == 'None':
+        feature_method = os.path.basename(classifiers)
+        feature_method = os.path.splitext(classifiers)[0]
+        feature_method = feature_method.split('-')[1]
     with open(classifiers, "rb") as f:
         classifiers = pickle.load(f)
 
