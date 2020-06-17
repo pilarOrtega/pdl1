@@ -186,4 +186,4 @@ if __name__ == "__main__":
     feature_method = os.path.splitext(feature_method)[0]
     feature_method = feature_method.split('_')[1]
 
-    classifiers = cluster_division(features, classifiers, n_division, outpath, feature_method, method = args.method, nclustes=args.nclusters)
+    classifiers = cluster_division(features, classifiers, n_division, outpath, feature_method, method = args.method, ncluster=args.nclusters)
