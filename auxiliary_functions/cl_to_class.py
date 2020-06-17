@@ -16,7 +16,7 @@ def cl_to_class(clusterlist, class_init):
         image_name = image_name.split('#')[1]
         number = image_name.split('-')
         number = int(number[0])
-        slide_path = os.path.dirname(im)
+        slide_path = os.path.dirname(im[0])
         index_slide = slide_list.index(os.path.basename(slide_path))
         classifiers[index_slide][2][number][4] = im[1]
 
