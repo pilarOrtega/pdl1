@@ -36,9 +36,6 @@ def get_preview(slidename, classifier, level, size, slide_folder, n_division, me
 
 
 def show_preview(classifiers, level, size, slide_folder, outpath, feature_method, n_division=0, method='TopDown'):
-    if n_division == 0:
-        n_division = (s[2].shape[1]) - 4
-
     start = time.time()
     previews = Parallel(n_jobs=4)(delayed(get_preview)(s[0], s[2], level, size, slide_folder, n_division, method=method) for s in tqdm(classifiers))
     end = time.time()
