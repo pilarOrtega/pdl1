@@ -139,6 +139,7 @@ if __name__ == "__main__":
     classifiers = args.cluster_list
     outpath = args.outpath
     save_folder = args.save_folder
+    feature_method = args.feature_method
     if feature_method == 'None':
         feature_method = os.path.basename(classifiers)
         feature_method = os.path.splitext(classifiers)[0]
