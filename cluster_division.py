@@ -57,7 +57,7 @@ def image_cluster(features, classifiers, n, method='Kmeans'):
     return classifiers, features_1, features_0
 
 
-def cluster_division(features, classifiers_0, n_division, outpath, feature_method, method='TopDown', ncluster=16, save=False):
+def cluster_division(features, classifiers_0, n_division, outpath, feature_method, method='TopDown', nclusters=16, save=False):
     """
     Arguments:
         - features:
