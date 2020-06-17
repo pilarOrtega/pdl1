@@ -10,24 +10,21 @@ def pickle_save(file, path, name):
 
 def get_clusterlist(outpath, classifier, n_division):
     cluster_list = []
-    image_list = glob.glob(os.path.join(outpath, '*.jpg'))
     #print('Get cluster list from {}'.format(outpath))
-    for im in image_list:
-        image_name = os.path.basename(im)
-        number = image_name.split('#')[1]
-        number = number.split('-')
-        number = int(number[0])
+    for c in classifier:
+        slidename = os.path.basename(outpath)
+        im = os.path.join(outpath, '{}#{}-level{}-{}-{}.jpg'.format(slidename, c[0], 16, c[1], c[2]))
 
-        if classifier[number][3] == 0:
+        if c[3] == 0:
             continue
 
         cluster = 0
         if n_division == 1:
-            cluster = classifier[number][4]
+            cluster = c[4]
         else:
             for j in range(n_division):
                 exp = n_division - j - 1
-                cluster = cluster + classifier[number][j+4] * (2**exp)
+                cluster = cluster + c[j+4] * (2**exp)
         cluster_list.append((im, cluster))
 
     return cluster_list
