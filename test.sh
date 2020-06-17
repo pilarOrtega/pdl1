@@ -1,7 +1,4 @@
 #!/bin/bash
-python test.py -s '/home/DeepLearning/media/pdl1/RC.PDL1.V2' -o '/data/DeepLearning/ABREU_Arnaud/Pilar_stage/tests/level_16_ts_224_V2_test3' -f 'DenseH' -m 'BottomUp' --flag 2 -j -2 -c 23| tee Records/test3_DenseH_BU_1606-1.txt
-mv /data/DeepLearning/ABREU_Arnaud/Pilar_stage/tests/level_16_ts_224_V2_test3/class-DenseH-16-BottomUp.p /data/DeepLearning/ABREU_Arnaud/Pilar_stage/tests/level_16_ts_224_V2_test3/class-DenseH-16-BottomUp-50.p
-
 python cluster_division.py -f '/data/DeepLearning/ABREU_Arnaud/Pilar_stage/tests/level_16_ts_224_V2_test3/features_DaisyDAB_level16.p' -c '/data/DeepLearning/ABREU_Arnaud/Pilar_stage/tests/level_16_ts_224_V2_test3/class_16_224.p' -o '/data/DeepLearning/ABREU_Arnaud/Pilar_stage/tests/level_16_ts_224_V2_test3' -m 'BottomUp' --nclusters 23| tee Records/test3_DaisyDAB_BU_1606-2.txt
 mv /data/DeepLearning/ABREU_Arnaud/Pilar_stage/tests/level_16_ts_224_V2_test3/class-DaisyDAB-16-BottomUp.p /data/DeepLearning/ABREU_Arnaud/Pilar_stage/tests/level_16_ts_224_V2_test3/class-DenseH-16-BottomUp-45.p
 python cluster_division.py -f '/data/DeepLearning/ABREU_Arnaud/Pilar_stage/tests/level_16_ts_224_V2_test3/features_DaisyDAB_level16.p' -c '/data/DeepLearning/ABREU_Arnaud/Pilar_stage/tests/level_16_ts_224_V2_test3/class_16_224.p' -o '/data/DeepLearning/ABREU_Arnaud/Pilar_stage/tests/level_16_ts_224_V2_test3' -m 'BottomUp' --nclusters 23| tee Records/test3_DaisyDAB_BU_1606-3.txt
