@@ -63,7 +63,8 @@ def compare(features, classifiers,outpath, feature_method, i):
     return result
 
 def best_kmeans(features, classifiers, outpath, feature_method, min=1, max=50, step=5):
-    outpath_temp = os.mkdir(outpath, 'temp')
+    outpath_temp = os.path.join(outpath, 'temp')
+    os.mkdir(outpath_temp)
     scores = Parallel(n_jobs=-2)(delayed(compare)(features, classifiers, outpath_temp, feature_method, i) for i in tqdm(range(min, max, step)))
     shutil.rmtree(outpath_temp)
     scores = numpy.array(scores)
