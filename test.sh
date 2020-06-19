@@ -1,6 +1,6 @@
 #!/bin/bash
-mkdir /data/DeepLearning/ABREU_Arnaud/Pilar_stage/tests/level_16_ts_224_V2_test4
-python feature_extraction.py -l '/data/DeepLearning/ABREU_Arnaud/Pilar_stage/tests/level_16_ts_224_V2_test3/list_16_224.p' -o '/data/DeepLearning/ABREU_Arnaud/Pilar_stage/tests/level_16_ts_224_V2_test4' -f 'DenseDAB'
+python detect_dab.py -l '/data/DeepLearning/ABREU_Arnaud/Pilar_stage/tests/level_16_ts_224_V2_test3/list_16_224.p' -o '/data/DeepLearning/ABREU_Arnaud/Pilar_stage/tests/level_16_ts_224_V2_test4' -t 10
+python feature_extraction.py -l '/data/DeepLearning/ABREU_Arnaud/Pilar_stage/tests/level_16_ts_224_V2_test4/list_positive_16_224.p' -o '/data/DeepLearning/ABREU_Arnaud/Pilar_stage/tests/level_16_ts_224_V2_test4' -f 'DenseDAB'
 
 for i in 71 72 73 74 75 76 77 78 79 80
 do
