@@ -8,7 +8,7 @@ from auxiliary_functions.pickle_functions import *
 from auxiliary_functions.cl_to_class import *
 
 
-def cooperative_cluster(data, feature_method, limit=0):
+def cooperative_cluster(data, feature_method, limit=0, nclusters=16):
     cluster_runs = []
     for d in data:
         classifier = pickle_load(d)
@@ -25,7 +25,7 @@ def cooperative_cluster(data, feature_method, limit=0):
     # Cluster run is an array shape (M,N), being M number of clustering methods and N number of samples
     if not limit == 0:
         cluster_runs = cluster_runs[:, :limit]
-    consensus_labels = CE.cluster_ensembles(cluster_runs, verbose = True, N_clusters_max = 16)
+    consensus_labels = CE.cluster_ensembles(cluster_runs, verbose = True, N_clusters_max = nclusters)
     clusterlist = [(images[i], consensus_labels[i]) for i in range(len(consensus_labels))]
     return clusterlist
 
@@ -36,6 +36,7 @@ if __name__ == "__main__":
     parser.add_argument('-d', '--data', default='None', nargs='+', help='Add files to compare')
     parser.add_argument('-f', '--feature_method', type=str, help='feature method')
     parser.add_argument('-c', '--classifier', default='None')
+    parser.add_argument('-n', '--nclusters', default=16, type=int)
     parser.add_argument('-l', '--limit', default=0, type=int)
     args = parser.parse_args()
 
@@ -44,6 +45,7 @@ if __name__ == "__main__":
     data = args.data
     classifier = args.classifier
     limit = args.limit
+    nclusters= args.nclusters
 
     if data == 'None':
         data = os.path.join(outpath, '*-{}-*.p'.format(feature_method))
@@ -54,7 +56,7 @@ if __name__ == "__main__":
 
     classifier = pickle_load(classifier)
 
-    clusterlist = cooperative_cluster(data, feature_method, limit)
+    clusterlist = cooperative_cluster(data, feature_method, limit=limit, nclusters=nclusters)
     class_cooperative = cl_to_class(clusterlist, classifier)
 
     name = 'Cooperative_{}.p'.format(feature_method)
