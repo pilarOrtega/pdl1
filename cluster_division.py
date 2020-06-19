@@ -57,7 +57,7 @@ def image_cluster(features, classifiers, n, method='Kmeans'):
     return classifiers, features_1, features_0
 
 
-def cluster_division(features, classifiers_0, n_division, outpath, feature_method, method='TopDown', ncluster=16, save=False):
+def cluster_division(features, classifiers_0, n_division, outpath, feature_method, method='TopDown', ncluster=16, save=False, level=16):
     """
     Arguments:
         - features:
@@ -129,11 +129,6 @@ def cluster_division(features, classifiers_0, n_division, outpath, feature_metho
             index_slide = slide_list.index(os.path.basename(slide_path))
             classifiers[index_slide][2][number][4] =labels[index]
 
-    name = outpath
-    name = os.path.basename(name)
-    name = os.path.splitext(name)[0]
-    name = name.split('_')
-    level = name[1]
     pickle_save(classifiers, outpath, 'class-{}-{}-{}.p'.format(feature_method, level, method))
 
     if save:
