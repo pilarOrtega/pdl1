@@ -68,6 +68,8 @@ def hof_dense(im, kmeans, nclusters, method='DenseDAB'):
         image = image[:, :, 0]
     else:
         patch_shape = (8, 8, 3)
+
+    image = preprocess_input(image)
     image = numpy.asarray(image)
     image = image.astype(float)
     patches = view_as_windows(image, patch_shape)
@@ -104,6 +106,7 @@ def hof_daisy(im, kmeans, nclusters, method='Daisy'):
         image = image[:, :, 0]
     if method == 'Daisy':
         image = numpy.asarray(rgb2grey(image))
+    image = preprocess_input(image)
     daisyzy = daisy(image, step=1, radius=8, rings=3)
     # daisy has shape P, Q, R
     p = daisyzy.shape[0]
@@ -159,6 +162,8 @@ def get_features(image_list, nclusters=256, method='Dense'):
                 patch_shape = (8, 8)
                 image = numpy.asarray(rgb2hed(image))
                 image = image[:, :, 0]
+
+            image = preprocess_input(image)
             image = image.astype(float)
             patches = view_as_windows(image, patch_shape)
             patches_reshaped = get_patch_reshaped(patches, patch_shape)
@@ -196,6 +201,8 @@ def get_features(image_list, nclusters=256, method='Dense'):
             if method == 'DaisyH':
                 image = numpy.asarray(rgb2hed(image))
                 image = image[:, :, 0]
+
+            image = preprocess_input(image)
             daisyzy = daisy(image, step=1, radius=8, rings=3)
             # daisy has shape P, Q, R
             p = daisyzy.shape[0]
