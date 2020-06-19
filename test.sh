@@ -32,7 +32,7 @@
 # python cluster_division.py -f '/data/DeepLearning/ABREU_Arnaud/Pilar_stage/tests/level_16_ts_224_V2_test3/features_DaisyH_level16.p' -c '/data/DeepLearning/ABREU_Arnaud/Pilar_stage/tests/level_16_ts_224_V2_test3/class_16_224.p' -o '/data/DeepLearning/ABREU_Arnaud/Pilar_stage/tests/level_16_ts_224_V2_test3' -m 'BottomUp' --nclusters 23| tee Records/test3_DaisyH_BU_1806-6.txt
 # mv /data/DeepLearning/ABREU_Arnaud/Pilar_stage/tests/level_16_ts_224_V2_test3/class-DaisyH-16-BottomUp.p /data/DeepLearning/ABREU_Arnaud/Pilar_stage/tests/level_16_ts_224_V2_test3/class-DaisyH-16-BottomUp-60.p
 
-for i in {61. .71}
+for i in 61 62 63 64 65 66 67 68 69 70 71
 do
   python cluster_division.py -f '/data/DeepLearning/ABREU_Arnaud/Pilar_stage/tests/level_16_ts_224_V2_test3/features_DenseDAB_level16.p' -c '/data/DeepLearning/ABREU_Arnaud/Pilar_stage/tests/level_16_ts_224_V2_test3/class_16_224.p' -o '/data/DeepLearning/ABREU_Arnaud/Pilar_stage/tests/level_16_ts_224_V2_test3' -m 'BottomUp' --nclusters 23| tee Records/test3_DaisyH_BU_1806-$i.txt
   mv /data/DeepLearning/ABREU_Arnaud/Pilar_stage/tests/level_16_ts_224_V2_test3/class-DenseDAB-16-BottomUp.p /data/DeepLearning/ABREU_Arnaud/Pilar_stage/tests/level_16_ts_224_V2_test3/class-DenseDAB-16-BottomUp-$i.p
