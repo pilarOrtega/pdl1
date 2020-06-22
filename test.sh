@@ -6,7 +6,7 @@ do
   mv /data/DeepLearning/ABREU_Arnaud/Pilar_stage/tests/level_16_ts_224_V2_test4/class-DenseDAB-16-BottomUp.p /data/DeepLearning/ABREU_Arnaud/Pilar_stage/tests/level_16_ts_224_V2_test4/class-DenseDAB-16-BottomUp-$i.p
 done
 
-python feature_extraction.py -l '/data/DeepLearning/ABREU_Arnaud/Pilar_stage/tests/level_16_ts_224_V2_test4/list_16_224.p' -o '/data/DeepLearning/ABREU_Arnaud/Pilar_stage/tests/level_16_ts_224_V2_test4' -f 'DenseH'
+python feature_extraction.py -l '/data/DeepLearning/ABREU_Arnaud/Pilar_stage/tests/level_16_ts_224_V2_test4/list_positive_16_224.p' -o '/data/DeepLearning/ABREU_Arnaud/Pilar_stage/tests/level_16_ts_224_V2_test4' -f 'DenseH'
 
 for i in 81 82 83 84 85 86 87 88 89 90
 do
