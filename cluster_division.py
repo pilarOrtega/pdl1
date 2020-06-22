@@ -57,7 +57,7 @@ def image_cluster(features, classifiers, n, method='Kmeans'):
     return classifiers, features_1, features_0
 
 
-def cluster_division(features, classifiers_0, n_division, outpath, feature_method, method='TopDown', ncluster=16, save=False, level=16, init='None'):
+def cluster_division(features, classifiers_0, n_division, outpath, feature_method, method='TopDown', ncluster=16, save=False, level=16, init=0):
     """
     Arguments:
         - features:
@@ -115,7 +115,7 @@ def cluster_division(features, classifiers_0, n_division, outpath, feature_metho
         slide_list = []
         for x in classifiers:
             slide_list.append(x[0])
-        if init == 'None':
+        if init == 0:
             cls = MiniBatchKMeans(n_clusters=ncluster)
         else:
             cls = MiniBatchKMeans(n_clusters=init.shape[0], init=init)
@@ -169,7 +169,7 @@ if __name__ == "__main__":
     parser.add_argument('-o', '--outpath', type=str, help='path to outfolder')
     parser.add_argument('-m', '--method', type=str, choices=['BottomUp', 'TopDown'])
     parser.add_argument('--nclusters', type=int, default=23)
-    parser.add_argument('-i', '--init', type=str, default='None', help='File to initiation features [Default: %(default)s]')
+    parser.add_argument('-i', '--init', default=0, help='File to initiation features [Default: %(default)s]')
 
     args = parser.parse_args()
 
@@ -188,7 +188,7 @@ if __name__ == "__main__":
     feature_method = os.path.splitext(feature_method)[0]
     feature_method = feature_method.split('_')[1]
 
-    if init == 'None':
+    if init == 0:
         classifiers = cluster_division(features, classifiers, n_division, outpath, feature_method, method = args.method, ncluster=args.nclusters)
     else:
         with open(init, "rb") as f:
