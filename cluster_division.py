@@ -57,7 +57,7 @@ def image_cluster(features, classifiers, n, method='Kmeans'):
     return classifiers, features_1, features_0
 
 
-def cluster_division(features, classifiers_0, n_division, outpath, feature_method, method='TopDown', ncluster=16, save=False, level=16):
+def cluster_division(features, classifiers_0, n_division, outpath, feature_method, method='TopDown', ncluster=16, save=False, level=16, init='None'):
     """
     Arguments:
         - features:
@@ -115,7 +115,10 @@ def cluster_division(features, classifiers_0, n_division, outpath, feature_metho
         slide_list = []
         for x in classifiers:
             slide_list.append(x[0])
-        cls = MiniBatchKMeans(n_clusters=ncluster)
+        if init == 'None':
+            cls = MiniBatchKMeans(n_clusters=ncluster)
+        else:
+            cls = MiniBatchKMeans(n_clusters=init.shape[0], init=init)
         labels = cls.fit_predict(features)
         score = davies_bouldin_score(features, labels)
         print('Davies-Bouldin Score: {}'.format(score))
@@ -166,6 +169,7 @@ if __name__ == "__main__":
     parser.add_argument('-o', '--outpath', type=str, help='path to outfolder')
     parser.add_argument('-m', '--method', type=str, choices=['BottomUp', 'TopDown'])
     parser.add_argument('--nclusters', type=int, default=23)
+    parser.add_argument('-i', '--init', type=str, default='None', help='File to initiation features [Default: %(default)s]')
 
     args = parser.parse_args()
 
@@ -173,12 +177,20 @@ if __name__ == "__main__":
         features = pickle.load(f)
     with open(args.classifiers, "rb") as f:
         classifiers = pickle.load(f)
+    with open(args.init, "rb") as f:
+        init =pickle.load(f)
     outpath = args.outpath
     n_division = args.n_division
+    init = args.init
 
     feature_method = args.list_features
     feature_method = os.path.basename(feature_method)
     feature_method = os.path.splitext(feature_method)[0]
     feature_method = feature_method.split('_')[1]
 
-    classifiers = cluster_division(features, classifiers, n_division, outpath, feature_method, method = args.method, ncluster=args.nclusters)
+    if init == 'None':
+        classifiers = cluster_division(features, classifiers, n_division, outpath, feature_method, method = args.method, ncluster=args.nclusters)
+    else:
+        with open(init, "rb") as f:
+            init =pickle.load(f)
+        classifiers = cluster_division(features, classifiers, n_division, outpath, feature_method, method = args.method, init=init)
