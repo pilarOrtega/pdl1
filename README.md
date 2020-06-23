@@ -201,7 +201,7 @@ Functions:
 features.
 - **feature_reduction**: Reduces the dimensions of the vector of features with
 a PCA (90% variability).
-- **feature_extraction**: Main fucntion. 
+- **feature_extraction**: Main function.
 
 ### Cluster division
 

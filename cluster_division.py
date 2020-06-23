@@ -117,10 +117,10 @@ def cluster_division(features, classifiers_0, n_division, outpath, feature_metho
             slide_list.append(x[0])
         if init == 0:
             cls = MiniBatchKMeans(n_clusters=ncluster)
+            cls = cls.fit(features)
+            pickle_save(cls, outpath, 'model-{}-{}-{}.p'.format(feature_method, level, method))
         else:
             cls = MiniBatchKMeans(n_clusters=init.shape[0], init=init)
-        cls = cls.fit(features)
-        pickle_save(cls, outpath, 'model-{}-{}-{}.p'.format(feature_method, level, method))
         labels = cls.predict(features)
         score = davies_bouldin_score(features, labels)
         print('Davies-Bouldin Score: {}'.format(score))
