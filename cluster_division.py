@@ -57,7 +57,7 @@ def image_cluster(features, classifiers, n, method='Kmeans'):
     return classifiers, features_1, features_0
 
 
-def cluster_division(features, classifiers_0, n_division, outpath, feature_method, method='TopDown', ncluster=16, save=False, level=16, init=0):
+def cluster_division(features, classifiers_0, n_division, outpath, feature_method, method='TopDown', ncluster=16, save=False, level=16, init=[]):
     """
     Arguments:
         - features:
@@ -115,7 +115,7 @@ def cluster_division(features, classifiers_0, n_division, outpath, feature_metho
         slide_list = []
         for x in classifiers:
             slide_list.append(x[0])
-        if init == 0:
+        if init == []:
             cls = MiniBatchKMeans(n_clusters=ncluster)
             cls = cls.fit(features)
             pickle_save(cls, outpath, 'model-{}-{}-{}.p'.format(feature_method, level, method))
