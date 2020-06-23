@@ -120,8 +120,8 @@ def cluster_division(features, classifiers_0, n_division, outpath, feature_metho
             cls = cls.fit(features)
             pickle_save(cls, outpath, 'model-{}-{}-{}.p'.format(feature_method, level, method))
         else:
-            cls = KMeans(n_clusters=init.shape[0], init=init)
-            cls = cls.fit(init)
+            cls = KMeans()
+            cls.cluster_centers_ = init
         labels = cls.predict(features)
         score = davies_bouldin_score(features, labels)
         print('Davies-Bouldin Score: {}'.format(score))
