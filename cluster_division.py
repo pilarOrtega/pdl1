@@ -119,7 +119,9 @@ def cluster_division(features, classifiers_0, n_division, outpath, feature_metho
             cls = MiniBatchKMeans(n_clusters=ncluster)
         else:
             cls = MiniBatchKMeans(n_clusters=init.shape[0], init=init)
-        labels = cls.fit_predict(features)
+        cls = cls.fit(features)
+        pickle_save(cls, outpath, 'model-{}-{}-{}.p'.format(feature_method, level, method))
+        labels = cls.predict(features)
         score = davies_bouldin_score(features, labels)
         print('Davies-Bouldin Score: {}'.format(score))
         for im in image_list:
