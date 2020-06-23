@@ -11,7 +11,7 @@ def obtain_init_array(list_patches, features):
     init_arr = [get_patch_features(p, features).flatten() for p in list_patches]
     return numpy.asarray(init_arr)
 
-def weighted_clustering(data, features, outpath, feature_method, classifiers):
+def weighted_clustering(data, features, outpath, feature_method, classifiers, slide_folder):
     labels = read_csv(data)
     labels_dict = { int(label[0]) : label[2]  for label in labels }
     color_dict = { int(label[0]) : (float(label[3]), float(label[4]), float(label[5])) for label in labels}
@@ -22,7 +22,7 @@ def weighted_clustering(data, features, outpath, feature_method, classifiers):
 
     preview = []
     for c in classifiers:
-        preview.append(get_preview(c[0], c[2], 16, 224, slide_folder, n_division, method='BottomUp'))
+        preview.append(get_preview(c[0], c[2], 16, 224, slide_folder, 4, method='BottomUp'))
 
     for im in preview:
         image = numpy.array([[color_dict[x] for x in row] for row in im[1]])
@@ -54,6 +54,7 @@ if __name__ == "__main__":
     parser.add_argument('-d', '--data', help='CSV file with label information')
     parser.add_argument('-f', '--features', type=str, help='Feature file')
     parser.add_argument('-c', '--classifiers', type=str, help='Path to classifier file')
+    parser.add_arguement('-s', '--slides', type=str, help='Path to slide folder')
     args = parser.parse_args()
 
     outpath = args.outpath
@@ -62,7 +63,8 @@ if __name__ == "__main__":
     feature_method = os.path.basename(args.features)
     feature_method = feature_method.split('_')[1]
     classifiers = args.classifiers
+    slides = args.slides
 
-    classifiers = weighted_clustering(data, features, outpath, feature_method)
+    classifiers = weighted_clustering(data, features, outpath, feature_method, classifiers, slides)
 
     pickle_save(classifiers, outpath, 'class-wKmeans-{}-{}-{}.p'.format(feature_method, level, method))
