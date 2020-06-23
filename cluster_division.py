@@ -122,7 +122,7 @@ def cluster_division(features, classifiers_0, n_division, outpath, feature_metho
         else:
             cls = KMeans()
             cls.cluster_centers_ = init
-            print(cls.cluster_center_.shape())
+            print(cls.cluster_centers_.shape())
         labels = cls.predict(features)
         score = davies_bouldin_score(features, labels)
         print('Davies-Bouldin Score: {}'.format(score))
