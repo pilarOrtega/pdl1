@@ -181,7 +181,7 @@ def get_features(image_list, nclusters=256, method='Dense'):
         print()
         print('Feature extraction completed')
         print()
-        return features
+        return features, kmeans
 
     elif method in ['Daisy', 'DaisyDAB', 'DaisyH']:
         patch_shape = (8, 8)
@@ -222,7 +222,7 @@ def get_features(image_list, nclusters=256, method='Dense'):
         print()
         print('Feature extraction completed')
         print()
-        return features
+        return features, kmeans
 
     else:
         print('Method not valid')
@@ -296,9 +296,9 @@ def feature_reduction(list_features):
     features, image_list = feature_list_division(list_features)
     # We take the features that explain 90% of the variance
     pca = PCA(n_components=0.9)
-    features_pca = pca.fit_transform(features)
+    pca = pca.fit(features)
     #features_tsne = TSNE(n_components=2, random_state=123).fit_transform(features_pca)
-
+    features_pca = pca.transform(features)
     initial_features = features.shape[1]
     pca_features = features_pca.shape[1]
     #final_features = features_tsne.shape[1]
@@ -312,7 +312,7 @@ def feature_reduction(list_features):
     # for i in range(len(image_list)):
     #     result.append((image_list[i], features_scaled[i]))
 
-    return result
+    return result, pca
 
 
 def feature_extraction(list_positive, outpath, feature_method):
@@ -322,8 +322,8 @@ def feature_extraction(list_positive, outpath, feature_method):
     start = time.time()
     # Extract features from positive images
     if feature_method in ['Dense', 'DenseDAB', 'DenseH', 'Daisy', 'DaisyDAB', 'DaisyH']:
-        features = get_features(list_positive, nclusters=256, method=feature_method)
-
+        features, kmeans = get_features(list_positive, nclusters=256, method=feature_method)
+        pickle_save(kmeans, outpath, 'kmeans_features_{}_level{}.p'.format(feature_method, level))
     if feature_method in ['VGG16', 'VGG16DAB', 'VGG16H', 'Xception', 'XceptionDAB', 'XceptionH']:
         features = get_features_CNN(list_positive, outpath, model=feature_method)
     end = time.time()
@@ -340,10 +340,11 @@ def feature_extraction(list_positive, outpath, feature_method):
     pickle_save(features, outpath, 'features_{}_level{}.p'.format(feature_method, level))
 
     start = time.time()
-    features = feature_reduction(features)
+    features, pca = feature_reduction(features)
     end = time.time()
     print('Feature reduction completed in time {:.4f} s'.format(end-start))
 
+    pickle_save(pca, outpath, 'pca_{}_level{}.p'.format(feature_method, level))
     pickle_save(features, outpath, 'features_{}_level{}.p'.format(feature_method, level))
 
     csv_features = 'features_{}_level{}.csv'.format(feature_method, level)
