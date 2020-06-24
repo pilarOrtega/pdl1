@@ -1,5 +1,6 @@
 import numpy
 
+
 def feature_list_division(list_features):
     """
     Gets a list with elements ('image_name', 'array of features') and returns a

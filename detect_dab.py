@@ -124,7 +124,7 @@ def detect_dab_delayed(slide, threshold):
         c[slide_number][3] = 0
     classifier = (os.path.basename(slide), slide, c)
 
-    return classifier, list_positive
+    return classifier, list_positive, list_negative
 
 
 def detect_dab(list_slides, outpath, jobs, threshold):

@@ -117,10 +117,6 @@ def patch_division(slides, outpath, level, tile_size=224, tissue_ratio=0.50, job
     end = time.time()
     print('Total time patch extraction: {:.4f} s'.format(end-start))
     for s in glob.glob(slides):
-        # print('[INFO] Extracting patches from slide {}'.format(s))
-        # Obtains patches from each slide s
-        # n_s, outpath_slide = get_patches(s, outpath, level, tissue_ratio, tile_size)
-        # Saves the slide name and the path to the patch folder in slide_list
         slidename = os.path.basename(s)
         outpath_slide = os.path.join(outpath, slidename)
         slide_list.append((slidename, outpath_slide))

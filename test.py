@@ -5,16 +5,8 @@ from cluster_division import *
 from show_preview import *
 from save_cluster import *
 from auxiliary_functions.get_clusterlist import *
-import pickle
+from auxiliary_functions.pickle_functions import *
 import time
-
-
-def pickle_load(file_name):
-    with open(file_name, "rb") as f:
-        file = pickle.load(f)
-        print('Document ' + file_name + ' correctly loaded')
-        print()
-    return file
 
 
 # Manage parameters
@@ -41,11 +33,11 @@ os.environ["CUDA_VISIBLE_DEVICES"] = args.device
 
 gpus = tf.config.experimental.list_physical_devices('GPU')
 if gpus:
-  try:
-    for gpu in gpus:
-      tf.config.experimental.set_memory_growth(gpu, True)
-  except RuntimeError as e:
-    print(e)
+    try:
+        for gpu in gpus:
+            tf.config.experimental.set_memory_growth(gpu, True)
+        except RuntimeError as e:
+            print(e)
 
 slides = args.slides
 outpath = args.outpath
@@ -77,7 +69,7 @@ if flag <= 1:
         slide_list = os.path.join(outpath, 'list_{}_{}.p'.format(level, tile_size))
         slide_list = pickle_load(slide_list)
     start = time.time()
-    classifiers, list_positive = detect_dab(slide_list, outpath, jobs=jobs, threshold=85)
+    classifiers, list_positive, list_negative = detect_dab(slide_list, outpath, jobs=jobs, threshold=85)
     end = time.time()
     print('***** Total time detect_dab {:.4f} s *****'.format(end-start))
     print()
