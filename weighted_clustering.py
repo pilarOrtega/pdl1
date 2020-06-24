@@ -10,14 +10,16 @@ import matplotlib.patches as mpatches
 from matplotlib import gridspec
 from matplotlib import pyplot as plt
 
+
 def obtain_init_array(list_patches, features):
     init_arr = [get_patch_features(p, features).flatten() for p in list_patches]
     return numpy.asarray(init_arr)
 
+
 def weighted_clustering(data, features, outpath, feature_method, classifiers, slide_folder):
     labels = read_csv(data)
-    labels_dict = { (int(label[0])+2) : label[2]  for label in labels }
-    color_dict = { (int(label[0])+2) : (float(label[3]), float(label[4]), float(label[5])) for label in labels}
+    labels_dict = {(int(label[0])+2): label[2] for label in labels}
+    color_dict = {(int(label[0])+2): (float(label[3]), float(label[4]), float(label[5])) for label in labels}
     labels_dict[0] = 'Background'
     labels_dict[1] = 'Negative'
     color_dict[0] = (0, 0, 0.4)
@@ -46,7 +48,7 @@ def weighted_clustering(data, features, outpath, feature_method, classifiers, sl
     for im in preview:
         image = numpy.array([[color_dict[x] for x in row] for row in im[1]])
 
-        fig = plt.figure(figsize=(13,4))
+        fig = plt.figure(figsize=(13, 4))
         spec = gridspec.GridSpec(ncols=2, nrows=1, width_ratios=[2, 1])
         ax0 = fig.add_subplot(spec[0])
         ax1 = fig.add_subplot(spec[1])
@@ -55,13 +57,14 @@ def weighted_clustering(data, features, outpath, feature_method, classifiers, sl
         ax1.legend(handles=patchList, loc='center left', prop={'size': 15})
         ax1.axis("off")
         title = im[0] + ' ' + feature_method
-        fig.suptitle(title, va='baseline', fontsize = 15)
+        fig.suptitle(title, va='baseline', fontsize=15)
         fig.tight_layout()
         plt.show()
         name = os.path.join(outpath, im[0]+feature_method+'.png')
         fig.savefig(name, bbox_inches='tight', dpi=fig.dpi)
 
     return classifiers
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Cooperative clustering')
