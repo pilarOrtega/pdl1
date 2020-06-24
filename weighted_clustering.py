@@ -36,12 +36,15 @@ def weighted_clustering(data, features, outpath, feature_method, classifiers, sl
     for c in classifiers:
         preview.append(get_preview(c[0], c[2], 16, 224, slide_folder, 4, method='BottomUp'))
 
+    unique_labels = [(color_dict[key], labels_dict[key]) for key in color_dict]
+    set(unique_labels)
+    patchList = []
+    for patch in unique_labels:
+        data_key = mpatches.Patch(color=patch[0], label=patch[1])
+        patchList.append(data_key)
+
     for im in preview:
         image = numpy.array([[color_dict[x] for x in row] for row in im[1]])
-        patchList = []
-        for key in color_dict:
-            data_key = mpatches.Patch(color=color_dict[key], label=labels_dict[key])
-            patchList.append(data_key)
 
         fig = plt.figure(figsize=(13,4))
         spec = gridspec.GridSpec(ncols=2, nrows=1, width_ratios=[2, 1])
