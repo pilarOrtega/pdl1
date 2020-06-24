@@ -125,7 +125,7 @@ def cluster_division(features, classifiers_0, n_division, outpath, feature_metho
         labels = cls.predict(features)
         score = davies_bouldin_score(features, labels)
         print('Davies-Bouldin Score: {}'.format(score))
-        for im in image_list:
+        for im in tqdm(image_list):
             index = image_list.index(im)
             image_name = os.path.basename(im)
             image_name = image_name.split('#')[1]
@@ -176,12 +176,8 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    with open(args.list_features, "rb") as f:
-        features = pickle.load(f)
-    with open(args.classifiers, "rb") as f:
-        classifiers = pickle.load(f)
-    with open(args.init, "rb") as f:
-        init =pickle.load(f)
+    features = pickle_load(args.list_features)
+    classifiers = pickle_load(args.classifiers)
     outpath = args.outpath
     n_division = args.n_division
     init = args.init
@@ -192,8 +188,7 @@ if __name__ == "__main__":
     feature_method = feature_method.split('_')[1]
 
     if init == 0:
-        classifiers = cluster_division(features, classifiers, n_division, outpath, feature_method, method = args.method, ncluster=args.nclusters)
+        classifiers = cluster_division(features, classifiers, n_division, outpath, feature_method, method=args.method, ncluster=args.nclusters)
     else:
-        with open(init, "rb") as f:
-            init =pickle.load(f)
-        classifiers = cluster_division(features, classifiers, n_division, outpath, feature_method, method = args.method, init=init)
+        init = pickle_load(init)
+        classifiers = cluster_division(features, classifiers, n_division, outpath, feature_method, method=args.method, init=init)
