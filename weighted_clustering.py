@@ -18,7 +18,12 @@ def weighted_clustering(data, features, outpath, feature_method, classifiers, sl
     data = [label[1] for label in labels]
 
     init_arr = obtain_init_array(data, features)
-    classifiers = cluster_division(features, classifiers, 4, outpath, feature_method, method='BottomUp', init=init_arr)
+    features_mod = []
+    for f in features:
+        for c in classifiers:
+            if c[1] in f[0]:
+                features_mod.append(f)
+    classifiers = cluster_division(features_mod, classifiers, 4, outpath, feature_method, method='BottomUp', init=init_arr)
 
     preview = []
     for c in classifiers:
