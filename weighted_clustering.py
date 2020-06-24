@@ -6,6 +6,9 @@ from show_preview import *
 import numpy
 import argparse
 import os
+import matplotlib.patches as mpatches
+from matplotlib import gridspec
+from matplotlib import pyplot as plt
 
 def obtain_init_array(list_patches, features):
     init_arr = [get_patch_features(p, features).flatten() for p in list_patches]
