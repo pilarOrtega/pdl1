@@ -13,8 +13,12 @@ def obtain_init_array(list_patches, features):
 
 def weighted_clustering(data, features, outpath, feature_method, classifiers, slide_folder):
     labels = read_csv(data)
-    labels_dict = { int(label[0]) : label[2]  for label in labels }
-    color_dict = { int(label[0]) : (float(label[3]), float(label[4]), float(label[5])) for label in labels}
+    labels_dict = { (int(label[0])+2) : label[2]  for label in labels }
+    color_dict = { (int(label[0])+2) : (float(label[3]), float(label[4]), float(label[5])) for label in labels}
+    labels_dict[0] = 'Background'
+    labels_dict[1] = 'Negative'
+    color_dict[0] = (0, 0, 0.4)
+    color_dict[1] = (0.2, 0.4, 1)
     data = [label[1] for label in labels]
 
     init_arr = obtain_init_array(data, features)
