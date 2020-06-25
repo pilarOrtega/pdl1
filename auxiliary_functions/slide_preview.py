@@ -4,6 +4,7 @@ from matplotlib import pyplot as plt
 import numpy
 import os
 
+
 def slide_preview(slide, slidename, outpath):
     """
     Gets the preview from a given Openslide slide

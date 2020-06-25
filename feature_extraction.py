@@ -305,14 +305,15 @@ def feature_reduction(list_features):
     print('Number of features reduced from {} to {}'.format(initial_features, pca_features))
     print()
     # StandardScaler normalizes the data
-    features_scaled = StandardScaler(with_mean=False, with_std=False).fit_transform(features_pca)
+    scaler = StandardScaler()
+    features_scaled = scaler.fit_transform(features_pca)
     # List comprehension
     result = [(image_list[i], features_scaled[i]) for i in range(len(image_list))]
     # result = []
     # for i in range(len(image_list)):
     #     result.append((image_list[i], features_scaled[i]))
 
-    return result, pca
+    return result, pca, scaler
 
 
 def feature_extraction(list_positive, outpath, feature_method):
@@ -323,7 +324,7 @@ def feature_extraction(list_positive, outpath, feature_method):
     # Extract features from positive images
     if feature_method in ['Dense', 'DenseDAB', 'DenseH', 'Daisy', 'DaisyDAB', 'DaisyH']:
         features, kmeans = get_features(list_positive, nclusters=256, method=feature_method)
-        pickle_save(kmeans, outpath, 'kmeans_features_{}_level{}.p'.format(feature_method, level))
+        pickle_save(kmeans, outpath, 'kmeans_features_{}_level{}.p'.format(feature_method, 16))
     if feature_method in ['VGG16', 'VGG16DAB', 'VGG16H', 'Xception', 'XceptionDAB', 'XceptionH']:
         features = get_features_CNN(list_positive, outpath, model=feature_method)
     end = time.time()
@@ -340,11 +341,12 @@ def feature_extraction(list_positive, outpath, feature_method):
     pickle_save(features, outpath, 'features_{}_level{}.p'.format(feature_method, level))
 
     start = time.time()
-    features, pca = feature_reduction(features)
+    features, pca, scaler = feature_reduction(features)
     end = time.time()
     print('Feature reduction completed in time {:.4f} s'.format(end-start))
 
     pickle_save(pca, outpath, 'pca_{}_level{}.p'.format(feature_method, level))
+    pickle_save(scaler, outpath, 'scaler_{}_level{}.p'.format(feature_method, level))
     pickle_save(features, outpath, 'features_{}_level{}.p'.format(feature_method, level))
 
     csv_features = 'features_{}_level{}.csv'.format(feature_method, level)
