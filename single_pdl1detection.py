@@ -88,7 +88,7 @@ print()
 print('[STEP 4] Cluster division')
 start = time.time()
 features, image_list = feature_list_division(features)
-labels = cls.predict(features)
+labels = c_kmeans.predict(features)
 score = davies_bouldin_score(features, labels)
 print('Davies-Bouldin Score: {}'.format(score))
 slide_list = []
