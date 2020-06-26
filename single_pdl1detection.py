@@ -59,7 +59,7 @@ print()
 
 print('[STEP 2] DAB Detection')
 start = time.time()
-classifiers, list_positive, list_negative = detect_dab(slide_list, outpath, jobs=-1, threshold=85)
+classifiers, list_positive, list_negative = detect_dab(slide_list, outpath, jobs=-1, threshold=85, level=16, tile_size=224)
 end = time.time()
 print('***** Total time detect_dab {:.4f} s *****'.format(end-start))
 print()

@@ -127,7 +127,7 @@ def detect_dab_delayed(slide, threshold):
     return classifier, list_positive, list_negative
 
 
-def detect_dab(list_slides, outpath, jobs, threshold):
+def detect_dab(list_slides, outpath, jobs, threshold, level=16, tile_size=224):
     """
     For a list of slides, this function gets the patches that have DAB tinction
     on them (DAB positive patches). It saves two .p files in the outpath
@@ -164,12 +164,6 @@ def detect_dab(list_slides, outpath, jobs, threshold):
         for p in result[i][1]:
             list_positive.append(p)
 
-    name = outpath
-    name = os.path.basename(name)
-    name = os.path.splitext(name)[0]
-    name = name.split('_')
-    level = name[1]
-    tile_size = name[3]
     pickle_save(classifier, outpath, 'class_{}_{}.p'.format(level, tile_size))
     pickle_save(list_positive, outpath, 'list_positive_{}_{}.p'.format(level, tile_size))
 
