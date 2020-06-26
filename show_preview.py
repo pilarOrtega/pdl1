@@ -46,8 +46,6 @@ def show_preview(classifiers, level, size, slide_folder, outpath, feature_method
         name = os.path.join(outpath, slidename)
         fig = plt.figure()
         image = plt.imshow(im[1], cmap=plt.cm.get_cmap('tab20b', 18))
-        image_t = numpy.transpose(image)
-        plt.imsave(os.path.join(outpath,'cmap-{}-{}.png'.format(im[0], feature_method)), image_t)
         plt.colorbar(image, fraction=0.046, pad=0.04)
         fig.savefig(name, bbox_inches='tight', dpi=fig.dpi)
         #plt.close()
