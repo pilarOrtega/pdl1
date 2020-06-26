@@ -163,11 +163,15 @@ def detect_dab(list_slides, outpath, jobs, threshold, level=16, tile_size=224):
     for i in range(len(list_slides)):
         for p in result[i][1]:
             list_positive.append(p)
+    list_negative = []
+    for i in range(len(list_slides)):
+        for p in result[i][2]:
+            list_negative.append(p)
 
     pickle_save(classifier, outpath, 'class_{}_{}.p'.format(level, tile_size))
     pickle_save(list_positive, outpath, 'list_positive_{}_{}.p'.format(level, tile_size))
 
-    return classifier, list_positive
+    return classifier, list_positive, list_negative
 
 
 if __name__ == '__main__':
