@@ -74,8 +74,8 @@ print()
 print('[STEP 3.b] Feature reduction')
 start = time.time()
 features_list, image_list = feature_list_division(features)
-features_pca = pca.transform(features)
-initial_features = features.shape[1]
+features_pca = pca.transform(features_list)
+initial_features = features_list.shape[1]
 pca_features = features_pca.shape[1]
 print('Number of features reduced from {} to {}'.format(initial_features, pca_features))
 print()
