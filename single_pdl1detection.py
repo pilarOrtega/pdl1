@@ -92,8 +92,14 @@ labels = c_kmeans.predict(features)
 score = davies_bouldin_score(features, labels)
 print('Davies-Bouldin Score: {}'.format(score))
 slide_list = []
-for x in classifiers:
-    slide_list.append(x[0])
+classifiers_0 = []
+for s in classifiers:
+    slide_list.append(s[0])
+    n_samples = s[2].shape[0]
+    n_features = s[2].shape[1] + 1
+    c = numpy.zeros((n_samples, n_features))
+    c[:, : - 1] = s[2]
+    classifiers_0.append((s[0], s[1], c))
 for im in image_list:
     index = image_list.index(im)
     image_name = os.path.basename(im)
@@ -102,9 +108,9 @@ for im in image_list:
     number = int(number[0])
     slide_path = os.path.dirname(im)
     index_slide = slide_list.index(os.path.basename(slide_path))
-    classifiers[index_slide][2][number][4] = labels[index]
+    classifiers_0[index_slide][2][number][4] = labels[index]
 end = time.time()
 print('***** Total time cluster division {:.4f} s *****'.format(end-start))
 print()
 
-pickle_save(classifiers, outpath, 'class-{}-{}-{}.p'.format(feature_method, 16, 'BottomUp'))
+pickle_save(classifiers_0, outpath, 'class-{}-{}-{}.p'.format(feature_method, 16, 'BottomUp'))
