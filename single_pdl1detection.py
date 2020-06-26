@@ -18,6 +18,7 @@ parser.add_argument('-o', '--outpath', type=str, required='True', help='path to 
 parser.add_argument('-f', '--feature_method', type=str, default='Dense', help='features extracted from individual patches [Default: %(default)s]')
 parser.add_argument('-n', '--nclusters', type=int, default=16, help='number of clusters [Default: %(default)s]')
 parser.add_argument('--pca', type=str, help='Path to pca.p file')
+parser.add_argument('--scaler', type=str, help='Path to scaler file')
 parser.add_argument('--f_kmeans', type=str, help='Path to feature_extraction kmeans')
 parser.add_argument('--c_kmeans', type=str, help='Path to cluster_division kmeans')
 parser.add_argument('--flag', type=int, default=0, help='Step [Default: %(default)s]')
@@ -32,6 +33,7 @@ flag = args.flag
 nclusters = args.nclusters
 f_kmeans = pickle_load(args.f_kmeans)
 pca = pickle_load(args.pca)
+scaler = pickle_load(args.scaler)
 c_kmeans = pickle_load(args.c_kmeans)
 
 # Creates outpath if it doesn't exist yet
@@ -77,7 +79,7 @@ initial_features = features.shape[1]
 pca_features = features_pca.shape[1]
 print('Number of features reduced from {} to {}'.format(initial_features, pca_features))
 print()
-features_scaled = StandardScaler(with_mean=False, with_std=False).fit_transform(features_pca)
+features_scaled = scaler.transform(features_pca)
 features = [(image_list[i], features_scaled[i]) for i in range(len(image_list))]
 end = time.time()
 print('***** Total time feature reduction {:.4f} s *****'.format(end-start))
