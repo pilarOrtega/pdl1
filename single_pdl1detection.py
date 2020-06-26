@@ -66,7 +66,7 @@ print()
 
 print('[STEP 3.a] Feature extraction')
 start = time.time()
-features = Parallel(n_jobs=-2)(delayed(hof_dense)(im, f_kmeans, 256, method='DenseDAB') for im in tqdm(list_positive))
+features = Parallel(n_jobs=-1)(delayed(hof_dense)(im, f_kmeans, 256, method='DenseDAB') for im in tqdm(list_positive))
 end = time.time()
 print('***** Total time feature extraction {:.4f} s *****'.format(end-start))
 print()
