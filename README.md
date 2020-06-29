@@ -3,6 +3,7 @@
 ## Description
 
 Code for automatic clustering of PD-L1 IHC pathology slides.
+![](https://github.com/pilarOrtega/pdl1/blob/master/images/Workflow.png)
 
 ## Usage
 
