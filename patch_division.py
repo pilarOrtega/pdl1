@@ -64,6 +64,8 @@ def get_patches(slidepath, outpath, level=10, tissue_ratio=0.25, size=256):
         print("Directory", outpath, "created")
     except FileExistsError:
         print("Directory", outpath, "already exists")
+        print("Patches already extracted")
+        return
 
     # Saves tiles if detects tissue presence higher than tissue_ratio
     n = 0
