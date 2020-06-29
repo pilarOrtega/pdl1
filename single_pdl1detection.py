@@ -36,6 +36,7 @@ f_kmeans = pickle_load(args.f_kmeans)
 pca = pickle_load(args.pca)
 scaler = pickle_load(args.scaler)
 c_kmeans = pickle_load(args.c_kmeans)
+threshold = args.threshold
 
 # Creates outpath if it doesn't exist yet
 try:
