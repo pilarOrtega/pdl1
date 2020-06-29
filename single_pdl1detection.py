@@ -21,6 +21,7 @@ parser.add_argument('--pca', type=str, help='Path to pca.p file')
 parser.add_argument('--scaler', type=str, help='Path to scaler file')
 parser.add_argument('--f_kmeans', type=str, help='Path to feature_extraction kmeans')
 parser.add_argument('--c_kmeans', type=str, help='Path to cluster_division kmeans')
+parser.add_argument('-t', '--threshold', type=int, default=85, help='DAB detection threshold [Default: %(default)s]')
 parser.add_argument('--flag', type=int, default=0, help='Step [Default: %(default)s]')
 
 
@@ -59,7 +60,7 @@ print()
 
 print('[STEP 2] DAB Detection')
 start = time.time()
-classifiers, list_positive, list_negative = detect_dab(slide_list, outpath, jobs=-1, threshold=85, level=16, tile_size=224)
+classifiers, list_positive, list_negative = detect_dab(slide_list, outpath, jobs=-1, threshold=threshold, level=16, tile_size=224)
 end = time.time()
 print('***** Total time detect_dab {:.4f} s *****'.format(end-start))
 print()
