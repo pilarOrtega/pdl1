@@ -47,6 +47,8 @@ def weighted_clustering(data, features, outpath, feature_method, classifiers, sl
 
     for im in preview:
         image = numpy.array([[color_dict[x] for x in row] for row in im[1]])
+        image2 = numpy.transpose(image, (1, 0, 2))
+        plt.imsave(os.path.join(outpath,'cmap_{}_{}.png'.format(im[0], feature_method)), image2)
 
         fig = plt.figure(figsize=(13, 4))
         spec = gridspec.GridSpec(ncols=2, nrows=1, width_ratios=[2, 1])
