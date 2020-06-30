@@ -5,10 +5,10 @@
 - [Description](#description)
 - [Usage](#usage)
 - [Blocks](#blocks)
-  - [Patch division](###Patch%20division)
-  - [DAB detect](###dab%20detect)
-  - [Feature extraction](###feature%20extraction)
-  - [Cluster division](###cluster%20division)
+  - [Patch division](#patch-division)
+  - [DAB detect](#dab-detect)
+  - [Feature extraction](#feature-extraction)
+  - [Cluster division](#cluster-division)
 
 
 ## Description
