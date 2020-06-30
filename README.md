@@ -1,5 +1,18 @@
 # PDL1 stage project
 
+## Table of Contents (Optional)
+
+> If your `README` has a lot of info, section headers might be nice.
+
+- [Description](#description)
+- [Usage](#usage)
+- [Blocks](#blocks)
+  - [Patch division](#patch divsion)
+  - [DAB detect](#dab detect)
+  - [Feature extraction](#feature extraction)
+  - [Cluster division](#cluster division)
+
+
 ## Description
 
 Code for automatic clustering of PD-L1 IHC pathology slides.
