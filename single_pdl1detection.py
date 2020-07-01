@@ -146,3 +146,12 @@ if __name__ == "__main__":
     print()
 
     pickle_save(classifiers_0, outpath, 'class-{}-{}-{}.p'.format(feature_method, 16, 'BottomUp'))
+
+    # Visualization of results
+
+    # DAB
+    show_preview(classifiers_0[0], 16, 224, os.path.dirname(slides), outpath, feature_method='DenseDAB', n_division=0, method='BottomUp')
+    # H in positive
+    show_preview(classifiers_0[1], 16, 224, os.path.dirname(slides), outpath, feature_method='DenseH_pos', n_division=0, method='BottomUp')
+    # H in negative
+    show_preview(classifiers_0[2], 16, 224, os.path.dirname(slides), outpath, feature_method='DenseH_neg', n_division=0, method='BottomUp', neg=1)

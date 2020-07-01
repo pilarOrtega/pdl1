@@ -10,7 +10,7 @@ import time
 import os
 
 
-def get_preview(slidename, classifier, level, size, slide_folder, n_division, method='TopDown'):
+def get_preview(slidename, classifier, level, size, slide_folder, n_division, method='TopDown', neg=0):
     result = []
     slidepath = os.path.join(slide_folder, slidename)
     slide = OpenSlide(slidepath)
@@ -20,7 +20,7 @@ def get_preview(slidename, classifier, level, size, slide_folder, n_division, me
     for x in classifier:
         im_x = int(x[1])
         im_y = int(x[2])
-        if x[3] == 0:
+        if x[3] == neg:
             preview[im_x][im_y] = 1
         else:
             if method == 'TopDown':
@@ -35,9 +35,9 @@ def get_preview(slidename, classifier, level, size, slide_folder, n_division, me
     return result
 
 
-def show_preview(classifiers, level, size, slide_folder, outpath, feature_method, n_division=0, method='TopDown'):
+def show_preview(classifiers, level, size, slide_folder, outpath, feature_method, n_division=0, method='TopDown', neg=0):
     start = time.time()
-    previews = Parallel(n_jobs=4)(delayed(get_preview)(s[0], s[2], level, size, slide_folder, n_division, method=method) for s in tqdm(classifiers))
+    previews = Parallel(n_jobs=4)(delayed(get_preview)(s[0], s[2], level, size, slide_folder, n_division, method=method, neg=neg) for s in tqdm(classifiers))
     end = time.time()
     print('Total time get previews: {:.4f} s'.format(end-start))
 
