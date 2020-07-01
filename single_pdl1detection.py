@@ -75,7 +75,7 @@ if __name__ == "__main__":
     feature_method = args.feature_method
     flag = args.flag
     nclusters = args.nclusters
-    f_kmeans_dab = pickle_load(args.f_kmeans_dab)
+    f_kmeans_DAB = pickle_load(args.f_kmeans_dab)
     pca_DAB = pickle_load(args.pca_dab)
     scaler_DAB = pickle_load(args.scaler_dab)
     c_kmeans_DAB = pickle_load(args.c_kmeans_dab)
