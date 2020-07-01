@@ -76,13 +76,13 @@ if __name__ == "__main__":
     flag = args.flag
     nclusters = args.nclusters
     f_kmeans_dab = pickle_load(args.f_kmeans_dab)
-    pca_dab = pickle_load(args.pca_dab)
-    scaler_dab = pickle_load(args.scaler_dab)
-    c_kmeans_dab = pickle_load(args.c_kmeans_dab)
-    f_kmeans_h = pickle_load(args.f_kmeans_h)
-    pca_h = pickle_load(args.pca_h)
-    scaler_h = pickle_load(args.scaler_h)
-    c_kmeans_h = pickle_load(args.c_kmeans_h)
+    pca_DAB = pickle_load(args.pca_dab)
+    scaler_DAB = pickle_load(args.scaler_dab)
+    c_kmeans_DAB = pickle_load(args.c_kmeans_dab)
+    f_kmeans_H = pickle_load(args.f_kmeans_h)
+    pca_H = pickle_load(args.pca_h)
+    scaler_H = pickle_load(args.scaler_h)
+    c_kmeans_H = pickle_load(args.c_kmeans_h)
     threshold = args.threshold
 
     # Creates outpath if it doesn't exist yet
@@ -115,10 +115,10 @@ if __name__ == "__main__":
 
     print('[STEP 3.a] Feature extraction (DAB channel)')
     start = time.time()
-    features_DAB = Parallel(n_jobs=-1)(delayed(hof_dense)(im, f_kmeans, 256, method='DenseDAB') for im in tqdm(list_positive))
+    features_DAB = Parallel(n_jobs=-1)(delayed(hof_dense)(im, f_kmeans_DAB, 256, method='DenseDAB') for im in tqdm(list_positive))
     print('[STEP 3.a] Feature extraction (H channel)')
-    features_pos_H = Parallel(n_jobs=-1)(delayed(hof_dense)(im, f_kmeans, 256, method='DenseH') for im in tqdm(list_positive))
-    features_neg_H = Parallel(n_jobs=-1)(delayed(hof_dense)(im, f_kmeans, 256, method='DenseH') for im in tqdm(list_negative))
+    features_pos_H = Parallel(n_jobs=-1)(delayed(hof_dense)(im, f_kmeans_H, 256, method='DenseH') for im in tqdm(list_positive))
+    features_neg_H = Parallel(n_jobs=-1)(delayed(hof_dense)(im, f_kmeans_H, 256, method='DenseH') for im in tqdm(list_negative))
     end = time.time()
     print('***** Total time feature extraction {:.4f} s *****'.format(end-start))
     print()
