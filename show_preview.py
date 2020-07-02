@@ -40,8 +40,14 @@ def show_preview(classifiers, level, size, slide_folder, outpath, feature_method
     previews = Parallel(n_jobs=4)(delayed(get_preview)(s[0], s[2], level, size, slide_folder, n_division, method=method, neg=neg) for s in tqdm(classifiers))
     end = time.time()
     print('Total time get previews: {:.4f} s'.format(end-start))
+    colordict = './dict/color_dict.csv'
+    colordict = read_csv(colordict)
+    colordict = {(int(c[0])): (float(c[1]), float(c[2]), float(c[3])) for c in colordict}
 
     for im in previews:
+        image = numpy.array([[color_dict[x] for x in row] for row in im[1]])
+        image2 = numpy.transpose(image, (1, 0, 2))
+        plt.imsave(os.path.join(outpath,'cmap_{}_{}.png'.format(im[0], feature_method)), image2)
         slidename = '{}-{}-level{}-ts{}-{}-{}.png'.format(im[0], feature_method, level, size, n_division, method)
         name = os.path.join(outpath, slidename)
         fig = plt.figure()
