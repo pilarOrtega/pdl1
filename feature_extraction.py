@@ -229,7 +229,7 @@ def get_features(image_list, nclusters=256, method='Dense'):
         return
 
 
-def get_features_CNN(image_list, outpath, model='VGG16'):
+def get_features_CNN(image_list, outpath, model='VGG16', da=False):
     """
     Extracts image features using CNN
 
@@ -262,18 +262,20 @@ def get_features_CNN(image_list, outpath, model='VGG16'):
     if model in ['Xception', 'XceptionDAB', 'XceptionH']:
         print('Loading network...')
 
-        outdir = os.path.join(outpath, model)
-        if not os.path.exists(outdir):
-            if model == 'Xception':
-                domain_adaption(image_list, outdir, 224, pdl1=True)
-            if model == 'XceptionDAB':
-                domain_adaption(image_list, outdir, 224, pdl1=True, dab=True)
-            if model == 'XceptionH':
-                domain_adaption(image_list, outdir, 224, pdl1=True, h=True)
+        if da:
+            outdir = os.path.join(outpath, model)
+            if not os.path.exists(outdir):
+                if model == 'Xception':
+                    domain_adaption(image_list, outdir, 224, pdl1=True)
+                if model == 'XceptionDAB':
+                    domain_adaption(image_list, outdir, 224, pdl1=True, dab=True)
+                if model == 'XceptionH':
+                    domain_adaption(image_list, outdir, 224, pdl1=True, h=True)
+            weights_dir = os.path.join(outdir, 'weights')
+            model = load_model(outdir, 5)
+            model.summary()
 
-        weights_dir = os.path.join(outdir, 'weights')
-        model = load_model(outdir, 5)
-        model.summary()
+        model = Xception(weights='imagenet', include_top=False, pooling='avg', input_shape=(224, 224, 3))
 
         for im in tqdm(image_list):
             image = imread(im)
@@ -316,7 +318,7 @@ def feature_reduction(list_features):
     return result, pca, scaler
 
 
-def feature_extraction(list_positive, outpath, feature_method):
+def feature_extraction(list_positive, outpath, feature_method, da=False):
 
     print('[INFO] Extracting features from {} positive images'.format(len(list_positive)))
 
@@ -326,7 +328,7 @@ def feature_extraction(list_positive, outpath, feature_method):
         features, kmeans = get_features(list_positive, nclusters=256, method=feature_method)
         pickle_save(kmeans, outpath, 'kmeans_features_{}_level{}.p'.format(feature_method, 16))
     if feature_method in ['VGG16', 'VGG16DAB', 'VGG16H', 'Xception', 'XceptionDAB', 'XceptionH']:
-        features = get_features_CNN(list_positive, outpath, model=feature_method)
+        features = get_features_CNN(list_positive, outpath, model=feature_method, da=da)
     end = time.time()
     print('Feature extraction completed in time {:.4f} s'.format(end-start))
 
@@ -386,6 +388,8 @@ if __name__ == "__main__":
     parser.add_argument('-o', '--outpath', type=str, help='path to outfolder')
     parser.add_argument('-f', '--feature_method', type=str, help='feature method')
     parser.add_argument('-d', '--device', default="0", type=str, help='GPU device to use [Default: %(default)s]')
+    parser.add_argument('--da', action='store_true')
+)
     args = parser.parse_args()
 
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
@@ -396,5 +400,6 @@ if __name__ == "__main__":
 
     outpath = args.outpath
     feature_method = args.feature_method
+    da = args.da
 
     features = feature_extraction(list_positive, outpath, feature_method)
