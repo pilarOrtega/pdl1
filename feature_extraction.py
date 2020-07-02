@@ -389,7 +389,7 @@ if __name__ == "__main__":
     parser.add_argument('-f', '--feature_method', type=str, help='feature method')
     parser.add_argument('-d', '--device', default="0", type=str, help='GPU device to use [Default: %(default)s]')
     parser.add_argument('--da', action='store_true')
-)
+    
     args = parser.parse_args()
 
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
