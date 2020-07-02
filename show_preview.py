@@ -8,6 +8,7 @@ from tqdm import tqdm
 from joblib import Parallel, delayed
 import time
 import os
+from auxiliary_functions.read_csv import *
 
 
 def get_preview(slidename, classifier, level, size, slide_folder, n_division, method='TopDown', neg=0):
