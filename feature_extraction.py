@@ -215,7 +215,7 @@ def get_features(image_list, nclusters=256, method='Dense'):
 
         start2 = time.time()
         print('Step 2: Histogram of features extraction')
-        features = Parallel(n_jobs=-2)(delayed(hof_daisy)(im, kmeans, nclusters, method=method) for im in tqdm(image_list))
+        features = Parallel(n_jobs=20)(delayed(hof_daisy)(im, kmeans, nclusters, method=method) for im in tqdm(image_list))
         end2 = time.time()
         print('Total time KMeans fitting: {:.4f} s'.format(end2-start2))
 
@@ -389,7 +389,7 @@ if __name__ == "__main__":
     parser.add_argument('-f', '--feature_method', type=str, help='feature method')
     parser.add_argument('-d', '--device', default="0", type=str, help='GPU device to use [Default: %(default)s]')
     parser.add_argument('--da', action='store_true')
-    
+
     args = parser.parse_args()
 
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
