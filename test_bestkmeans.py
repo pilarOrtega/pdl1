@@ -67,7 +67,7 @@ def best_kmeans(features, classifiers, outpath, feature_method, min=1, max=50, s
     os.mkdir(outpath_temp)
     classifiers = pickle_load(classifiers)
     features = pickle_load(features)
-    scores = Parallel(n_jobs=-2)(delayed(compare)(features, classifiers, outpath_temp, feature_method, i) for i in tqdm(range(min, max, step)))
+    scores = Parallel(n_jobs=-10)(delayed(compare)(features, classifiers, outpath_temp, feature_method, i) for i in tqdm(range(min, max, step)))
     shutil.rmtree(outpath_temp)
     scores = numpy.array(scores)
     pickle_save(scores, outpath, 'Scores_{}.p'.format(feature_method))
