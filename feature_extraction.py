@@ -215,7 +215,7 @@ def get_features(image_list, nclusters=256, method='Dense'):
 
         start2 = time.time()
         print('Step 2: Histogram of features extraction')
-        features = Parallel(n_jobs=-10, backend='loky')(delayed(hof_daisy)(im, kmeans, nclusters, method=method) for im in tqdm(image_list))
+        features = Parallel(n_jobs=-3, backend='loky')(delayed(hof_daisy)(im, kmeans, nclusters, method=method) for im in tqdm(image_list))
         end2 = time.time()
         print('Total time KMeans fitting: {:.4f} s'.format(end2-start2))
 
