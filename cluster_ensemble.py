@@ -48,7 +48,7 @@ if __name__ == "__main__":
     nclusters= args.nclusters
 
     if data == 'None':
-        data = os.path.join(outpath, '*-{}-*.p'.format(feature_method))
+        data = os.path.join(outpath, 'class-{}-*.p'.format(feature_method))
         data = glob.glob(data)
 
     if classifier == 'None':
