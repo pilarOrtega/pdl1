@@ -45,7 +45,7 @@ if __name__ == "__main__":
     data = args.data
     classifier = args.classifier
     limit = args.limit
-    nclusters= args.nclusters
+    nclusters = args.nclusters
 
     if data == 'None':
         data = os.path.join(outpath, 'class-{}-*.p'.format(feature_method))

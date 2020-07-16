@@ -34,6 +34,7 @@ def show_random_imgs(images, x, y, figsize=(10, 10), save_fig=False, name=''):
     if save_fig:
         fig.savefig(name, bbox_inches='tight', dpi=fig.dpi)
     #plt.close(fig)
+    return len(images)
 
 
 if __name__ == "__main__":
