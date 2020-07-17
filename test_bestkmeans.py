@@ -61,7 +61,7 @@ def compare(features, classifiers, outpath, feature_method, i):
     result = []
     std = statistics.stdev(scores)
     result.extend((i, score, std))
-    return result
+    return result, scores
 
 
 def best_kmeans(features, classifiers, outpath, feature_method, min=1, max=50, step=5):
@@ -69,13 +69,19 @@ def best_kmeans(features, classifiers, outpath, feature_method, min=1, max=50, s
     os.mkdir(outpath_temp)
     classifiers = pickle_load(classifiers)
     features = pickle_load(features)
-    scores = Parallel(n_jobs=-3)(delayed(compare)(features, classifiers, outpath_temp, feature_method, i) for i in tqdm(range(min, max, step)))
+    result = Parallel(n_jobs=-3)(delayed(compare)(features, classifiers, outpath_temp, feature_method, i) for i in tqdm(range(min, max, step)))
+    scores = []
+    scores_avg = []
+    for x in result:
+        scores.append(x[1])
+        scores_avg.append(x[0])
     shutil.rmtree(outpath_temp)
-    scores = numpy.array(scores)
+    scores_avg = numpy.array(scores_avg)
+    pickle_save(scores_avg, outpath, 'Scores_avg_{}.p'.format(feature_method))
     pickle_save(scores, outpath, 'Scores_{}.p'.format(feature_method))
     fig, axes = plt.subplots(1, 1)
-    x_values = [s[0] for s in scores]
-    y_values = [s[1] for s in scores]
+    x_values = [s[0] for s in scores_avg]
+    y_values = [s[1] for s in scores_avg]
     axes.plot(x_values, y_values)
     plt.show()
     name = os.path.join(outpath, 'Scores_{}.png'.format(feature_method))
