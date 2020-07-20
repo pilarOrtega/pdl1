@@ -8,6 +8,7 @@ import shutil
 from sklearn.metrics.cluster import adjusted_rand_score
 from prettytable import PrettyTable
 
+
 def cluster_comparison(classifiers_1, classifiers_2, outpath, pairs=True):
 
     feature_method_1 = os.path.basename(classifiers_1)

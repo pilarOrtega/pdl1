@@ -79,6 +79,13 @@ def best_kmeans(features, classifiers, outpath, feature_method, min=1, max=50, s
     scores_avg = numpy.array(scores_avg)
     pickle_save(scores_avg, outpath, 'Scores_avg_{}.p'.format(feature_method))
     pickle_save(scores, outpath, 'Scores_{}.p'.format(feature_method))
+    csv_file = 'scores_{}.csv'.format(feature_method)
+    csv_file_path = os.path.join(outpath, csv_file)
+    with open(csv_file_path, "w") as f:
+        writer = csv.writer(f)
+        for i in scores:
+            writer.writerow(i)
+
     fig, axes = plt.subplots(1, 1)
     x_values = [s[0] for s in scores_avg]
     y_values = [s[1] for s in scores_avg]
