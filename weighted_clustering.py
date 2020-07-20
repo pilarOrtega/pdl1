@@ -22,8 +22,8 @@ def weighted_clustering(data, features, outpath, feature_method, classifiers, sl
     color_dict = {(int(label[0])+2): (float(label[3]), float(label[4]), float(label[5])) for label in labels}
     labels_dict[0] = 'Background'
     labels_dict[1] = 'Negative'
-    color_dict[0] = (0, 0, 0.4)
-    color_dict[1] = (0.2, 0.4, 1)
+    color_dict[0] = (0.22, 0.2314, 0.4745)
+    color_dict[1] = (0.3216, 0.3294, 0.6392)
     data = [label[1] for label in labels]
 
     init_arr = obtain_init_array(data, features)
