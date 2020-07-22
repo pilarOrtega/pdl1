@@ -11,22 +11,24 @@ from matplotlib import gridspec
 from matplotlib import pyplot as plt
 
 
-def obtain_init_array(list_patches, features):
+def obtain_init_array(list_patches, features, model):
     init_arr = [get_patch_features(p, features).flatten() for p in list_patches]
+    for x in model.cluster_centers_:
+        init_arr.append(x)
     return numpy.asarray(init_arr)
 
 
-def weighted_clustering(data, features, outpath, feature_method, classifiers, slide_folder):
+def weighted_clustering(data, features, outpath, feature_method, classifiers, slide_folder, model):
     labels = read_csv(data)
     labels_dict = {(int(label[0])+2): label[2] for label in labels}
-    color_dict = {(int(label[0])+2): (float(label[3]), float(label[4]), float(label[5])) for label in labels}
+    colordict = './dict/color_dict.csv'
+    colordict = read_csv(colordict)
+    colordict = {(int(c[0])): (float(c[1]), float(c[2]), float(c[3])) for c in colordict}
     labels_dict[0] = 'Background'
     labels_dict[1] = 'Negative'
-    color_dict[0] = (0.22, 0.2314, 0.4745)
-    color_dict[1] = (0.3216, 0.3294, 0.6392)
     data = [label[1] for label in labels]
 
-    init_arr = obtain_init_array(data, features)
+    init_arr = obtain_init_array(data, features, model)
     features_mod = []
     for f in features:
         for c in classifiers:
@@ -38,7 +40,7 @@ def weighted_clustering(data, features, outpath, feature_method, classifiers, sl
     for c in classifiers:
         preview.append(get_preview(c[0], c[2], 16, 224, slide_folder, 4, method='BottomUp'))
 
-    unique_labels = [(color_dict[key], labels_dict[key]) for key in color_dict]
+    unique_labels = [(color_dict[key], labels_dict[key]) for key in labels_dict]
     unique_labels = set(unique_labels)
     patchList = []
     for patch in unique_labels:
@@ -74,7 +76,8 @@ if __name__ == "__main__":
     parser.add_argument('-d', '--data', help='CSV file with label information')
     parser.add_argument('-f', '--features', type=str, help='Feature file')
     parser.add_argument('-c', '--classifiers', type=str, help='Path to classifier file')
-    parser.add_arguement('-s', '--slides', type=str, help='Path to slide folder')
+    parser.add_argument('-s', '--slides', type=str, help='Path to slide folder')
+    parser.add_argument('-m', '--model', type=str, default='None' help='Path to the Kmeans trained model')
     args = parser.parse_args()
 
     outpath = args.outpath
@@ -84,7 +87,10 @@ if __name__ == "__main__":
     feature_method = feature_method.split('_')[1]
     classifiers = args.classifiers
     slides = args.slides
+    if args.model == 'None':
+        model = os.path.join(outpath, 'model-{}-16-BottomUp.p'.format(feature_method))
+    model = pickle_load(model)
 
-    classifiers = weighted_clustering(data, features, outpath, feature_method, classifiers, slides)
+    classifiers = weighted_clustering(data, features, outpath, feature_method, classifiers, slides, model)
 
     pickle_save(classifiers, outpath, 'class-wKmeans-{}-{}-{}.p'.format(feature_method, level, method))
