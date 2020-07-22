@@ -41,7 +41,7 @@ def weighted_clustering(data, features, outpath, feature_method, classifiers, sl
         preview.append(get_preview(c[0], c[2], 16, 224, slide_folder, 4, method='BottomUp'))
 
     unique_labels = [(color_dict[key], labels_dict[key]) for key in labels_dict]
-    unique_labels = set(unique_labels)
+    #unique_labels = set(unique_labels)
     patchList = []
     for patch in unique_labels:
         data_key = mpatches.Patch(color=patch[0], label=patch[1])

@@ -120,7 +120,7 @@ def cluster_division(features, classifiers_0, n_division, outpath, feature_metho
             cls = cls.fit(features)
             pickle_save(cls, outpath, 'model-{}-{}-{}.p'.format(feature_method, level, method))
         else:
-            cls = KMeans()
+            cls = MiniBatchKMeans()
             cls.cluster_centers_ = init
         labels = cls.predict(features)
         score = davies_bouldin_score(features, labels)
@@ -133,7 +133,7 @@ def cluster_division(features, classifiers_0, n_division, outpath, feature_metho
             number = int(number[0])
             slide_path = os.path.dirname(im)
             index_slide = slide_list.index(os.path.basename(slide_path))
-            classifiers[index_slide][2][number][4] =labels[index]
+            classifiers[index_slide][2][number][4] = labels[index]
 
     pickle_save(classifiers, outpath, 'class-{}-{}-{}.p'.format(feature_method, level, method))
 
