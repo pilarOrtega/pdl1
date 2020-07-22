@@ -77,7 +77,7 @@ if __name__ == "__main__":
     parser.add_argument('-f', '--features', type=str, help='Feature file')
     parser.add_argument('-c', '--classifiers', type=str, help='Path to classifier file')
     parser.add_argument('-s', '--slides', type=str, help='Path to slide folder')
-    parser.add_argument('-m', '--model', type=str, default='None' help='Path to the Kmeans trained model')
+    parser.add_argument('-m', '--model', type=str, default='None', help='Path to the Kmeans trained model')
     args = parser.parse_args()
 
     outpath = args.outpath
