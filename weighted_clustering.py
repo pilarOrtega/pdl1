@@ -21,9 +21,9 @@ def obtain_init_array(list_patches, features, model):
 def weighted_clustering(data, features, outpath, feature_method, classifiers, slide_folder, model):
     labels = read_csv(data)
     labels_dict = {(int(label[0])+2): label[2] for label in labels}
-    colordict = './dict/color_dict.csv'
-    colordict = read_csv(colordict)
-    colordict = {(int(c[0])): (float(c[1]), float(c[2]), float(c[3])) for c in colordict}
+    color_dict = './dict/color_dict.csv'
+    color_dict = read_csv(color_dict)
+    color_dict = {(int(c[0])): (float(c[1]), float(c[2]), float(c[3])) for c in color_dict}
     labels_dict[0] = 'Background'
     labels_dict[1] = 'Negative'
     data = [label[1] for label in labels]
