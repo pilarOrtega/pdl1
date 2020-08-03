@@ -75,7 +75,7 @@ def cluster_division(features, classifiers_0, outpath, feature_method, ncluster=
         indices = distances[index].argsort()
         if init != []:
             if (distances[index][indices[1]]-distances[index][indices[0]]) <= 0.5:
-                if indices[1] < len(init) && indices[0] >= len(init):
+                if indices[1] < len(init) and indices[0] >= len(init):
                     print('Initial: {}, {}'.format(classifiers[index_slide][2][number][4], classifiers[index_slide][2][number][5]))
                     classifiers[index_slide][2][number][4], classifiers[index_slide][2][number][5] = classifiers[index_slide][2][number][5], classifiers[index_slide][2][number][4]
                     print('Final: {}, {}'.format(classifiers[index_slide][2][number][4], classifiers[index_slide][2][number][5]))
