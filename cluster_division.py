@@ -73,15 +73,15 @@ def cluster_division(features, classifiers_0, outpath, feature_method, ncluster=
     for im in tqdm(image_list):
         index = image_list.index(im)
         indices = distances[index].argsort()
+        print(len(init))
         if not init == []:
             if (distances[index][indices[1]]-distances[index][indices[0]]) <= 0.5:
-                print('Options: {}, {}'.format(indices[0], indices[1]))
-                if indices[1] < len(init) and indices[0] >= len(init):
+                if (indices[1] < len(init)) and (indices[0] >= len(init)):
                     print('Initial: {}, {}'.format(classifiers[index_slide][2][number][4], classifiers[index_slide][2][number][5]))
                     classifiers[index_slide][2][number][4], classifiers[index_slide][2][number][5] = classifiers[index_slide][2][number][5], classifiers[index_slide][2][number][4]
                     print('Final: {}, {}'.format(classifiers[index_slide][2][number][4], classifiers[index_slide][2][number][5]))
                     n += 1
-
+    print('Total of {} out of {} patches changed'.format(n, len(image_list)))
     pickle_save(classifiers, outpath, 'class-{}-{}-BottomUp.p'.format(feature_method, level))
 
     if save:
