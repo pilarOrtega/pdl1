@@ -24,6 +24,7 @@ parser.add_argument('--flag', type=int, default=0, help='Step [Default: %(defaul
 parser.add_argument('-d', '--device', default="0", help='GPU used (0 or 1) [Default: %(default)s]')
 parser.add_argument('-j', '--jobs', type=int)
 parser.add_argument('-b', '--features_batch', action='store_true')
+parser.add_argument('--pca', default='0.9', help='PCA level [Default: %(default)s]')
 parser.add_argument('--da', action='store_true')
 
 
@@ -54,6 +55,7 @@ flag = args.flag
 method = args.method
 nclusters = args.nclusters
 da = args.da
+pca_level = args.pca
 
 if method == 'BottomUp':
     n_division = 1
@@ -85,7 +87,7 @@ if flag <= 2:
     start = time.time()
     if features_batch:
         features = feature_extraction_batch(list_positive, outpath, feature_method)
-    features = feature_extraction(list_positive, outpath, feature_method, da=da)
+    features = feature_extraction(list_positive, outpath, feature_method, da=da, pca_level=pca_level)
     end = time.time()
     print('***** Total time feature_extraction {:.4f} s *****'.format(end-start))
     print()

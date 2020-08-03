@@ -294,10 +294,10 @@ def get_features_CNN(image_list, outpath, model='VGG16', da=False):
     return features
 
 
-def feature_reduction(list_features):
+def feature_reduction(list_features, pca_level=0.9):
     features, image_list = feature_list_division(list_features)
     # We take the features that explain 90% of the variance
-    pca = PCA(n_components=0.95)
+    pca = PCA(n_components=pca_level)
     pca = pca.fit(features)
     #features_tsne = TSNE(n_components=2, random_state=123).fit_transform(features_pca)
     features_pca = pca.transform(features)
@@ -318,7 +318,7 @@ def feature_reduction(list_features):
     return result, pca, scaler
 
 
-def feature_extraction(list_positive, outpath, feature_method, da=False):
+def feature_extraction(list_positive, outpath, feature_method, da=False, pca_level=0.9):
 
     print('[INFO] Extracting features from {} positive images'.format(len(list_positive)))
 
@@ -343,7 +343,7 @@ def feature_extraction(list_positive, outpath, feature_method, da=False):
     pickle_save(features, outpath, 'features_{}_level{}.p'.format(feature_method, level))
 
     start = time.time()
-    features, pca, scaler = feature_reduction(features)
+    features, pca, scaler = feature_reduction(features, pca_level)
     end = time.time()
     print('Feature reduction completed in time {:.4f} s'.format(end-start))
 
@@ -389,6 +389,7 @@ if __name__ == "__main__":
     parser.add_argument('-f', '--feature_method', type=str, help='feature method')
     parser.add_argument('-d', '--device', default="0", type=str, help='GPU device to use [Default: %(default)s]')
     parser.add_argument('--da', action='store_true')
+    parser.add_argument('--pca', type=float, help='PCA level')
 
     args = parser.parse_args()
 
@@ -401,5 +402,6 @@ if __name__ == "__main__":
     outpath = args.outpath
     feature_method = args.feature_method
     da = args.da
+    pca_level = args.pca
 
-    features = feature_extraction(list_positive, outpath, feature_method)
+    features = feature_extraction(list_positive, outpath, feature_method, pca_level)
