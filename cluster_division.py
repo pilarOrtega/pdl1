@@ -73,8 +73,9 @@ def cluster_division(features, classifiers_0, outpath, feature_method, ncluster=
     for im in tqdm(image_list):
         index = image_list.index(im)
         indices = distances[index].argsort()
-        if init != []:
+        if not init == []:
             if (distances[index][indices[1]]-distances[index][indices[0]]) <= 0.5:
+                print('Options: {}, {}'.format(indices[0], indices[1]))
                 if indices[1] < len(init) and indices[0] >= len(init):
                     print('Initial: {}, {}'.format(classifiers[index_slide][2][number][4], classifiers[index_slide][2][number][5]))
                     classifiers[index_slide][2][number][4], classifiers[index_slide][2][number][5] = classifiers[index_slide][2][number][5], classifiers[index_slide][2][number][4]
