@@ -35,13 +35,14 @@ def weighted_clustering(data, features, outpath, feature_method, classifiers, sl
     label_color_dict[0] = init_color_dict[0]
     label_color_dict[1] = init_color_dict[1]
 
+    n_init = len(data)
     init_arr = obtain_init_array(data, features, model)
     features_mod = []
     for f in features:
         for c in classifiers:
             if c[1] in f[0]:
                 features_mod.append(f)
-    classifiers = cluster_division(features_mod, classifiers, outpath, feature_method, init=init_arr)
+    classifiers = cluster_division(features_mod, classifiers, outpath, feature_method, init=init_arr, n_init=n_init)
 
     preview = []
     for c in classifiers:

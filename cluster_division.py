@@ -13,7 +13,7 @@ from auxiliary_functions.feature_list_division import *
 from auxiliary_functions.pickle_functions import *
 
 
-def cluster_division(features, classifiers_0, outpath, feature_method, ncluster=16, save=False, level=16, init=[]):
+def cluster_division(features, classifiers_0, outpath, feature_method, ncluster=16, save=False, level=16, init=[], n_init=26):
     """
     Arguments:
         - features:
@@ -73,10 +73,9 @@ def cluster_division(features, classifiers_0, outpath, feature_method, ncluster=
     for im in tqdm(image_list):
         index = image_list.index(im)
         indices = distances[index].argsort()
-        print(len(init))
         if not init == []:
             if (distances[index][indices[1]]-distances[index][indices[0]]) <= 0.5:
-                if (indices[1] < len(init)) and (indices[0] >= len(init)):
+                if (indices[1] < n_init) and (indices[0] >= n_init):
                     print('Initial: {}, {}'.format(classifiers[index_slide][2][number][4], classifiers[index_slide][2][number][5]))
                     classifiers[index_slide][2][number][4], classifiers[index_slide][2][number][5] = classifiers[index_slide][2][number][5], classifiers[index_slide][2][number][4]
                     print('Final: {}, {}'.format(classifiers[index_slide][2][number][4], classifiers[index_slide][2][number][5]))
