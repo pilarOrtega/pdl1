@@ -19,11 +19,11 @@ from joblib import Parallel, delayed
 
 def compare(features, classifiers, outpath, feature_method, i):
     scores = []
-    classifiers_1 = cluster_division(features, classifiers, 1, outpath, feature_method, method='BottomUp', ncluster=i)
-    classifiers_2 = cluster_division(features, classifiers, 1, outpath, feature_method, method='BottomUp', ncluster=i)
-    classifiers_3 = cluster_division(features, classifiers, 1, outpath, feature_method, method='BottomUp', ncluster=i)
-    classifiers_4 = cluster_division(features, classifiers, 1, outpath, feature_method, method='BottomUp', ncluster=i)
-    classifiers_5 = cluster_division(features, classifiers, 1, outpath, feature_method, method='BottomUp', ncluster=i)
+    classifiers_1 = cluster_division(features, classifiers, 1, outpath, feature_method, ncluster=i)
+    classifiers_2 = cluster_division(features, classifiers, 1, outpath, feature_method, ncluster=i)
+    classifiers_3 = cluster_division(features, classifiers, 1, outpath, feature_method, ncluster=i)
+    classifiers_4 = cluster_division(features, classifiers, 1, outpath, feature_method, ncluster=i)
+    classifiers_5 = cluster_division(features, classifiers, 1, outpath, feature_method, ncluster=i)
     print()
     clusterlist1, n = extract_complete_clusterlist(classifiers_1, feature_method)
     clusterlist2, n = extract_complete_clusterlist(classifiers_2, feature_method)

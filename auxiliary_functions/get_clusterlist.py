@@ -8,23 +8,15 @@ def pickle_save(file, path, name):
     with open(file_path, "wb") as f:
         pickle.dump(file, f)
 
-def get_clusterlist(outpath, classifier, n_division):
+def get_clusterlist(outpath, classifier):
     cluster_list = []
     #print('Get cluster list from {}'.format(outpath))
     for c in classifier:
         slidename = os.path.basename(outpath)
         im = os.path.join(outpath, '{}#{}-level{}-{}-{}.jpg'.format(slidename, int(c[0]), 16, int(c[1]), int(c[2])))
-
         if c[3] == 0:
             continue
-
-        cluster = 0
-        if n_division == 1:
-            cluster = c[4]
-        else:
-            for j in range(n_division):
-                exp = n_division - j - 1
-                cluster = cluster + c[j+4] * (2**exp)
+        cluster = c[4]
         cluster_list.append((im, cluster))
 
     return cluster_list
@@ -35,8 +27,7 @@ def extract_complete_clusterlist(classifier, feature_method):
     print('Getting complete clusterlist for {}'.format(feature_method))
     clusterlist = []
     for c in classifier:
-        ndivision = (c[2].shape[1]) - 4
-        clusterlist.extend(get_clusterlist(c[1], c[2], ndivision))
+        clusterlist.extend(get_clusterlist(c[1], c[2]))
 
     nclusters = max([x[1] for x in clusterlist]) + 1
 

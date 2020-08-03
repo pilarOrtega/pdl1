@@ -13,51 +13,7 @@ from auxiliary_functions.feature_list_division import *
 from auxiliary_functions.pickle_functions import *
 
 
-def image_cluster(features, classifiers, n, method='Kmeans'):
-    """
-    Separates patches in two clusters according to the features given. It saves
-    the result in the classifiers array.
-
-    The classifiers array
-    """
-    features, image_list = feature_list_division(features)
-    slide_list = []
-    for x in classifiers:
-        slide_list.append(x[0])
-    features_1 = []
-    features_0 = []
-
-    if len(image_list) < 2:
-        return classifiers, features_1, features_0
-
-    if method == 'Kmeans':
-        cls = MiniBatchKMeans(n_clusters=2)
-        labels = cls.fit_predict(features)
-        score = davies_bouldin_score(features, labels)
-        print('Davies-Bouldin Score: {}'.format(score))
-    else:
-        print('Method not valid')
-
-    for im in tqdm(image_list):
-        # Gets the index of the image
-        index = image_list.index(im)
-        image_name = os.path.basename(im)
-        image_name = image_name.split('#')[1]
-        number = image_name.split('-')
-        number = int(number[0])
-        slide_path = os.path.dirname(im)
-        index_slide = slide_list.index(os.path.basename(slide_path))
-        if labels[index] == 1:
-            classifiers[index_slide][2][number][n] = 1
-            features_1.append((im, features[index]))
-        if labels[index] == 0:
-            classifiers[index_slide][2][number][n] = 0
-            features_0.append((im, features[index]))
-
-    return classifiers, features_1, features_0
-
-
-def cluster_division(features, classifiers_0, n_division, outpath, feature_method, method='TopDown', ncluster=16, save=False, level=16, init=[]):
+def cluster_division(features, classifiers_0, outpath, feature_method, ncluster=16, save=False, level=16, init=[]):
     """
     Arguments:
         - features:
@@ -74,68 +30,58 @@ def cluster_division(features, classifiers_0, n_division, outpath, feature_metho
     param = []
     param.append(features)
 
-    # We create a new classifiers list in which we introduce a new array for
-    # each slide with shape (n_samples, n_features) being n_features 4 +
-    # n_division. I.e. if we want to create a clustering hierarchy of 4 levels
-    # (16 clusters) we will have an array of size (n_samples, 8). Information
-    # for the first division will be stored in column 5 (0 or 1)
-    if method == 'BottomUp':
-        n_division = 1
     classifiers = []
     for s in classifiers_0:
         n_samples = s[2].shape[0]
-        n_features = s[2].shape[1] + n_division
+        n_features = s[2].shape[1] + 3
         c = numpy.zeros((n_samples, n_features))
-        c[:, : - n_division] = s[2]
+        c[:, : - 3] = s[2]
         classifiers.append((s[0], s[1], c))
 
-    if method == 'TopDown':
-        print('[INFO] Dividing patches into clusters')
-        print('Total of {} images to be divided in {} clusters'.format(len(features), 2**n_division))
-        print()
-        for i in range(n_division):
-            n_level = i + 4
-            for j in range(2**i):
-                index = j + 2**i - 1
-                curr_features = param[index]
-                classifiers, f1, f0 = image_cluster(curr_features, classifiers, n_level)
-                param.append(f1)
-                param.append(f0)
-                number_divisions = 2**i
-                print('Division completed - division {} out of {} in level {}'.format(j+1, number_divisions, i))
-                print('    {} images in cluster {}'.format(len(f1), 1))
-                print('    {} images in cluster {}'.format(len(f0), 0))
-                print()
+    print('[INFO] Dividing patches into clusters')
+    print('Total of {} images to be divided in {} clusters'.format(len(features), ncluster))
+    print()
+    features, image_list = feature_list_division(features)
+    slide_list = []
+    for x in classifiers:
+        slide_list.append(x[0])
+    if init == []:
+        cls = MiniBatchKMeans(n_clusters=ncluster)
+        cls = cls.fit(features)
+        pickle_save(cls, outpath, 'model-{}-{}-BottomUp.p'.format(feature_method, level))
+    else:
+        cls = MiniBatchKMeans()
+        cls.cluster_centers_ = init
+    labels = cls.predict(features)
+    distances = cls.transform(features)
+    score = davies_bouldin_score(features, labels)
+    print('Davies-Bouldin Score: {}'.format(score))
+    for im in tqdm(image_list):
+        index = image_list.index(im)
+        image_name = os.path.basename(im)
+        image_name = image_name.split('#')[1]
+        number = image_name.split('-')
+        number = int(number[0])
+        slide_path = os.path.dirname(im)
+        index_slide = slide_list.index(os.path.basename(slide_path))
+        indices = distances[index].argsort()
+        for i in range(3):
+            classifiers[index_slide][2][number][4+i] = indices[i]
 
-    if method == 'BottomUp':
-        print('[INFO] Dividing patches into clusters')
-        print('Total of {} images to be divided in {} clusters'.format(len(features), ncluster))
-        print()
-        features, image_list = feature_list_division(features)
-        slide_list = []
-        for x in classifiers:
-            slide_list.append(x[0])
-        if init == []:
-            cls = MiniBatchKMeans(n_clusters=ncluster)
-            cls = cls.fit(features)
-            pickle_save(cls, outpath, 'model-{}-{}-{}.p'.format(feature_method, level, method))
-        else:
-            cls = MiniBatchKMeans()
-            cls.cluster_centers_ = init
-        labels = cls.predict(features)
-        score = davies_bouldin_score(features, labels)
-        print('Davies-Bouldin Score: {}'.format(score))
-        for im in tqdm(image_list):
-            index = image_list.index(im)
-            image_name = os.path.basename(im)
-            image_name = image_name.split('#')[1]
-            number = image_name.split('-')
-            number = int(number[0])
-            slide_path = os.path.dirname(im)
-            index_slide = slide_list.index(os.path.basename(slide_path))
-            classifiers[index_slide][2][number][4] = labels[index]
+    print('Improving clusters...')
+    n = 0
+    for im in tqdm(image_list):
+        index = image_list.index(im)
+        indices = distances[index].argsort()
+        if init != []:
+            if (distances[index][indices[1]]-distances[index][indices[0]]) <= 0.5:
+                if indices[1] < len(init) && indices[0] >= len(init):
+                    print('Initial: {}, {}'.format(classifiers[index_slide][2][number][4], classifiers[index_slide][2][number][5]))
+                    classifiers[index_slide][2][number][4], classifiers[index_slide][2][number][5] = classifiers[index_slide][2][number][5], classifiers[index_slide][2][number][4]
+                    print('Final: {}, {}'.format(classifiers[index_slide][2][number][4], classifiers[index_slide][2][number][5]))
+                    n += 1
 
-    pickle_save(classifiers, outpath, 'class-{}-{}-{}.p'.format(feature_method, level, method))
+    pickle_save(classifiers, outpath, 'class-{}-{}-BottomUp.p'.format(feature_method, level))
 
     if save:
         print('[INFO] Saving csv files...')
@@ -148,16 +94,13 @@ def cluster_division(features, classifiers_0, n_division, outpath, feature_metho
             csv_columns.append('X')
             csv_columns.append('Y')
             csv_columns.append('Positive')
-            for i in range(n_division):
-                csv_columns.append('Level_{}'.format(i))
+            csv_columns.append('Cluster')
 
             with open(csv_file_path_cluster, 'w') as csv_file:
                 writer = csv.DictWriter(csv_file, csv_columns)
                 writer.writeheader()
                 for i in range(c.shape[0]):
-                    row = {'Patch_number': c[i][0], 'X': c[i][1], 'Y': c[i][2], 'Positive': c[i][3]}
-                    for j in range(n_division):
-                        row["Level_{}".format(j)] = c[i][j+4]
+                    row = {'Patch_number': c[i][0], 'X': c[i][1], 'Y': c[i][2], 'Positive': c[i][3], 'Cluster': c[i][4]}
                     writer.writerow(row)
 
     return classifiers
@@ -168,9 +111,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Script that divides a set of patches into cluster hierarchically using KMeans.')
     parser.add_argument('-f', '--list_features', type=str, help='file with feature list')
     parser.add_argument('-c', '--classifiers', type=str, help='path to classification file')
-    parser.add_argument('-n', '--n_division', type=int, default=4, help='number of divisions [Default: %(default)s]')
     parser.add_argument('-o', '--outpath', type=str, help='path to outfolder')
-    parser.add_argument('-m', '--method', type=str, choices=['BottomUp', 'TopDown'])
     parser.add_argument('--nclusters', type=int, default=23)
     parser.add_argument('-i', '--init', default=0, help='File to initiation features [Default: %(default)s]')
 
@@ -179,7 +120,6 @@ if __name__ == "__main__":
     features = pickle_load(args.list_features)
     classifiers = pickle_load(args.classifiers)
     outpath = args.outpath
-    n_division = args.n_division
     init = args.init
 
     feature_method = args.list_features
@@ -188,7 +128,7 @@ if __name__ == "__main__":
     feature_method = feature_method.split('_')[1]
 
     if init == 0:
-        classifiers = cluster_division(features, classifiers, n_division, outpath, feature_method, method=args.method, ncluster=args.nclusters)
+        classifiers = cluster_division(features, classifiers, outpath, feature_method, ncluster=args.nclusters)
     else:
         init = pickle_load(init)
-        classifiers = cluster_division(features, classifiers, n_division, outpath, feature_method, method=args.method, init=init)
+        classifiers = cluster_division(features, classifiers, outpath, feature_method, init=init)
