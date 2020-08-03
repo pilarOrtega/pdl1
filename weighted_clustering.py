@@ -41,11 +41,11 @@ def weighted_clustering(data, features, outpath, feature_method, classifiers, sl
         for c in classifiers:
             if c[1] in f[0]:
                 features_mod.append(f)
-    classifiers = cluster_division(features_mod, classifiers, 4, outpath, feature_method, method='BottomUp', init=init_arr)
+    classifiers = cluster_division(features_mod, classifiers, outpath, feature_method, init=init_arr)
 
     preview = []
     for c in classifiers:
-        preview.append(get_preview(c[0], c[2], 16, 224, slide_folder, 4, method='BottomUp'))
+        preview.append(get_preview(c[0], c[2], 16, 224, slide_folder))
 
     unique_labels = [(label_color_dict[key], labels_dict[key]) for key in labels_dict]
     unique_labels = set(unique_labels)
@@ -107,4 +107,4 @@ if __name__ == "__main__":
 
     classifiers = weighted_clustering(data, features, outpath, feature_method, classifiers, slides, model)
 
-    pickle_save(classifiers, outpath, 'class-wKmeans-{}-{}-{}.p'.format(feature_method, level, method))
+    pickle_save(classifiers, outpath, 'class-wKmeans-{}-{}-BottomUp.p'.format(feature_method, level))
