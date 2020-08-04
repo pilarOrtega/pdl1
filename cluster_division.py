@@ -140,6 +140,7 @@ if __name__ == "__main__":
     classifiers = pickle_load(args.classifiers)
     outpath = args.outpath
     init = args.init
+    slide_folder = args.slide_folder
 
     feature_method = args.list_features
     feature_method = os.path.basename(feature_method)
@@ -147,7 +148,7 @@ if __name__ == "__main__":
     feature_method = feature_method.split('_')[1]
 
     if init == 0:
-        classifiers = cluster_division(features, classifiers, outpath, feature_method, ncluster=args.nclusters)
+        classifiers = cluster_division(features, classifiers, outpath, feature_method, slide_folder, ncluster=args.nclusters)
     else:
         init = pickle_load(init)
-        classifiers = cluster_division(features, classifiers, outpath, feature_method, init=init)
+        classifiers = cluster_division(features, classifiers, outpath, feature_method, slide_folder, init=init)
