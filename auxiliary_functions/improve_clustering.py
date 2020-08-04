@@ -25,7 +25,7 @@ def get_preview(slidename, classifier, level, size, slide_folder, neg=0):
     return result
 
 
-def improve_cluster(classifiers, slide_folder):
+def improve_clustering(classifiers, slide_folder):
     i = 0
     pos_dict = {}
     for c in classifiers:
