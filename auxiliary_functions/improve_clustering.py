@@ -57,11 +57,15 @@ def improve_clustering(classifiers, slide_folder):
                     continue
                 counts = numpy.bincount(window.astype(int))
                 mf = numpy.argmax(counts)
-                if counts[mf] < 7:
+                if counts[mf] < 5:
                     continue
-                if mf == 0 and counts[mf] < 8:
-                    continue
-                # Falta añadir la condicion del clustering
                 number = pos_dict[(index_slide, (i+1, j+1))]
-                c[2][number][4] = mf-2
+                if mf == 0 and counts[mf] >= 7:
+                    c[2][number][4] = mf-2
+                    continue
+                if mf == 1 and counts[mf] >= 7:
+                    c[2][number][4] = mf-2
+                    continue
+                if mf == c[2][number][5] or mf == c[2][number][6]:
+                    c[2][number][4] = mf-2
     return classifiers
