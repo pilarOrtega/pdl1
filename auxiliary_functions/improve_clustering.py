@@ -53,7 +53,7 @@ def improve_clustering(classifiers, slide_folder):
                 x = window[4]
                 if x == 0:
                     continue
-                if numpy.any(window[:4] == x) and numpy.any(window[5:] == x):
+                if numpy.any(window[:4] == x) or numpy.any(window[5:] == x):
                     continue
                 counts = numpy.bincount(window.astype(int))
                 mf = numpy.argmax(counts)
