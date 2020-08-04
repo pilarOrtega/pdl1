@@ -1,4 +1,3 @@
-from get_preview import *
 from joblib import Parallel, delayed
 import numpy
 from skimage.util.shape import view_as_windows
