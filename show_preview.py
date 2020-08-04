@@ -2,32 +2,13 @@ import numpy
 from matplotlib import pyplot as plt
 import argparse
 import pickle
-from openslide import OpenSlide, deepzoom
 import csv
 from tqdm import tqdm
 from joblib import Parallel, delayed
 import time
 import os
 from auxiliary_functions.read_csv import *
-
-
-def get_preview(slidename, classifier, level, size, slide_folder, neg=0):
-    result = []
-    slidepath = os.path.join(slide_folder, slidename)
-    slide = OpenSlide(slidepath)
-    slide_dz = deepzoom.DeepZoomGenerator(slide, tile_size=(size - 2), overlap=1)
-    tiles = slide_dz.level_tiles[level]
-    preview = numpy.zeros(tiles)
-    for x in classifier:
-        im_x = int(x[1])
-        im_y = int(x[2])
-        if x[3] == neg:
-            preview[im_x][im_y] = 1
-        else:
-            cluster = x[4]
-            preview[im_x][im_y] = cluster + 2
-    result.extend((slidename, preview))
-    return result
+from auxiliary_functions.get_preview import *
 
 
 def show_preview(classifiers, level, size, slide_folder, outpath, feature_method, neg=0):
