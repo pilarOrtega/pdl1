@@ -66,6 +66,6 @@ def improve_clustering(classifiers, slide_folder):
                 if mf == 1 and counts[mf] >= 7:
                     c[2][number][4] = mf-2
                     continue
-                if mf == c[2][number][5] or mf == c[2][number][6]:
+                if mf == (c[2][number][5]+2) or mf == (c[2][number][6]+2):
                     c[2][number][4] = mf-2
     return classifiers
