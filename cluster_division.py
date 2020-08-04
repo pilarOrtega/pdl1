@@ -89,7 +89,7 @@ def cluster_division(features, classifiers_0, outpath, feature_method, slide_fol
                 if (indices[1] < n_init) and (indices[0] >= n_init):
                     classifiers[index_slide][2][number][4], classifiers[index_slide][2][number][5] = classifiers[index_slide][2][number][5], classifiers[index_slide][2][number][4]
                     n += 1
-            else if (distances[index][indices[2]]-distances[index][indices[0]]) <= 1:
+            elif (distances[index][indices[2]]-distances[index][indices[0]]) <= 1:
                 if (indices[2] < n_init) and (indices[0] >= n_init):
                     classifiers[index_slide][2][number][4], classifiers[index_slide][2][number][6] = classifiers[index_slide][2][number][6], classifiers[index_slide][2][number][4]
                     n += 1
