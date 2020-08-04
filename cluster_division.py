@@ -11,9 +11,12 @@ import pickle
 from tqdm import tqdm
 from auxiliary_functions.feature_list_division import *
 from auxiliary_functions.pickle_functions import *
+from auxiliary_functions.improve_clustering import *
+from joblib import Parallel, delayed
+from skimage.util.shape import view_as_windows
 
 
-def cluster_division(features, classifiers_0, outpath, feature_method, ncluster=16, save=False, level=16, init=[], n_init=26):
+def cluster_division(features, classifiers_0, outpath, feature_method, slide_folder, ncluster=16, save=False, level=16, init=[], n_init=26):
     """
     Arguments:
         - features:
@@ -68,26 +71,31 @@ def cluster_division(features, classifiers_0, outpath, feature_method, ncluster=
         for i in range(3):
             classifiers[index_slide][2][number][4+i] = indices[i]
 
-    print('Improving clusters...')
+    pickle_save(classifiers, outpath, 'class-{}-{}-Original.p'.format(feature_method, level))
+
+    print('[INFO] Improving clusters...')
     n = 0
-    for im in tqdm(image_list):
-        index = image_list.index(im)
-        image_name = os.path.basename(im)
-        image_name = image_name.split('#')[1]
-        number = image_name.split('-')
-        number = int(number[0])
-        slide_path = os.path.dirname(im)
-        index_slide = slide_list.index(os.path.basename(slide_path))
-        indices = distances[index].argsort()
-        if not init == []:
+    if not init == []:
+        for im in tqdm(image_list):
+            index = image_list.index(im)
+            image_name = os.path.basename(im)
+            image_name = image_name.split('#')[1]
+            number = image_name.split('-')
+            number = int(number[0])
+            slide_path = os.path.dirname(im)
+            index_slide = slide_list.index(os.path.basename(slide_path))
+            indices = distances[index].argsort()
             if (distances[index][indices[1]]-distances[index][indices[0]]) <= 0.5:
                 if (indices[1] < n_init) and (indices[0] >= n_init):
-                    print('Initial: {}, {}'.format(classifiers[index_slide][2][number][4], classifiers[index_slide][2][number][5]))
                     classifiers[index_slide][2][number][4], classifiers[index_slide][2][number][5] = classifiers[index_slide][2][number][5], classifiers[index_slide][2][number][4]
-                    print('Final: {}, {}'.format(classifiers[index_slide][2][number][4], classifiers[index_slide][2][number][5]))
                     n += 1
-    print('Total of {} out of {} patches changed'.format(n, len(image_list)))
-    pickle_save(classifiers, outpath, 'class-{}-{}-BottomUp.p'.format(feature_method, level))
+        print('Total of {} out of {} patches changed'.format(n, len(image_list)))
+
+    pickle_save(classifiers, outpath, 'class-{}-{}-Mod_init.p'.format(feature_method, level))
+
+    classifiers = improve_clustering(classifiers, slide_folder)
+
+    pickle_save(classifiers, outpath, 'class-{}-{}-Final.p'.format(feature_method, level))
 
     if save:
         print('[INFO] Saving csv files...')
@@ -119,6 +127,7 @@ if __name__ == "__main__":
     parser.add_argument('-c', '--classifiers', type=str, help='path to classification file')
     parser.add_argument('-o', '--outpath', type=str, help='path to outfolder')
     parser.add_argument('--nclusters', type=int, default=23)
+    parser.add_argument('-s', '--slide_folder', type=str, default=0.5, help='path to slide folder')
     parser.add_argument('-i', '--init', default=0, help='File to initiation features [Default: %(default)s]')
 
     args = parser.parse_args()
