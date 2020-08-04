@@ -42,7 +42,7 @@ def weighted_clustering(data, features, outpath, feature_method, classifiers, sl
         for c in classifiers:
             if c[1] in f[0]:
                 features_mod.append(f)
-    classifiers = cluster_division(features_mod, classifiers, outpath, feature_method, init=init_arr, n_init=n_init)
+    classifiers = cluster_division(features_mod, classifiers, outpath, feature_method, slide_folder, init=init_arr, n_init=n_init)
 
     preview = []
     for c in classifiers:

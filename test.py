@@ -92,7 +92,7 @@ if flag <= 3:
         features = os.path.join(outpath, 'features_{}_level{}.p'.format(feature_method, level))
         features = pickle_load(features)
     start = time.time()
-    classifiers = cluster_division(features, classifiers, outpath, feature_method, ncluster=nclusters)
+    classifiers = cluster_division(features, classifiers, outpath, feature_method, slides, ncluster=nclusters)
     end = time.time()
     print('***** Total time cluster_division {:.4f} s *****'.format(end-start))
     print()
