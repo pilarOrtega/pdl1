@@ -44,7 +44,6 @@ def improve_clustering(classifiers, slide_folder):
         n = 0
         index_slide = slide_list.index(c[0])
         preview = previews_dict[c[0]]
-        print(preview.shape)
         windows = view_as_windows(preview, window_shape)
         for i in range(windows.shape[0]):
             for j in range(windows.shape[1]):
