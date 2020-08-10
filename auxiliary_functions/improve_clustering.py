@@ -61,10 +61,14 @@ def improve_clustering(classifiers, slide_folder):
                 number = pos_dict[(index_slide, (i+1, j+1))]
                 if mf == 0 and counts[mf] >= 7:
                     c[2][number][4] = mf-2
+                    n += 1
                     continue
                 if mf == 1 and counts[mf] >= 7:
                     c[2][number][4] = mf-2
+                    n += 1
                     continue
                 if mf == (c[2][number][5]+2) or mf == (c[2][number][6]+2):
                     c[2][number][4] = mf-2
+                    n += 1
+    print('Total of {} patches changed'.format(n))
     return classifiers
