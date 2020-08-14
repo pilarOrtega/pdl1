@@ -19,7 +19,7 @@ from skimage.util.shape import view_as_windows
 def cluster_division(features, classifiers_0, outpath, feature_method, slide_folder, ncluster=16, save=False, level=16, init=[], n_init=26):
     """
     Arguments:
-        - features:
+        - features
         - classifiers_0: list with lentgh equal to the number of slides studied.
             Each element of the list contains three elements: (1) str, Slidename
             (2) str, Path to the folder in which patches are stored (3) arr,
@@ -51,7 +51,7 @@ def cluster_division(features, classifiers_0, outpath, feature_method, slide_fol
     if init == []:
         cls = MiniBatchKMeans(n_clusters=ncluster)
         cls = cls.fit(features)
-        pickle_save(cls, outpath, 'model-{}-{}-BottomUp.p'.format(feature_method, level))
+        pickle_save(cls, outpath, 'model-{}-{}.p'.format(feature_method, level))
     else:
         cls = MiniBatchKMeans()
         cls.cluster_centers_ = init

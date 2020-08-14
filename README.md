@@ -217,4 +217,47 @@ a PCA (90% variability).
 
 ### Cluster division
 
+``` shell
+python cluster_division.py [-h] [-f LIST_FEATURES] [-c CLASSIFIERS]
+                           [-o OUTPATH] [--nclusters NCLUSTERS]
+                           [-s SLIDE_FOLDER] [-i INIT]
+```
+
+This block divides all patches (presented as input in LIST_FEATURES) in k number
+of clusters using the MiniBatchKMeans algorithm proposed by sklearn library.
+The algorithm will follow several steps:
+1. The classifiers array will be extended with three more columns
+2. The list of images and the list of features are divided using the auxiliary
+function `feature_list_division`
+3. MiniBatchKMeans algorithm is fitted (if no init array is provided), the model
+is saved and the features predicted (distances to each cluster obtained with
+`MiniBatchKMeans.transform()`)
+4. The 3 shortest distances for each patch are saved in the classifiers array.
+5. **Cluster improvements**: This is done in two levels:
+  - If there is an init array which provides some labeled centroids, the first
+  3 distances are regarded, and the first one which correspond to a labelled
+  cluster is set (given that it stays within a limited threshold)
+  - Second cluster improvement is based on neighbor similarity: surrounding
+  patches classification is regarded an patches are reclassified accordingly.
+
+This block will return and save:
+- The fitted model for MiniBatchKMeans algorithm if no init array was provided
+(stored in `outpath` as `model-{feature_method}-{level}.p`)
+- Three different classifiers:
+  - `class-{}-{}-Original.p`: classifier before improvement
+  - `class-{}-{}-Mod_init.p`: classifier after priorization of labelled cluster
+  - `class-{}-{}-Final.p`: classifier after neighborhood improvement
+  - If save option, the classifier may also be saved in a .csv file -
+  `{slide_name}-{}-level{}.csv`
+
+The parameters required are:
+- The feature list, list of tuples containing the string with the patch path and an array of
+features.
+- Classifiers array, as obtained from dab_division
+- The outpath
+- The number of clusters (k)
+- The path to the folder where all slides are saved.
+- Optionally, an array with labelled clusters to be use as centroids.
+
+
 ###
