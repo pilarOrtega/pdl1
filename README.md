@@ -239,6 +239,7 @@ is saved and the features predicted (distances to each cluster obtained with
   cluster is set (given that it stays within a limited threshold)
   - Second cluster improvement is based on neighbor similarity: surrounding
   patches classification is regarded an patches are reclassified accordingly.
+![](https://github.com/pilarOrtega/pdl1/blob/master/images/Cluster_improvement.png)
 
 This block will return and save:
 - The fitted model for MiniBatchKMeans algorithm if no init array was provided
