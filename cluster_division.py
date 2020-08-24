@@ -97,6 +97,7 @@ def cluster_division(features, classifiers_0, outpath, feature_method, slide_fol
 
     pickle_save(classifiers, outpath, 'class-{}-{}-Mod_init.p'.format(feature_method, level))
 
+    print(classifiers[0])
     classifiers = improve_clustering(classifiers, slide_folder)
 
     pickle_save(classifiers, outpath, 'class-{}-{}-Final.p'.format(feature_method, level))
