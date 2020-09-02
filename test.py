@@ -24,6 +24,7 @@ parser.add_argument('-j', '--jobs', type=int)
 parser.add_argument('-b', '--features_batch', action='store_true')
 parser.add_argument('--pca', default=0.9, help='PCA level [Default: %(default)s]')
 parser.add_argument('--da', action='store_true')
+parser.add_argument('-n', '--number', type=int, default=0)
 
 
 args = parser.parse_args()
@@ -51,6 +52,7 @@ flag = args.flag
 nclusters = args.nclusters
 da = args.da
 pca_level = args.pca
+n = args.number
 
 # Flag is an argument that determines in which step start the execution. It is
 
@@ -91,6 +93,12 @@ if flag <= 3:
         classifiers = pickle_load(classifiers)
         features = os.path.join(outpath, 'features_{}_level{}.p'.format(feature_method, level))
         features = pickle_load(features)
+    outpath = os.path.join(outpath, '{}_Results_{}_{}'.format(number, feature_method, nclusters))
+    try:
+        os.mkdir(outpath)
+        print("Directory", outpath, "created")
+    except FileExistsError:
+        print("Directory", outpath, "already exists")
     start = time.time()
     classifiers = cluster_division(features, classifiers, outpath, feature_method, slides, ncluster=nclusters)
     end = time.time()
@@ -99,14 +107,8 @@ if flag <= 3:
 
 if flag <= 4:
     if flag == 4:
-        classifiers = os.path.join(outpath, 'class-{}-{}-{}.p'.format(feature_method, level))
+        classifiers = os.path.join(outpath, 'class-{}-{}-Final.p'.format(feature_method, nclusters))
         classifiers = pickle_load(classifiers)
-    outpath = os.path.join(outpath, 'Results_{}_{}'.format(feature_method, nclusters))
-    try:
-        os.mkdir(outpath)
-        print("Directory", outpath, "created")
-    except FileExistsError:
-        print("Directory", outpath, "already exists")
     show_preview(classifiers, level, tile_size, slides, outpath, feature_method)
     cluster_list, n = extract_complete_clusterlist(classifiers, feature_method)
     save_cluster(cluster_list, outpath, feature_method)
