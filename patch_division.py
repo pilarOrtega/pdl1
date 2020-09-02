@@ -126,9 +126,10 @@ def patch_division(slides, outpath, level, tile_size=224, tissue_ratio=0.50, job
 
     pickle_save(slide_list, outpath, 'list_{}_{}.p'.format(level, tile_size))
 
-    n = sum(n)
-    print('Total number of patches extracted {}'.format(n))
-    print()
+    if not n == 0:
+        n = sum(n)
+        print('Total number of patches extracted {}'.format(n))
+        print()
     return slide_list
 
 
