@@ -318,7 +318,7 @@ def feature_reduction(list_features, pca_level=0.9):
     return result, pca, scaler
 
 
-def feature_extraction(list_positive, outpath, feature_method, da=False, pca_level=0.9):
+def feature_extraction(list_positive, outpath, feature_method, level=16, da=False, pca_level=0.9):
 
     print('[INFO] Extracting features from {} positive images'.format(len(list_positive)))
 
@@ -333,12 +333,6 @@ def feature_extraction(list_positive, outpath, feature_method, da=False, pca_lev
     print('Feature extraction completed in time {:.4f} s'.format(end-start))
 
     print('Saving features...')
-    start = time.time()
-    name = outpath
-    name = os.path.basename(name)
-    name = os.path.splitext(name)[0]
-    name = name.split('_')
-    level = name[1]
 
     pickle_save(features, outpath, 'features_{}_level{}.p'.format(feature_method, level))
 

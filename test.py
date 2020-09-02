@@ -22,7 +22,7 @@ parser.add_argument('--flag', type=int, default=0, help='Step [Default: %(defaul
 parser.add_argument('-d', '--device', default="0", help='GPU used (0 or 1) [Default: %(default)s]')
 parser.add_argument('-j', '--jobs', type=int)
 parser.add_argument('-b', '--features_batch', action='store_true')
-parser.add_argument('--pca', default='0.9', help='PCA level [Default: %(default)s]')
+parser.add_argument('--pca', default=0.9, help='PCA level [Default: %(default)s]')
 parser.add_argument('--da', action='store_true')
 
 
@@ -101,7 +101,7 @@ if flag <= 4:
     if flag == 4:
         classifiers = os.path.join(outpath, 'class-{}-{}-{}.p'.format(feature_method, level))
         classifiers = pickle_load(classifiers)
-    outpath = os.path.join(outpath, 'Results_{}_BottomUp'.format(feature_method))
+    outpath = os.path.join(outpath, 'Results_{}_{}'.format(feature_method, nclusters))
     try:
         os.mkdir(outpath)
         print("Directory", outpath, "created")
