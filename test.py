@@ -52,7 +52,7 @@ flag = args.flag
 nclusters = args.nclusters
 da = args.da
 pca_level = args.pca
-n = args.number
+number = args.number
 
 # Flag is an argument that determines in which step start the execution. It is
 
