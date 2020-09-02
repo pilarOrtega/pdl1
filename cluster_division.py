@@ -51,7 +51,7 @@ def cluster_division(features, classifiers_0, outpath, feature_method, slide_fol
     if init == []:
         cls = MiniBatchKMeans(n_clusters=ncluster)
         cls = cls.fit(features)
-        pickle_save(cls, outpath, 'model-{}-{}.p'.format(feature_method, nclusters))
+        pickle_save(cls, outpath, 'model-{}-{}.p'.format(feature_method, ncluster))
     else:
         cls = MiniBatchKMeans()
         cls.cluster_centers_ = init
@@ -71,7 +71,7 @@ def cluster_division(features, classifiers_0, outpath, feature_method, slide_fol
         for i in range(3):
             classifiers[index_slide][2][number][4+i] = indices[i]
 
-    pickle_save(classifiers, outpath, 'class-{}-{}-Original.p'.format(feature_method, nclusters))
+    pickle_save(classifiers, outpath, 'class-{}-{}-Original.p'.format(feature_method, ncluster))
 
     print('[INFO] Improving clusters...')
     n = 0
@@ -95,17 +95,17 @@ def cluster_division(features, classifiers_0, outpath, feature_method, slide_fol
                     n += 1
         print('Total of {} out of {} patches changed'.format(n, len(image_list)))
 
-        pickle_save(classifiers, outpath, 'class-{}-{}-Mod_init.p'.format(feature_method, nclusters))
+        pickle_save(classifiers, outpath, 'class-{}-{}-Mod_init.p'.format(feature_method, ncluster))
 
     classifiers = improve_clustering(classifiers, slide_folder)
 
-    pickle_save(classifiers, outpath, 'class-{}-{}-Final.p'.format(feature_method, nclusters))
+    pickle_save(classifiers, outpath, 'class-{}-{}-Final.p'.format(feature_method, ncluster))
 
     if save:
         print('[INFO] Saving csv files...')
         print()
         for x in classifiers:
-            csv_cluster = '{}-{}-clusters{}.csv'.format(x[0], feature_method, nclusters)
+            csv_cluster = '{}-{}-clusters{}.csv'.format(x[0], feature_method, ncluster)
             c = x[2]
             csv_file_path_cluster = os.path.join(outpath, csv_cluster)
             csv_columns = ["Patch_number"]
