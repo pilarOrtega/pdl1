@@ -55,7 +55,7 @@ def get_patches(slidepath, outpath, level=10, tissue_ratio=0.25, size=256):
         print('Level {} contains {} tiles (empty tiles included)'.format(level, slide_dz.level_tiles[level][0]*slide_dz.level_tiles[level][1]))
     else:
         print('Invalid level')
-        return
+        return 0
 
     # Creates new directory - where patches will be stored
     outpath = os.path.join(outpath, slidename)
@@ -65,7 +65,7 @@ def get_patches(slidepath, outpath, level=10, tissue_ratio=0.25, size=256):
     except FileExistsError:
         print("Directory", outpath, "already exists")
         print("Patches already extracted")
-        return
+        return 0
 
     # Saves tiles if detects tissue presence higher than tissue_ratio
     n = 0
@@ -126,8 +126,8 @@ def patch_division(slides, outpath, level, tile_size=224, tissue_ratio=0.50, job
 
     pickle_save(slide_list, outpath, 'list_{}_{}.p'.format(level, tile_size))
 
+    n = sum(n)
     if not n == 0:
-        n = sum(n)
         print('Total number of patches extracted {}'.format(n))
         print()
     return slide_list
