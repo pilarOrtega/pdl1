@@ -64,7 +64,7 @@ def cluster_division(features, classifiers_0, outpath, feature_method, slide_fol
         n_samples = s[2].shape[0]
         n_features = s[2].shape[1] + ncluster
         c = numpy.zeros((n_samples, n_features))
-        c[:, : - 3] = s[2]
+        c[:, : - ncluster] = s[2]
         distance_class.append((s[0], s[1], c))
     for im in tqdm(image_list):
         index = image_list.index(im)
