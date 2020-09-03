@@ -59,6 +59,13 @@ def cluster_division(features, classifiers_0, outpath, feature_method, slide_fol
     distances = cls.transform(features)
     score = davies_bouldin_score(features, labels)
     print('Davies-Bouldin Score: {}'.format(score))
+    distance_class = []
+    for s in classifiers_0:
+        n_samples = s[2].shape[0]
+        n_features = s[2].shape[1] + ncluster
+        c = numpy.zeros((n_samples, n_features))
+        c[:, : - 3] = s[2]
+        distance_class.append((s[0], s[1], c))
     for im in tqdm(image_list):
         index = image_list.index(im)
         image_name = os.path.basename(im)
@@ -70,9 +77,11 @@ def cluster_division(features, classifiers_0, outpath, feature_method, slide_fol
         indices = distances[index].argsort()
         for i in range(3):
             classifiers[index_slide][2][number][4+i] = indices[i]
+        for i in range(ncluster):
+            distance_class[index_slide][2][number][4+i] = distances[index][i]
 
     pickle_save(classifiers, outpath, 'class-{}-{}-Original.p'.format(feature_method, ncluster))
-
+    ickle_save(distance_class, outpath, 'distances-{}-{}.p'.format(feature_method, ncluster))
     print('[INFO] Improving clusters...')
     n = 0
     if not init == []:
