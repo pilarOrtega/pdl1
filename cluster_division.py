@@ -81,7 +81,7 @@ def cluster_division(features, classifiers_0, outpath, feature_method, slide_fol
             distance_class[index_slide][2][number][4+i] = distances[index][i]
 
     pickle_save(classifiers, outpath, 'class-{}-{}-Original.p'.format(feature_method, ncluster))
-    ickle_save(distance_class, outpath, 'distances-{}-{}.p'.format(feature_method, ncluster))
+    pickle_save(distance_class, outpath, 'distances-{}-{}.p'.format(feature_method, ncluster))
     print('[INFO] Improving clusters...')
     n = 0
     if not init == []:
