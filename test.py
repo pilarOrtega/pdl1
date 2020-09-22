@@ -25,6 +25,7 @@ parser.add_argument('-b', '--features_batch', action='store_true')
 parser.add_argument('--pca', default=0.9, help='PCA level [Default: %(default)s]')
 parser.add_argument('--da', action='store_true')
 parser.add_argument('-n', '--number', type=int, default=0)
+parser.add_argument('-t', '--threshold', type=int, default=85)
 
 
 args = parser.parse_args()
@@ -53,6 +54,7 @@ nclusters = args.nclusters
 da = args.da
 pca_level = args.pca
 number = args.number
+threshold = args.threshold
 
 # Flag is an argument that determines in which step start the execution. It is
 
@@ -68,7 +70,7 @@ if flag <= 1:
         slide_list = os.path.join(outpath, 'list_{}_{}.p'.format(level, tile_size))
         slide_list = pickle_load(slide_list)
     start = time.time()
-    classifiers, list_positive, list_negative = detect_dab(slide_list, outpath, jobs=jobs, threshold=85)
+    classifiers, list_positive, list_negative = detect_dab(slide_list, outpath, jobs=jobs, threshold=threshold)
     end = time.time()
     print('***** Total time detect_dab {:.4f} s *****'.format(end-start))
     print()
