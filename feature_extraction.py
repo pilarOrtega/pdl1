@@ -20,6 +20,7 @@ from slideminer.finetuning.fitting import *
 from auxiliary_functions.pickle_functions import *
 from auxiliary_functions.feature_list_division import *
 from auxiliary_functions.imagetoDAB import *
+from auxiliary_functions.get_patch_reshaped import *
 
 
 # Importing Keras libraries
@@ -27,18 +28,6 @@ from keras.utils import np_utils
 from keras.applications import VGG16, Xception
 from keras.applications import imagenet_utils
 from keras.applications.xception import preprocess_input
-
-
-def get_patch_reshaped(patches, patch_shape):
-    plines = patches.shape[0]
-    pcols = patches.shape[1]
-    if len(patch_shape) == 3:
-        patches_reshaped = patches.reshape(plines, pcols, patch_shape[0] * patch_shape[1] * patch_shape[2])
-        patches_reshaped = patches_reshaped.reshape(plines * pcols, patch_shape[0] * patch_shape[1] * patch_shape[2])
-    if len(patch_shape) == 2:
-        patches_reshaped = patches.reshape(plines, pcols, patch_shape[0] * patch_shape[1])
-        patches_reshaped = patches_reshaped.reshape(plines * pcols, patch_shape[0] * patch_shape[1])
-    return patches_reshaped
 
 
 def hof_dense(im, kmeans, nclusters, method='DenseDAB'):
