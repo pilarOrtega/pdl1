@@ -26,7 +26,7 @@ def get_patches(slidepath, outpath, level=10, tissue_ratio=0.25, size=256):
           name as the image to patchify
         - level: int, level in which image is patchified. The bigger the level,
           the higher the number of patches and the resolution of the images.
-          Default = 10
+          Default = 16
         - tissue_ratio: float, minimum surface of tissue tile to be considered.
           Default = 0.25
         - size: int, side number of pixels (n pixels size*size). Default = 256
