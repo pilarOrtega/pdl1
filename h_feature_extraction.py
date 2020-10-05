@@ -50,7 +50,7 @@ def features_ex(im, patch_shape):
             patch_name = os.path.basename(im)
             patch_name = patch_name.split('#')[0]
             patch_name = os.path.join(os.path.dirname(outpath), patch_name)
-            patch_name = glob.glob(os.path.join(patch_name, '*{}-{}.jpg'.format(i+1, j+1)))
+            patch_name = glob.glob(os.path.join(patch_name, '*-{}-{}.jpg'.format(i+1, j+1)))
             if not patch_name == []:
                 patch = patches[i][j].reshape(patch_shape[0] * patch_shape[1] * patch_shape[2])
                 features.append((patch_name[0], patch))
@@ -73,6 +73,10 @@ def h_feature_extraction(distances, outpath, slide_folder):
     patch_shape = (3, 3, n_features + 1)
     features = Parallel(n_jobs=-1)(delayed(features_ex)(i, patch_shape) for i in tqdm(image_list))
 
-    pickle_save(features, outpath, 'hierarchical_features.p')
+    total_features = []
+    for f in features:
+        total_features.extend(f)
+
+    pickle_save(total_features, outpath, 'hierarchical_features.p')
 
     return features
