@@ -21,7 +21,7 @@ def get_preview(slidename, classifier, level, size, slide_folder, neg=0):
     for x in classifier:
         im_x = int(x[1])
         im_y = int(x[2])
-        if x[3] == neg:
+        if x[4] == neg and x[5] == neg:
             preview[im_x][im_y] = 1
         else:
             cluster = x[4]
