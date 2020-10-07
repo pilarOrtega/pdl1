@@ -218,7 +218,7 @@ def get_features(image_list, nclusters=256, method='Dense'):
         return
 
 
-def get_features_CNN(image_list, outpath, model='VGG16', da=False):
+def get_features_CNN(image_list, outpath, method='VGG16', da=False):
     """
     Extracts image features using CNN
 
@@ -230,16 +230,16 @@ def get_features_CNN(image_list, outpath, model='VGG16', da=False):
         - features: list, contains tuples with image path + histogram of features
     """
     features = []
-    if model in ['VGG16', 'VGG16DAB', 'VGG16H']:
+    if method in ['VGG16', 'VGG16DAB', 'VGG16H']:
         print('Loading network...')
         model = VGG16(weights='imagenet', include_top=False, pooling='avg')
         model.summary()
 
         for im in tqdm(image_list):
             image = imread(im)
-            if model == 'VGG16DAB':
+            if method == 'VGG16DAB':
                 image = imagetoDAB(image)
-            if model == 'VGG16H':
+            if method == 'VGG16H':
                 image = imagetoDAB(image, h=True)
             image = numpy.asarray(image)
             image = numpy.expand_dims(image, axis=0)
@@ -248,29 +248,30 @@ def get_features_CNN(image_list, outpath, model='VGG16', da=False):
             curr_feat = curr_feat.flatten()
             features.append((im, curr_feat))
 
-    if model in ['Xception', 'XceptionDAB', 'XceptionH']:
+    if method in ['Xception', 'XceptionDAB', 'XceptionH']:
         print('Loading network...')
 
         if da:
             outdir = os.path.join(outpath, model)
             if not os.path.exists(outdir):
-                if model == 'Xception':
+                if method == 'Xception':
                     domain_adaption(image_list, outdir, 224, pdl1=True)
-                if model == 'XceptionDAB':
+                if method == 'XceptionDAB':
                     domain_adaption(image_list, outdir, 224, pdl1=True, dab=True)
-                if model == 'XceptionH':
+                if method == 'XceptionH':
                     domain_adaption(image_list, outdir, 224, pdl1=True, h=True)
             weights_dir = os.path.join(outdir, 'weights')
             model = load_model(outdir, 5)
             model.summary()
 
-        model = Xception(weights='imagenet', include_top=False, pooling='avg', input_shape=(224, 224, 3))
+        else:
+            model = Xception(weights='imagenet', include_top=False, pooling='avg', input_shape=(224, 224, 3))
 
         for im in tqdm(image_list):
             image = imread(im)
-            if model == 'XceptionDAB':
+            if method == 'XceptionDAB':
                 image = imagetoDAB(image)
-            if model == 'XceptionH':
+            if method == 'XceptionH':
                 image = imagetoDAB(image, h=True)
             image = numpy.asarray(image)
             if image.shape == (224, 224, 3):
@@ -317,7 +318,7 @@ def feature_extraction(list_positive, outpath, feature_method, level=16, da=Fals
         features, kmeans = get_features(list_positive, nclusters=256, method=feature_method)
         pickle_save(kmeans, outpath, 'kmeans_features_{}_level{}.p'.format(feature_method, 16))
     if feature_method in ['VGG16', 'VGG16DAB', 'VGG16H', 'Xception', 'XceptionDAB', 'XceptionH']:
-        features = get_features_CNN(list_positive, outpath, model=feature_method, da=da)
+        features = get_features_CNN(list_positive, outpath, method=feature_method, da=da)
     end = time.time()
     print('Feature extraction completed in time {:.4f} s'.format(end-start))
 
