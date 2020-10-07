@@ -119,18 +119,37 @@ def patch_division(slides, outpath, level, tile_size=224, tissue_ratio=0.50, job
     n = Parallel(n_jobs=jobs)(delayed(get_patches)(s, outpath, level, tissue_ratio, tile_size) for s in glob.glob(slides))
     end = time.time()
     print('Total time patch extraction: {:.4f} s'.format(end-start))
+    classifier = []
     for s in glob.glob(slides):
         slidename = os.path.basename(s)
         outpath_slide = os.path.join(outpath, slidename)
-        slide_list.append((slidename, outpath_slide))
+        image_path = os.path.join(outpath_slide, "*.jpg")
+        patches = glob.glob(image_path)
+        c = numpy.zeros((len(patches), 4))
+        c = c.astype(int)
+        for p in patches:
+            name = os.path.basename(p)
+            name = os.path.splitext(p)[0]
+            number = name.split('#')[1]
+            number = number.split('-')
+            slide_number = int(number[0])
+            x = int(number[2])
+            y = int(number[3])
+            # Loads data in classifier matrix
+            c[slide_number][0] = slide_number
+            c[slide_number][1] = x
+            c[slide_number][2] = y
+            # Positive column = 1 if patch is in list_positive
+            c[slide_number][3] = 1
+        classifier.append((s, c))
 
-    pickle_save(slide_list, outpath, 'list_{}_{}.p'.format(level, tile_size))
+    pickle_save(classifier, outpath, 'class_{}_{}.p'.format(level, tile_size))
 
     n = sum(n)
     if not n == 0:
         print('Total number of patches extracted {}'.format(n))
         print()
-    return slide_list
+    return classifier
 
 
 if __name__ == "__main__":
@@ -152,4 +171,4 @@ if __name__ == "__main__":
     level = args.level
     jobs = args.jobs
 
-    slide_list = patch_division(slides, outpath, level, tile_size=tile_size, tissue_ratio=tissue_ratio, jobs=jobs)
+    classifier = patch_division(slides, outpath, level, tile_size=tile_size, tissue_ratio=tissue_ratio, jobs=jobs)

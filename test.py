@@ -11,21 +11,21 @@ import time
 
 # Manage parameters
 parser = argparse.ArgumentParser(description='Script that divides a WSI in individual patches and classifies the resulting tiles in similarity groups.')
-parser.add_argument('-s', '--slides', type=str, help='path to slides folder')
-parser.add_argument('-o', '--outpath', type=str, required='True', help='path to outfolder')
-parser.add_argument('-l', '--level', type=int, default=16,  help='division level of slide [Default: %(default)s]')
-parser.add_argument('-tr', '--tissue_ratio', type=float, default=0.5, help='tissue ratio per patch [Default: %(default)s]')
-parser.add_argument('-ts', '--tile_size', type=int, default=224, help='tile heigth and width in pixels [Default: %(default)s]')
-parser.add_argument('-f', '--feature_method', type=str, default='Dense', help='features extracted from individual patches [Default: %(default)s]')
-parser.add_argument('-c', '--nclusters', type=int, default=16, help='number of clusters [Default: %(default)s]')
+parser.add_argument('-s', '--slides', type=str, help='Path to slides folder')
+parser.add_argument('-o', '--outpath', type=str, required='True', help='Path to outfolder')
+parser.add_argument('-l', '--level', type=int, default=16,  help='Division level of slide [Default: %(default)s]')
+parser.add_argument('-tr', '--tissue_ratio', type=float, default=0.5, help='Tissue ratio per patch [Default: %(default)s]')
+parser.add_argument('-ts', '--tile_size', type=int, default=256, help='Tile heigth and width in pixels [Default: %(default)s]')
+parser.add_argument('-f', '--feature_method', type=str, default='Dense', help='Features extracted from individual patches [Default: %(default)s]')
+parser.add_argument('-c', '--nclusters', type=int, default=16, help='Number of clusters [Default: %(default)s]')
 parser.add_argument('--flag', type=int, default=0, help='Step [Default: %(default)s]')
 parser.add_argument('-d', '--device', default="0", help='GPU used (0 or 1) [Default: %(default)s]')
-parser.add_argument('-j', '--jobs', type=int)
-parser.add_argument('-b', '--features_batch', action='store_true')
+parser.add_argument('-j', '--jobs', type=int, help='Number of simultaneous running processes [Default: %(default)s]')
 parser.add_argument('--pca', default=0.9, help='PCA level [Default: %(default)s]')
-parser.add_argument('--da', action='store_true')
-parser.add_argument('-n', '--number', type=int, default=0)
-parser.add_argument('-t', '--threshold', type=int, default=85)
+parser.add_argument('-n', '--number', type=int, default=0, help='Number of experience - results will be saved as [n]_Results_[feature_method]_[nclusters]')
+parser.add_argument('-b', '--features_batch', action='store_true', help='Option for batch feature processing')
+parser.add_argument('--da', action='store_true', help='Option for domain adaptation in CNN feature extraction')
+parser.add_argument('--NoDAB', type=int, action='store_true', help='Prevents DAB filtering of patches')
 
 
 args = parser.parse_args()
@@ -55,36 +55,36 @@ da = args.da
 pca_level = args.pca
 number = args.number
 threshold = args.threshold
+NoDAB = args.NoDAB
 
 # Flag is an argument that determines in which step start the execution. It is
 
 if flag == 0:
     start = time.time()
-    slide_list = patch_division(slides, outpath, level, tile_size=tile_size, tissue_ratio=tissue_ratio, jobs=jobs)
+    classifier = patch_division(slides, outpath, level, tile_size=tile_size, tissue_ratio=tissue_ratio, jobs=jobs)
     end = time.time()
     print('***** Total time patch_division {:.4f} s *****'.format(end-start))
     print()
 
 if flag <= 1:
     if flag == 1:
-        slide_list = os.path.join(outpath, 'list_{}_{}.p'.format(level, tile_size))
-        slide_list = pickle_load(slide_list)
-    start = time.time()
-    classifiers, list_positive, list_negative = detect_dab(slide_list, outpath, jobs=jobs, threshold=threshold)
-    end = time.time()
-    print('***** Total time detect_dab {:.4f} s *****'.format(end-start))
-    print()
+        classifier = os.path.join(outpath, 'class_{}_{}.p'.format(level, tile_size))
+        classifier = pickle_load(classifier)
+    if not NoDAB:
+        start = time.time()
+        classifiers = detect_dab(classifier, outpath, jobs=jobs, threshold=threshold)
+        end = time.time()
+        print('***** Total time detect_dab {:.4f} s *****'.format(end-start))
+        print()
 
 if flag <= 2:
     if flag == 2:
-        list_positive = os.path.join(outpath, 'list_positive_{}_{}.p'.format(level, tile_size))
-        list_positive = pickle_load(list_positive)
         classifiers = os.path.join(outpath, 'class_{}_{}.p'.format(level, tile_size))
         classifiers = pickle_load(classifiers)
     start = time.time()
     if features_batch:
         features = feature_extraction_batch(list_positive, outpath, feature_method)
-    features = feature_extraction(list_positive, outpath, feature_method, da=da, pca_level=pca_level)
+    features = feature_extraction(classifier, outpath, feature_method, da=da, pca_level=pca_level)
     end = time.time()
     print('***** Total time feature_extraction {:.4f} s *****'.format(end-start))
     print()

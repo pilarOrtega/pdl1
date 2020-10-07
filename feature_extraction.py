@@ -308,9 +308,20 @@ def feature_reduction(list_features, pca_level=0.9):
     return result, pca, scaler
 
 
-def feature_extraction(list_positive, outpath, feature_method, level=16, da=False, pca_level=0.9):
+def feature_extraction(classifier, outpath, feature_method, level=16, da=False, pca_level=0.9):
 
     print('[INFO] Extracting features from {} positive images'.format(len(list_positive)))
+
+    # Get list of patches to analyze
+    list_positive = []
+    for c in tqdm(classifier):
+        slidepath = c[0]
+        for n in range(len(c[1])):
+            if c[1][n][3] == 1:
+                i = c[1][n][1]
+                j = c[1][n][2]
+                path_name = glob.glob(os.path.join(slidepath, '*#{}-level{}-{}-{}.jpg'.format(n, level, i, j)))
+                list_positive.append(patch_name)
 
     start = time.time()
     # Extract features from positive images

@@ -36,42 +36,7 @@ def dab(image, thr=85, freq=10):
     return dab
 
 
-def divide_dab(path, threshold):
-    """
-    Divides set of images according to the presence of DAB staining
-
-    Arguments:
-        - path: str, path to image folder
-        - threshold: int, threshold level for DAB detection
-
-    Returns:
-        - image_positive, image_negative: list
-        - n: int, total number of images
-    """
-
-    # Collects all images .jpg from path
-    image_path = os.path.join(path, "*.jpg")
-    image_path = glob.glob(image_path)
-    image_positive = []
-    image_negative = []
-    n = len(image_path)
-
-    # Detects DAB presence in each image. DAB positive images are stored in image_positive list
-    for im in tqdm(image_path):
-        image = imread(im)
-        if dab(image, thr=threshold):
-            image_positive.append(im)
-        else:
-            image_negative.append(im)
-
-    print('Division in path ' + path + ' completed.')
-    print('Number of positive elements: {} out of {}'.format(len(image_positive), n))
-    print()
-
-    return image_positive, image_negative, n
-
-
-def detect_dab_delayed(slide, threshold):
+def divide_dab(classifier, threshold):
     """
     Gets the DAB positive patches for a slide and creates the classifier asarray
 
@@ -89,45 +54,26 @@ def detect_dab_delayed(slide, threshold):
         - list_positive: list with the paths to all patches that are positive
             to DAB
     """
-    # Divide all patches in positive or negative to DAB
-    list_positive, list_negative, n = divide_dab(slide, threshold=threshold)
-    # Creates a numpy array with n rows and 4 columns (number, x, y, positive)
-    c = numpy.zeros((n, 4))
-    c = c.astype(int)
-    for im in list_positive:
-        # Extracts the patch number from the patch path
+    # Collects all images .jpg from path
+    image_path = os.path.join(classifier[0], "*.jpg")
+    image_path = glob.glob(image_path)
+    n = len(image_path)
+
+    # Detects DAB presence in each image. DAB positive images are stored in image_positive list
+    for im in tqdm(image_path):
+        image = imread(im)
         name = os.path.basename(im)
         name = os.path.splitext(name)[0]
         number = name.split('#')[1]
         number = number.split('-')
         slide_number = int(number[0])
-        x = int(number[2])
-        y = int(number[3])
-        # Loads data in classifier matrix
-        c[slide_number][0] = slide_number
-        c[slide_number][1] = x
-        c[slide_number][2] = y
-        # Positive column = 1 if patch is in list_positive
-        c[slide_number][3] = 1
-    for im in list_negative:
-        name = os.path.basename(im)
-        name = os.path.splitext(name)[0]
-        number = name.split('#')[1]
-        number = number.split('-')
-        slide_number = int(number[0])
-        x = int(number[2])
-        y = int(number[3])
-        c[slide_number][0] = slide_number
-        c[slide_number][1] = x
-        c[slide_number][2] = y
-        # Positive column = 0 if patch is in list_negative
-        c[slide_number][3] = 0
-    classifier = (os.path.basename(slide), slide, c)
+        if not dab(image, thr=threshold):
+            classifier[1][slide_number][3] = 0
 
-    return classifier, list_positive, list_negative
+    return classifier
 
 
-def detect_dab(list_slides, outpath, jobs, threshold, level=16, tile_size=224):
+def detect_dab(classifier, outpath, jobs, threshold, level=16, tile_size=224):
     """
     For a list of slides, this function gets the patches that have DAB tinction
     on them (DAB positive patches). It saves two .p files in the outpath
@@ -154,30 +100,19 @@ def detect_dab(list_slides, outpath, jobs, threshold, level=16, tile_size=224):
     """
     # Parallelization
     start = time.time()
-    result = Parallel(n_jobs=jobs)(delayed(detect_dab_delayed)(s[1], threshold) for s in (list_slides))
+    classifier = Parallel(n_jobs=jobs)(delayed(divide_dab)(c, threshold) for c in (classifier))
     end = time.time()
     print('Total time DAB detection: {:.4f} s'.format(end-start))
 
-    classifier = [result[i][0] for i in range(len(list_slides))]
-    list_positive = []
-    for i in range(len(list_slides)):
-        for p in result[i][1]:
-            list_positive.append(p)
-    list_negative = []
-    for i in range(len(list_slides)):
-        for p in result[i][2]:
-            list_negative.append(p)
-
     pickle_save(classifier, outpath, 'class_{}_{}.p'.format(level, tile_size))
-    pickle_save(list_positive, outpath, 'list_positive_{}_{}.p'.format(level, tile_size))
 
-    return classifier, list_positive, list_negative
+    return classifier
 
 
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Script that discriminates patches positives to DAB.')
-    parser.add_argument('-l', '--list_slides', type=str, help='file with slide list')
+    parser.add_argument('-c', '--classifier', type=str, help='Classifier file')
     parser.add_argument('-o', '--outpath', type=str, help='path to outfolder')
     parser.add_argument('-t', '--threshold', type=int, default=85)
     parser.add_argument('-j', '--jobs', type=int)
@@ -185,10 +120,10 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     outpath = args.outpath
-    list_slides = args.list_slides
+    classifier = args.classifier
     jobs = args.jobs
     threshold = args.threshold
-    with open(list_slides, "rb") as f:
-        list_slides = pickle.load(f)
+    with open(classifier, "rb") as f:
+        classifier = pickle.load(f)
 
-    classifier, list_positive = detect_dab(list_slides, outpath, jobs=jobs, threshold=threshold)
+    classifier = detect_dab(classifier, outpath, jobs=jobs, threshold=threshold)
