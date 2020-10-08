@@ -13,6 +13,7 @@ from openslide import OpenSlide, deepzoom
 
 def get_preview(slidename, classifier, level, size, slide_folder, neg=0):
     result = []
+    slidename = os.path.basename(slidename)
     slidepath = os.path.join(slide_folder, slidename)
     slide = OpenSlide(slidepath)
     slide_dz = deepzoom.DeepZoomGenerator(slide, tile_size=(size - 2), overlap=1)
@@ -32,7 +33,7 @@ def get_preview(slidename, classifier, level, size, slide_folder, neg=0):
 
 def show_preview(classifiers, level, size, slide_folder, outpath, feature_method, neg=0):
     start = time.time()
-    previews = Parallel(n_jobs=4)(delayed(get_preview)(s[0], s[2], level, size, slide_folder, neg=neg) for s in tqdm(classifiers))
+    previews = Parallel(n_jobs=4)(delayed(get_preview)(s[0], s[1], level, size, slide_folder, neg=neg) for s in tqdm(classifiers))
     end = time.time()
     print('Total time get previews: {:.4f} s'.format(end-start))
     colordict = './dict/color_dict.csv'

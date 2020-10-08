@@ -35,11 +35,11 @@ def cluster_division(features, classifiers_0, outpath, feature_method, slide_fol
 
     classifiers = []
     for s in classifiers_0:
-        n_samples = s[2].shape[0]
-        n_features = s[2].shape[1] + 3
+        n_samples = s[1].shape[0]
+        n_features = s[1].shape[1] + 3
         c = numpy.zeros((n_samples, n_features))
-        c[:, : - 3] = s[2]
-        classifiers.append((s[0], s[1], c))
+        c[:, : - 3] = s[1]
+        classifiers.append((s[0], c))
 
     print('[INFO] Dividing patches into clusters')
     print('Total of {} images to be divided in {} clusters'.format(len(features), ncluster))
@@ -61,11 +61,11 @@ def cluster_division(features, classifiers_0, outpath, feature_method, slide_fol
     print('Davies-Bouldin Score: {}'.format(score))
     distance_class = []
     for s in classifiers_0:
-        n_samples = s[2].shape[0]
-        n_features = s[2].shape[1] + ncluster
+        n_samples = s[1].shape[0]
+        n_features = s[1].shape[1] + ncluster
         c = numpy.zeros((n_samples, n_features))
-        c[:, : - ncluster] = s[2]
-        distance_class.append((s[0], s[1], c))
+        c[:, : - ncluster] = s[1]
+        distance_class.append((s[0], c))
     for im in tqdm(image_list):
         index = image_list.index(im)
         image_name = os.path.basename(im)
@@ -76,9 +76,9 @@ def cluster_division(features, classifiers_0, outpath, feature_method, slide_fol
         index_slide = slide_list.index(os.path.basename(slide_path))
         indices = distances[index].argsort()
         for i in range(3):
-            classifiers[index_slide][2][number][4+i] = indices[i]
+            classifiers[index_slide][1][number][4+i] = indices[i]
         for i in range(ncluster):
-            distance_class[index_slide][2][number][4+i] = distances[index][i]
+            distance_class[index_slide][1][number][4+i] = distances[index][i]
 
     pickle_save(classifiers, outpath, 'class-{}-{}-Original.p'.format(feature_method, ncluster))
     pickle_save(distance_class, outpath, 'distances-{}-{}.p'.format(feature_method, ncluster))
@@ -96,11 +96,11 @@ def cluster_division(features, classifiers_0, outpath, feature_method, slide_fol
             indices = distances[index].argsort()
             if (distances[index][indices[1]]-distances[index][indices[0]]) <= 1:
                 if (indices[1] < n_init) and (indices[0] >= n_init):
-                    classifiers[index_slide][2][number][4], classifiers[index_slide][2][number][5] = classifiers[index_slide][2][number][5], classifiers[index_slide][2][number][4]
+                    classifiers[index_slide][1][number][4], classifiers[index_slide][1][number][5] = classifiers[index_slide][1][number][5], classifiers[index_slide][1][number][4]
                     n += 1
             elif (distances[index][indices[2]]-distances[index][indices[0]]) <= 1:
                 if (indices[2] < n_init) and (indices[0] >= n_init):
-                    classifiers[index_slide][2][number][4], classifiers[index_slide][2][number][6] = classifiers[index_slide][2][number][6], classifiers[index_slide][2][number][4]
+                    classifiers[index_slide][1][number][4], classifiers[index_slide][1][number][6] = classifiers[index_slide][1][number][6], classifiers[index_slide][1][number][4]
                     n += 1
         print('Total of {} out of {} patches changed'.format(n, len(image_list)))
 
@@ -114,8 +114,8 @@ def cluster_division(features, classifiers_0, outpath, feature_method, slide_fol
         print('[INFO] Saving csv files...')
         print()
         for x in classifiers:
-            csv_cluster = '{}-{}-clusters{}.csv'.format(x[0], feature_method, ncluster)
-            c = x[2]
+            csv_cluster = '{}-{}-clusters{}.csv'.format(os.path.basename(x[0]), feature_method, ncluster)
+            c = x[1]
             csv_file_path_cluster = os.path.join(outpath, csv_cluster)
             csv_columns = ["Patch_number"]
             csv_columns.append('X')

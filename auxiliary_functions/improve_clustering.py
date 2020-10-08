@@ -8,6 +8,7 @@ import os
 
 def get_preview(slidename, classifier, level, size, slide_folder, neg=0):
     result = []
+    slidename = os.path.basename(slide_name)
     slidepath = os.path.join(slide_folder, slidename)
     slide = OpenSlide(slidepath)
     slide_dz = deepzoom.DeepZoomGenerator(slide, tile_size=(size - 2), overlap=1)
@@ -29,13 +30,13 @@ def improve_clustering(classifiers, slide_folder):
     i = 0
     pos_dict = {}
     for c in classifiers:
-        for x in range(len(c[2])):
-            pos_dict[(i, (c[2][x][1], c[2][x][2]))] = x
+        for x in range(len(c[1])):
+            pos_dict[(i, (c[1][x][1], c[1][x][2]))] = x
         i += 1
     slide_list = []
     for x in classifiers:
         slide_list.append(x[0])
-    previews = Parallel(n_jobs=-1)(delayed(get_preview)(s[0], s[2], 16, 224, slide_folder) for s in tqdm(classifiers))
+    previews = Parallel(n_jobs=-1)(delayed(get_preview)(s[0], s[1], 16, 224, slide_folder) for s in tqdm(classifiers))
     previews_dict = {}
     for p in previews:
         previews_dict[p[0]] = p[1]
@@ -60,15 +61,15 @@ def improve_clustering(classifiers, slide_folder):
                     continue
                 number = pos_dict[(index_slide, (i+1, j+1))]
                 if mf == 0 and counts[mf] >= 7:
-                    c[2][number][4] = mf-2
+                    c[1][number][4] = mf-2
                     n += 1
                     continue
                 if mf == 1 and counts[mf] >= 7:
-                    c[2][number][4] = mf-2
+                    c[1][number][4] = mf-2
                     n += 1
                     continue
-                if mf == (c[2][number][5]+2) or mf == (c[2][number][6]+2):
-                    c[2][number][4] = mf-2
+                if mf == (c[1][number][5]+2) or mf == (c[1][number][6]+2):
+                    c[1][number][4] = mf-2
                     n += 1
     print('Total of {} patches changed'.format(n))
     return classifiers
