@@ -2,7 +2,8 @@ import os
 import numpy
 import argparse
 from tqdm import tqdm
-from skimage.io import sift, imread, imsave
+from PIL import Image
+from skimage.io import sift, Image.open, imsave
 from sklearn.cluster import MiniBatchKMeans
 from skimage.color import rgb2grey, rgb2hed
 from skimage.feature import daisy
@@ -46,7 +47,7 @@ def hof_dense(im, kmeans, nclusters, method='DenseDAB'):
             of features of the image
     """
     features = []
-    image = imread(im)
+    image = Image.open(im)
     if method == 'DenseDAB':
         patch_shape = (8, 8)
         image = rgb2hed(image)
@@ -86,7 +87,7 @@ def hof_daisy(im, kmeans, nclusters, method='Daisy'):
             of features of the image
     """
     features = []
-    image = imread(im)
+    image = Image.open(im)
     if method == 'DaisyDAB':
         image = numpy.asarray(rgb2hed(image))
         image = image[:, :, 2]
@@ -139,7 +140,7 @@ def get_features(image_list, nclusters=256, method='Dense'):
         print('Step 1: KMeans fitting')
         # Fits k-means in 1/50 of the images
         for i in tqdm(range(0, len(image_list), 50)):
-            image = imread(image_list[i])
+            image = Image.open(image_list[i])
             if method == 'Dense':
                 patch_shape = (8, 8, 3)
                 image = numpy.asarray(image)
@@ -181,7 +182,7 @@ def get_features(image_list, nclusters=256, method='Dense'):
         start1 = time.time()
         print('Step 1: KMeans fitting')
         for i in tqdm(range(0, len(image_list), 50)):
-            image = imread(image_list[i])
+            image = Image.open(image_list[i])
             if method == 'Daisy':
                 image = numpy.asarray(rgb2grey(image))
             if method == 'DaisyDAB':
@@ -236,7 +237,7 @@ def get_features_CNN(image_list, outpath, method='VGG16', da=False):
         model.summary()
 
         for im in tqdm(image_list):
-            image = imread(im)
+            image = Image.open(im)
             if method == 'VGG16DAB':
                 image = imagetoDAB(image)
             if method == 'VGG16H':
@@ -268,7 +269,7 @@ def get_features_CNN(image_list, outpath, method='VGG16', da=False):
             model = Xception(weights='imagenet', include_top=False, pooling='avg', input_shape=(224, 224, 3))
 
         for im in tqdm(image_list):
-            image = imread(im)
+            image = Image.open(im)
             if method == 'XceptionDAB':
                 image = imagetoDAB(image)
             if method == 'XceptionH':
