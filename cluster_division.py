@@ -42,7 +42,8 @@ def cluster_division(features, classifiers_0, outpath, feature_method, slide_fol
         classifiers.append((s[0], c))
 
     print('[INFO] Dividing patches into clusters')
-    print('Total of {} images to be divided in {} clusters'.format(len(features), ncluster))
+    print('Total of {} images to be divided in {} clusters'.format(
+        len(features), ncluster))
     print()
     features, image_list = feature_list_division(features)
     slide_list = []
@@ -51,7 +52,8 @@ def cluster_division(features, classifiers_0, outpath, feature_method, slide_fol
     if init == []:
         cls = MiniBatchKMeans(n_clusters=ncluster)
         cls = cls.fit(features)
-        pickle_save(cls, outpath, 'model-{}-{}.p'.format(feature_method, ncluster))
+        pickle_save(
+            cls, outpath, 'model-{}-{}.p'.format(feature_method, ncluster))
     else:
         cls = MiniBatchKMeans()
         cls.cluster_centers_ = init
@@ -76,12 +78,14 @@ def cluster_division(features, classifiers_0, outpath, feature_method, slide_fol
         index_slide = slide_list.index(os.path.basename(slide_path))
         indices = distances[index].argsort()
         for i in range(3):
-            classifiers[index_slide][1][number][4+i] = indices[i]
+            classifiers[index_slide][1][number][4 + i] = indices[i]
         for i in range(ncluster):
-            distance_class[index_slide][1][number][4+i] = distances[index][i]
+            distance_class[index_slide][1][number][4 + i] = distances[index][i]
 
-    pickle_save(classifiers, outpath, 'class-{}-{}-Original.p'.format(feature_method, ncluster))
-    pickle_save(distance_class, outpath, 'distances-{}-{}.p'.format(feature_method, ncluster))
+    pickle_save(classifiers, outpath,
+                'class-{}-{}-Original.p'.format(feature_method, ncluster))
+    pickle_save(distance_class, outpath,
+                'distances-{}-{}.p'.format(feature_method, ncluster))
     print('[INFO] Improving clusters...')
     n = 0
     if not init == []:
@@ -94,27 +98,32 @@ def cluster_division(features, classifiers_0, outpath, feature_method, slide_fol
             slide_path = os.path.dirname(im)
             index_slide = slide_list.index(os.path.basename(slide_path))
             indices = distances[index].argsort()
-            if (distances[index][indices[1]]-distances[index][indices[0]]) <= 1:
+            if (distances[index][indices[1]] - distances[index][indices[0]]) <= 1:
                 if (indices[1] < n_init) and (indices[0] >= n_init):
-                    classifiers[index_slide][1][number][4], classifiers[index_slide][1][number][5] = classifiers[index_slide][1][number][5], classifiers[index_slide][1][number][4]
+                    classifiers[index_slide][1][number][4], classifiers[index_slide][1][number][
+                        5] = classifiers[index_slide][1][number][5], classifiers[index_slide][1][number][4]
                     n += 1
-            elif (distances[index][indices[2]]-distances[index][indices[0]]) <= 1:
+            elif (distances[index][indices[2]] - distances[index][indices[0]]) <= 1:
                 if (indices[2] < n_init) and (indices[0] >= n_init):
-                    classifiers[index_slide][1][number][4], classifiers[index_slide][1][number][6] = classifiers[index_slide][1][number][6], classifiers[index_slide][1][number][4]
+                    classifiers[index_slide][1][number][4], classifiers[index_slide][1][number][
+                        6] = classifiers[index_slide][1][number][6], classifiers[index_slide][1][number][4]
                     n += 1
         print('Total of {} out of {} patches changed'.format(n, len(image_list)))
 
-        pickle_save(classifiers, outpath, 'class-{}-{}-Mod_init.p'.format(feature_method, ncluster))
+        pickle_save(classifiers, outpath,
+                    'class-{}-{}-Mod_init.p'.format(feature_method, ncluster))
 
     classifiers = improve_clustering(classifiers, slide_folder)
 
-    pickle_save(classifiers, outpath, 'class-{}-{}-Final.p'.format(feature_method, ncluster))
+    pickle_save(classifiers, outpath,
+                'class-{}-{}-Final.p'.format(feature_method, ncluster))
 
     if save:
         print('[INFO] Saving csv files...')
         print()
         for x in classifiers:
-            csv_cluster = '{}-{}-clusters{}.csv'.format(os.path.basename(x[0]), feature_method, ncluster)
+            csv_cluster = '{}-{}-clusters{}.csv'.format(
+                os.path.basename(x[0]), feature_method, ncluster)
             c = x[1]
             csv_file_path_cluster = os.path.join(outpath, csv_cluster)
             csv_columns = ["Patch_number"]
@@ -127,7 +136,8 @@ def cluster_division(features, classifiers_0, outpath, feature_method, slide_fol
                 writer = csv.DictWriter(csv_file, csv_columns)
                 writer.writeheader()
                 for i in range(c.shape[0]):
-                    row = {'Patch_number': c[i][0], 'X': c[i][1], 'Y': c[i][2], 'Positive': c[i][3], 'Cluster': c[i][4]}
+                    row = {'Patch_number': c[i][0], 'X': c[i][1], 'Y': c[i]
+                           [2], 'Positive': c[i][3], 'Cluster': c[i][4]}
                     writer.writerow(row)
 
     return classifiers
@@ -135,13 +145,18 @@ def cluster_division(features, classifiers_0, outpath, feature_method, slide_fol
 
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser(description='Script that divides a set of patches into cluster hierarchically using KMeans.')
-    parser.add_argument('-f', '--list_features', type=str, help='file with feature list')
-    parser.add_argument('-c', '--classifiers', type=str, help='path to classification file')
+    parser = argparse.ArgumentParser(
+        description='Script that divides a set of patches into cluster hierarchically using KMeans.')
+    parser.add_argument('-f', '--list_features', type=str,
+                        help='file with feature list')
+    parser.add_argument('-c', '--classifiers', type=str,
+                        help='path to classification file')
     parser.add_argument('-o', '--outpath', type=str, help='path to outfolder')
     parser.add_argument('--nclusters', type=int, default=23)
-    parser.add_argument('-s', '--slide_folder', type=str, default=0.5, help='path to slide folder')
-    parser.add_argument('-i', '--init', default=0, help='File to initiation features [Default: %(default)s]')
+    parser.add_argument('-s', '--slide_folder', type=str,
+                        default=0.5, help='path to slide folder')
+    parser.add_argument('-i', '--init', default=0,
+                        help='File to initiation features [Default: %(default)s]')
 
     args = parser.parse_args()
 
@@ -157,7 +172,9 @@ if __name__ == "__main__":
     feature_method = feature_method.split('_')[1]
 
     if init == 0:
-        classifiers = cluster_division(features, classifiers, outpath, feature_method, slide_folder, ncluster=args.nclusters)
+        classifiers = cluster_division(
+            features, classifiers, outpath, feature_method, slide_folder, ncluster=args.nclusters)
     else:
         init = pickle_load(init)
-        classifiers = cluster_division(features, classifiers, outpath, feature_method, slide_folder, init=init)
+        classifiers = cluster_division(
+            features, classifiers, outpath, feature_method, slide_folder, init=init)

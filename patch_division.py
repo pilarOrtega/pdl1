@@ -41,7 +41,8 @@ def get_patches(slidepath, outpath, level=10, tissue_ratio=0.25, size=256):
     slide = OpenSlide(slidepath)
 
     # Gets deepzoom tile division
-    slide_dz = deepzoom.DeepZoomGenerator(slide, tile_size=(size - 2), overlap=1)
+    slide_dz = deepzoom.DeepZoomGenerator(
+        slide, tile_size=(size - 2), overlap=1)
 
     # Gets the name and number of the slide
     slidename = os.path.basename(slidepath)
@@ -52,7 +53,8 @@ def get_patches(slidepath, outpath, level=10, tissue_ratio=0.25, size=256):
     # Asures that the chosen level is valid
     if level < slide_dz.level_count:
         tiles = slide_dz.level_tiles[level]
-        print('Level {} contains {} tiles (empty tiles included)'.format(level, slide_dz.level_tiles[level][0]*slide_dz.level_tiles[level][1]))
+        print('Level {} contains {} tiles (empty tiles included)'.format(
+            level, slide_dz.level_tiles[level][0] * slide_dz.level_tiles[level][1]))
     else:
         print('Invalid level')
         return 0
@@ -78,10 +80,12 @@ def get_patches(slidepath, outpath, level=10, tissue_ratio=0.25, size=256):
             mask = tissue.get_tissue_from_rgb(image, blacktol=10, whitetol=240)
             # Saves tile in outpath only if tissue ratio is higher than threshold
             if mask.sum() > tissue_ratio * tile.size[0] * tile.size[1]:
-                tile_path = os.path.join(outpath, '{}#{}-level{}-{}-{}.jpg'.format(slidename, n, level, i, j))
+                tile_path = os.path.join(
+                    outpath, '{}#{}-level{}-{}-{}.jpg'.format(slidename, n, level, i, j))
                 tile.save(tile_path)
                 n = n + 1
-    print('Total of {} tiles with tissue ratio >{} in slide {}'.format(n, tissue_ratio, slidepath))
+    print('Total of {} tiles with tissue ratio >{} in slide {}'.format(
+        n, tissue_ratio, slidepath))
     print()
 
     return n
@@ -116,9 +120,10 @@ def patch_division(slides, outpath, level, tile_size=224, tissue_ratio=0.50, job
     slide_list = []
     start = time.time()
     n = 0
-    n = Parallel(n_jobs=jobs)(delayed(get_patches)(s, outpath, level, tissue_ratio, tile_size) for s in glob.glob(slides))
+    n = Parallel(n_jobs=jobs)(delayed(get_patches)(
+        s, outpath, level, tissue_ratio, tile_size) for s in glob.glob(slides))
     end = time.time()
-    print('Total time patch extraction: {:.4f} s'.format(end-start))
+    print('Total time patch extraction: {:.4f} s'.format(end - start))
     classifier = []
     for s in glob.glob(slides):
         slidename = os.path.basename(s)
@@ -154,12 +159,17 @@ def patch_division(slides, outpath, level, tile_size=224, tissue_ratio=0.50, job
 
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser(description='Script that divides a WSI in individual patches.')
-    parser.add_argument('-s', '--slides', type=str, help='path to slide folder')
+    parser = argparse.ArgumentParser(
+        description='Script that divides a WSI in individual patches.')
+    parser.add_argument('-s', '--slides', type=str,
+                        help='path to slide folder')
     parser.add_argument('-o', '--outpath', type=str, help='path to outfolder')
-    parser.add_argument('-l', '--level', type=int, default=13, help='division level [Default: %(default)s]')
-    parser.add_argument('-ts', '--tile_size', type=int, default=256, help='tile heigth and width in pixels [Default: %(default)s]')
-    parser.add_argument('-tr', '--tissue_ratio', type=float, default=0.5, help='tissue ratio per patch [Default: %(default)s]')
+    parser.add_argument('-l', '--level', type=int, default=13,
+                        help='division level [Default: %(default)s]')
+    parser.add_argument('-ts', '--tile_size', type=int, default=256,
+                        help='tile heigth and width in pixels [Default: %(default)s]')
+    parser.add_argument('-tr', '--tissue_ratio', type=float, default=0.5,
+                        help='tissue ratio per patch [Default: %(default)s]')
     parser.add_argument('-j', '--jobs', type=int)
 
     args = parser.parse_args()
@@ -171,4 +181,5 @@ if __name__ == "__main__":
     level = args.level
     jobs = args.jobs
 
-    classifier = patch_division(slides, outpath, level, tile_size=tile_size, tissue_ratio=tissue_ratio, jobs=jobs)
+    classifier = patch_division(
+        slides, outpath, level, tile_size=tile_size, tissue_ratio=tissue_ratio, jobs=jobs)

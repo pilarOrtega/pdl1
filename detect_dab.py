@@ -100,9 +100,10 @@ def detect_dab(classifier, outpath, jobs, threshold, level=16, tile_size=224):
     """
     # Parallelization
     start = time.time()
-    classifier = Parallel(n_jobs=jobs)(delayed(divide_dab)(c, threshold) for c in (classifier))
+    classifier = Parallel(n_jobs=jobs)(
+        delayed(divide_dab)(c, threshold) for c in (classifier))
     end = time.time()
-    print('Total time DAB detection: {:.4f} s'.format(end-start))
+    print('Total time DAB detection: {:.4f} s'.format(end - start))
 
     pickle_save(classifier, outpath, 'class_{}_{}.p'.format(level, tile_size))
 
@@ -111,7 +112,8 @@ def detect_dab(classifier, outpath, jobs, threshold, level=16, tile_size=224):
 
 if __name__ == '__main__':
 
-    parser = argparse.ArgumentParser(description='Script that discriminates patches positives to DAB.')
+    parser = argparse.ArgumentParser(
+        description='Script that discriminates patches positives to DAB.')
     parser.add_argument('-c', '--classifier', type=str, help='Classifier file')
     parser.add_argument('-o', '--outpath', type=str, help='path to outfolder')
     parser.add_argument('-t', '--threshold', type=int, default=85)
@@ -126,4 +128,5 @@ if __name__ == '__main__':
     with open(classifier, "rb") as f:
         classifier = pickle.load(f)
 
-    classifier = detect_dab(classifier, outpath, jobs=jobs, threshold=threshold)
+    classifier = detect_dab(classifier, outpath,
+                            jobs=jobs, threshold=threshold)

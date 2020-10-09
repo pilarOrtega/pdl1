@@ -16,10 +16,12 @@ def feature_reduction(features, pca, scaler):
     features_pca = pca.transform(features_list)
     initial_features = features_list.shape[1]
     pca_features = features_pca.shape[1]
-    print('Number of features reduced from {} to {}'.format(initial_features, pca_features))
+    print('Number of features reduced from {} to {}'.format(
+        initial_features, pca_features))
     print()
     features_scaled = scaler.transform(features_pca)
-    features = [(image_list[i], features_scaled[i]) for i in range(len(image_list))]
+    features = [(image_list[i], features_scaled[i])
+                for i in range(len(image_list))]
     return features
 
 
@@ -51,22 +53,32 @@ def cluster_division(features, classifiers, c_kmeans):
 
 if __name__ == "__main__":
     # Manage parameters
-    parser = argparse.ArgumentParser(description='Script that divides a WSI in individual patches and classifies the resulting tiles in similarity groups.')
-    parser.add_argument('-s', '--slides', type=str,  nargs='+', help='Path(s) to slides')
-    parser.add_argument('-o', '--outpath', type=str, required='True', help='path to outfolder')
-    parser.add_argument('-f', '--feature_method', type=str, default='Dense', help='features extracted from individual patches [Default: %(default)s]')
-    parser.add_argument('-n', '--nclusters', type=int, default=16, help='number of clusters [Default: %(default)s]')
+    parser = argparse.ArgumentParser(
+        description='Script that divides a WSI in individual patches and classifies the resulting tiles in similarity groups.')
+    parser.add_argument('-s', '--slides', type=str,
+                        nargs='+', help='Path(s) to slides')
+    parser.add_argument('-o', '--outpath', type=str,
+                        required='True', help='path to outfolder')
+    parser.add_argument('-f', '--feature_method', type=str, default='Dense',
+                        help='features extracted from individual patches [Default: %(default)s]')
+    parser.add_argument('-n', '--nclusters', type=int, default=16,
+                        help='number of clusters [Default: %(default)s]')
     parser.add_argument('--pca_dab', type=str, help='Path to pca.p file')
     parser.add_argument('--scaler_dab', type=str, help='Path to scaler file')
-    parser.add_argument('--f_kmeans_dab', type=str, help='Path to feature_extraction kmeans')
-    parser.add_argument('--c_kmeans_dab', type=str, help='Path to cluster_division kmeans')
+    parser.add_argument('--f_kmeans_dab', type=str,
+                        help='Path to feature_extraction kmeans')
+    parser.add_argument('--c_kmeans_dab', type=str,
+                        help='Path to cluster_division kmeans')
     parser.add_argument('--pca_h', type=str, help='Path to pca.p file')
     parser.add_argument('--scaler_h', type=str, help='Path to scaler file')
-    parser.add_argument('--f_kmeans_h', type=str, help='Path to feature_extraction kmeans')
-    parser.add_argument('--c_kmeans_h', type=str, help='Path to cluster_division kmeans')
-    parser.add_argument('-t', '--threshold', type=int, default=85, help='DAB detection threshold [Default: %(default)s]')
-    parser.add_argument('--flag', type=int, default=0, help='Step [Default: %(default)s]')
-
+    parser.add_argument('--f_kmeans_h', type=str,
+                        help='Path to feature_extraction kmeans')
+    parser.add_argument('--c_kmeans_h', type=str,
+                        help='Path to cluster_division kmeans')
+    parser.add_argument('-t', '--threshold', type=int, default=85,
+                        help='DAB detection threshold [Default: %(default)s]')
+    parser.add_argument('--flag', type=int, default=0,
+                        help='Step [Default: %(default)s]')
 
     args = parser.parse_args()
 
@@ -103,24 +115,29 @@ if __name__ == "__main__":
         outpath_slide = os.path.join(outpath, slidename)
         slide_list.append((slidename, outpath_slide))
     end = time.time()
-    print('***** Total time patch_division {:.4f} s *****'.format(end-start))
+    print('***** Total time patch_division {:.4f} s *****'.format(end - start))
     print()
 
     print('[STEP 2] DAB Detection')
     start = time.time()
-    classifiers, list_positive, list_negative = detect_dab(slide_list, outpath, jobs=-1, threshold=threshold, level=16, tile_size=224)
+    classifiers, list_positive, list_negative = detect_dab(
+        slide_list, outpath, jobs=-1, threshold=threshold, level=16, tile_size=224)
     end = time.time()
-    print('***** Total time detect_dab {:.4f} s *****'.format(end-start))
+    print('***** Total time detect_dab {:.4f} s *****'.format(end - start))
     print()
 
     print('[STEP 3.a] Feature extraction (DAB channel)')
     start = time.time()
-    features_DAB = Parallel(n_jobs=-1)(delayed(hof_dense)(im, f_kmeans_DAB, 256, method='DenseDAB') for im in tqdm(list_positive))
+    features_DAB = Parallel(n_jobs=-1)(delayed(hof_dense)(im, f_kmeans_DAB,
+                                                          256, method='DenseDAB') for im in tqdm(list_positive))
     print('[STEP 3.a] Feature extraction (H channel)')
-    features_pos_H = Parallel(n_jobs=-1)(delayed(hof_dense)(im, f_kmeans_H, 256, method='DenseH') for im in tqdm(list_positive))
-    features_neg_H = Parallel(n_jobs=-1)(delayed(hof_dense)(im, f_kmeans_H, 256, method='DenseH') for im in tqdm(list_negative))
+    features_pos_H = Parallel(n_jobs=-1)(delayed(hof_dense)(im,
+                                                            f_kmeans_H, 256, method='DenseH') for im in tqdm(list_positive))
+    features_neg_H = Parallel(n_jobs=-1)(delayed(hof_dense)(im,
+                                                            f_kmeans_H, 256, method='DenseH') for im in tqdm(list_negative))
     end = time.time()
-    print('***** Total time feature extraction {:.4f} s *****'.format(end-start))
+    print(
+        '***** Total time feature extraction {:.4f} s *****'.format(end - start))
     print()
 
     print('[STEP 3.b] Feature reduction')
@@ -129,9 +146,11 @@ if __name__ == "__main__":
     feature_batch.append((features_DAB, pca_DAB, scaler_DAB))
     feature_batch.append((features_pos_H, pca_H, scaler_H))
     feature_batch.append((features_neg_H, pca_H, scaler_H))
-    features = Parallel(n_jobs=-1)(delayed(feature_reduction)(f[0], f[1], f[2]) for f in feature_batch)
+    features = Parallel(n_jobs=-1)(delayed(feature_reduction)
+                                   (f[0], f[1], f[2]) for f in feature_batch)
     end = time.time()
-    print('***** Total time feature reduction {:.4f} s *****'.format(end-start))
+    print(
+        '***** Total time feature reduction {:.4f} s *****'.format(end - start))
     print()
 
     print('[STEP 4] Cluster division')
@@ -140,18 +159,24 @@ if __name__ == "__main__":
     features_cluster.append((features[0], c_kmeans_DAB))
     features_cluster.append((features[1], c_kmeans_H))
     features_cluster.append((features[2], c_kmeans_H))
-    classifiers_0 = Parallel(n_jobs=-1)(delayed(cluster_division)(f[0], classifiers, f[1]) for f in features_cluster)
+    classifiers_0 = Parallel(n_jobs=-1)(delayed(cluster_division)
+                                        (f[0], classifiers, f[1]) for f in features_cluster)
     end = time.time()
-    print('***** Total time cluster division {:.4f} s *****'.format(end-start))
+    print(
+        '***** Total time cluster division {:.4f} s *****'.format(end - start))
     print()
 
-    pickle_save(classifiers_0, outpath, 'class-{}-{}-{}.p'.format(feature_method, 16, 'BottomUp'))
+    pickle_save(classifiers_0, outpath,
+                'class-{}-{}-{}.p'.format(feature_method, 16, 'BottomUp'))
 
     # Visualization of results
 
     # DAB
-    show_preview(classifiers_0[0], 16, 224, os.path.dirname(slides), outpath, feature_method='DenseDAB', n_division=0)
+    show_preview(classifiers_0[0], 16, 224, os.path.dirname(
+        slides), outpath, feature_method='DenseDAB', n_division=0)
     # H in positive
-    show_preview(classifiers_0[1], 16, 224, os.path.dirname(slides), outpath, feature_method='DenseH_pos', n_division=0)
+    show_preview(classifiers_0[1], 16, 224, os.path.dirname(
+        slides), outpath, feature_method='DenseH_pos', n_division=0)
     # H in negative
-    show_preview(classifiers_0[2], 16, 224, os.path.dirname(slides), outpath, feature_method='DenseH_neg', n_division=0, neg=1)
+    show_preview(classifiers_0[2], 16, 224, os.path.dirname(
+        slides), outpath, feature_method='DenseH_neg', n_division=0, neg=1)
