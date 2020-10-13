@@ -39,7 +39,7 @@ parser.add_argument('-b', '--features_batch', action='store_true',
                     help='Option for batch feature processing')
 parser.add_argument('--da', action='store_true',
                     help='Option for domain adaptation in CNN feature extraction')
-parser.add_argument('--NoDAB', type=int, action='store_true',
+parser.add_argument('--NoDAB', action='store_true',
                     help='Prevents DAB filtering of patches')
 
 
