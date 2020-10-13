@@ -144,11 +144,11 @@ def get_features(image_list, n_words=256, method='Dense', learn_ratio=50):
                 if method == 'Dense':
                     patch_shape = (8, 8, 3)
                     image = numpy.asarray(image)
-                else if method == 'DenseDAB':
+                elif method == 'DenseDAB':
                     patch_shape = (8, 8)
                     image = numpy.asarray(rgb2hed(image))
                     image = image[:, :, 2]
-                else if method == 'DenseH':
+                elif method == 'DenseH':
                     patch_shape = (8, 8)
                     image = numpy.asarray(rgb2hed(image))
                     image = image[:, :, 0]
@@ -187,10 +187,10 @@ def get_features(image_list, n_words=256, method='Dense', learn_ratio=50):
             with Image.open(image_list[i]) as image:
                 if method == 'Daisy':
                     image = numpy.asarray(rgb2grey(image))
-                else if method == 'DaisyDAB':
+                elif method == 'DaisyDAB':
                     image = numpy.asarray(rgb2hed(image))
                     image = image[:, :, 2]
-                else if method == 'DaisyH':
+                elif method == 'DaisyH':
                     image = numpy.asarray(rgb2hed(image))
                     image = image[:, :, 0]
 
