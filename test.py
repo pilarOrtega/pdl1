@@ -35,6 +35,7 @@ parser.add_argument('--pca', default=0.9,
                     help='PCA level [Default: %(default)s]')
 parser.add_argument('-n', '--number', type=int, default=0,
                     help='Number of experience - results will be saved as [n]_Results_[feature_method]_[nclusters]')
+parser.add_argument('-th', '--threshold', type=int, default=85)
 parser.add_argument('-b', '--features_batch', action='store_true',
                     help='Option for batch feature processing')
 parser.add_argument('--da', action='store_true',
