@@ -13,7 +13,7 @@ def get_clusterlist(outpath, classifier):
     #print('Get cluster list from {}'.format(outpath))
     for c in classifier:
         slidename = os.path.basename(outpath)
-        im = os.path.join(outpath, '{}#{}-level{}-{}-{}.jpg'.format(slidename, int(c[0]), 16, int(c[1]), int(c[2])))
+        im = os.path.join(os.path.join(outpath), '{}#{}-level{}-{}-{}.jpg'.format(slidename, int(c[0]), 16, int(c[1]), int(c[2])))
         if c[3] == 0:
             continue
         cluster = c[4]
