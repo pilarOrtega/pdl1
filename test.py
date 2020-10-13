@@ -141,5 +141,5 @@ if flag <= 4:
         classifiers = pickle_load(classifiers)
     show_preview(classifiers, level, tile_size,
                  slides, outpath, feature_method)
-    cluster_list, n = extract_complete_clusterlist(classifiers, feature_method)
+    cluster_list, n = extract_complete_clusterlist(classifiers, feature_method, level)
     save_cluster(cluster_list, outpath, feature_method)
