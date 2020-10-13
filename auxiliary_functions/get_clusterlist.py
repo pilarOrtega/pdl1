@@ -21,13 +21,13 @@ def get_clusterlist(outpath, classifier, level):
 
     return cluster_list
 
-def extract_complete_clusterlist(classifier, feature_method):
+def extract_complete_clusterlist(classifier, feature_method, level):
 
     # Creamos una lista con todas las imagenes y su cluster
     print('Getting complete clusterlist for {}'.format(feature_method))
     clusterlist = []
     for c in classifier:
-        clusterlist.extend(get_clusterlist(c[0], c[1]))
+        clusterlist.extend(get_clusterlist(c[0], c[1], level))
 
     nclusters = max([x[1] for x in clusterlist]) + 1
 
