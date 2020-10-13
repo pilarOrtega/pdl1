@@ -3,7 +3,7 @@ import numpy
 import argparse
 from tqdm import tqdm
 from PIL import Image
-from skimage.io import sift, Image.open, imsave
+from skimage.io import sift, imsave
 from sklearn.cluster import MiniBatchKMeans
 from skimage.color import rgb2grey, rgb2hed
 from skimage.feature import daisy
