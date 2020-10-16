@@ -12,6 +12,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA, IncrementalPCA
 from sklearn.manifold import TSNE
 import pickle
+import glob
 import itertools
 import csv
 from joblib import Parallel, delayed
@@ -326,7 +327,7 @@ def feature_extraction(classifier, outpath, feature_method, level=16, da=False, 
             if c[1][n][3] == 1:
                 i = c[1][n][1]
                 j = c[1][n][2]
-                path_name = glob.glob(os.path.join(
+                patch_name = glob.glob(os.path.join(
                     slidepath, '*#{}-level{}-{}-{}.jpg'.format(n, level, i, j)))
                 list_positive.append(patch_name)
 

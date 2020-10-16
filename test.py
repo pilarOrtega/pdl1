@@ -104,9 +104,9 @@ if flag <= 2:
     start = time.time()
     if features_batch:
         features = feature_extraction_batch(
-            list_positive, outpath, feature_method)
+            classifiers, outpath, feature_method)
     features = feature_extraction(
-        classifier, outpath, feature_method, da=da, pca_level=pca_level)
+        classifiers, outpath, feature_method, da=da, pca_level=pca_level)
     end = time.time()
     print(
         '***** Total time feature_extraction {:.4f} s *****'.format(end - start))
