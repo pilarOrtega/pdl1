@@ -126,7 +126,7 @@ def get_features(image_list, n_words=256, method='Dense', learn_ratio=50):
         - features: list, contains tuples with image path and histogram of
             features for each image.
     """
-    kmeans = MiniBatchKMeans(n_words=nclusters)
+    kmeans = MiniBatchKMeans(n_clusters=n_words)
     # This for loop passes the window "patch_shape" to extract individual 8x8x3 patches all along the tiles.
     # The extracted patches are used to fit the kmeans classifier
     features = []
