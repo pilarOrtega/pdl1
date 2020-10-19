@@ -167,7 +167,7 @@ def get_features(image_list, n_words=256, method='Dense', learn_ratio=50):
         # This loop gets again the features of each tile and gets a list of the histograms of each individual tile
         print('Step 2: Histogram of features extraction')
         features = Parallel(n_jobs=-2)(delayed(hof_dense)(im, kmeans,
-                                                          nclusters, method=method) for im in tqdm(image_list))
+                                                          n_words, method=method) for im in tqdm(image_list))
         end2 = time.time()
         print('Total time KMeans fitting: {:.4f} s'.format(end2 - start2))
 
