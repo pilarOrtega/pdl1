@@ -193,6 +193,7 @@ if __name__ == "__main__":
     print('##################################################################')
 
     print('Getting Figure KMeans DAB')
+    figsize = (13, 11)
     fig, axes = plt.subplots(10, 10, figsize=figsize, sharex=True, sharey=True)
     ax = axes.ravel()
     for i, patch in enumerate(kmeans_dab.cluster_centers_):
