@@ -123,7 +123,7 @@ def get_features(image_list, n_words=256, learn_ratio=50):
                 im_h = tf.constant(im_h, dtype=tf.float32)
                 p_dab = tf.nn.conv2d(
                     input=im_dab, filters=kernel_in, strides=1, padding='SAME')
-                p_h = tf.nn.conv2d(input=im_h, filter=kernel_in,
+                p_h = tf.nn.conv2d(input=im_h, filters=kernel_in,
                                    strides=1, padding='SAME')
                 shape = p_dab.numpy().shape
                 pdab_list.extend(p_dab.numpy().reshape(
