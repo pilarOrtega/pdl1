@@ -184,7 +184,7 @@ if __name__ == "__main__":
     list_positive = pickle_load(list_positive)
     outpath = '/data/DeepLearning/ABREU_Arnaud/Pilar_stage/tests/'
     features, kmeans_dab, kmeans_h, kmeanstf_dab, kmeanstf_h = get_features(
-        list_positive, n_words=100, learn_ratio=3000)
+        list_positive, n_words=100, learn_ratio=1000)
 
     print('##################################################################')
     print('#')
@@ -226,7 +226,7 @@ if __name__ == "__main__":
     print('Getting Figure KMeansTF DAB')
     fig, axes = plt.subplots(10, 10, figsize=figsize, sharex=True, sharey=True)
     ax = axes.ravel()
-    for i, patch in enumerate(kmeanstf_dab.cluster_centers_):
+    for i, patch in enumerate(kmeanstf_dab.cluster_centers_.numpy()):
         ax[i].imshow(patch.reshape((8, 8)), cmap=plt.cm.gray,
                      interpolation='nearest')
         plt.xticks(())
@@ -241,7 +241,7 @@ if __name__ == "__main__":
     print('Getting Figure KMeansTF H')
     fig, axes = plt.subplots(10, 10, figsize=figsize, sharex=True, sharey=True)
     ax = axes.ravel()
-    for i, patch in enumerate(kmeanstf_h.cluster_centers_):
+    for i, patch in enumerate(kmeanstf_h.cluster_centers_.numpy()):
         ax[i].imshow(patch.reshape((8, 8)), cmap=plt.cm.gray,
                      interpolation='nearest')
         plt.xticks(())
