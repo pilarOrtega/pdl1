@@ -40,19 +40,20 @@ def get_features(image_list, n_words=256, learn_ratio=50):
     # Fits k-means in 1/50 of the images
     for i in tqdm(range(0, len(image_list), learn_ratio)):
         with Image.open(image_list[i]) as image:
-            image = numpy.asarray(rgb2hed(image))
-            im_dab = image[:, :, 2]
-            im_h = image[:, :, 0]
-            im_dab = preprocess_input(im_dab)
-            im_h = preprocess_input(im_h)
-            im_dab = im_dab.astype(float)
-            im_h = im_h.astype(float)
-            p_dab = view_as_windows(im_dab, patch_shape)
-            p_h = view_as_windows(im_h, patch_shape)
-            p_dab = get_patch_reshaped(p_dab, patch_shape)
-            p_h = get_patch_reshaped(p_h, patch_shape)
-            pdab_list.extend(p_dab)
-            ph_list.extend(p_h)
+            if (image.shape[0] == image.shape[1]):
+                image = numpy.asarray(rgb2hed(image))
+                im_dab = image[:, :, 2]
+                im_h = image[:, :, 0]
+                im_dab = preprocess_input(im_dab)
+                im_h = preprocess_input(im_h)
+                im_dab = im_dab.astype(float)
+                im_h = im_h.astype(float)
+                p_dab = view_as_windows(im_dab, patch_shape)
+                p_h = view_as_windows(im_h, patch_shape)
+                p_dab = get_patch_reshaped(p_dab, patch_shape)
+                p_h = get_patch_reshaped(p_h, patch_shape)
+                pdab_list.extend(p_dab)
+                ph_list.extend(p_h)
     end = time.time()
     print('Total time Sliding Window: {:.4f} s'.format(end - start))
     print()
