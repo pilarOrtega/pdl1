@@ -28,8 +28,7 @@ def get_features(image_list, n_words=256, learn_ratio=50):
     features = []
     image_list_path = os.path.dirname(image_list[0])
     image_list_path = os.path.dirname(image_list_path)
-    print('Extracting features ({} method) from images in '.format(
-        method) + image_list_path)
+    print('Extracting feature from images in '.format(image_list_path))
 
     inertia = []
     pdab_list = []
