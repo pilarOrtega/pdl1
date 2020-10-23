@@ -50,16 +50,16 @@ def hof_dense(im, kmeans, nclusters, method='DenseDAB'):
     image = Image.open(im)
     if method == 'DenseDAB':
         patch_shape = (8, 8)
-        image = rgb2hed(image)
+        image = numpy.asarray(rgb2hed(image))
         image = image[:, :, 2]
     elif method == 'DenseH':
         patch_shape = (8, 8)
-        image = rgb2hed(image)
+        image = numpy.asarray(rgb2hed(image))
         image = image[:, :, 0]
     else:
+        image = numpy.asarray(image)
         patch_shape = (8, 8, 3)
 
-    image = numpy.asarray(image)
     try:
         image = preprocess_input(image)
     except TypeError:
