@@ -18,7 +18,6 @@ import csv
 from joblib import Parallel, delayed
 import time
 from numba import jit, njit
-from slideminer.finetuning.fitting import *
 from auxiliary_functions.pickle_functions import *
 from auxiliary_functions.feature_list_division import *
 from auxiliary_functions.imagetoDAB import *
