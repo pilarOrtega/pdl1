@@ -59,11 +59,11 @@ def hof_dense(im, kmeans, nclusters, method='DenseDAB'):
     else:
         patch_shape = (8, 8, 3)
 
+    image = numpy.asarray(image)
     try:
         image = preprocess_input(image)
     except TypeError:
         print('Error in Image {}'.format(im))
-    image = numpy.asarray(image)
     image = image.astype(float)
     patches = view_as_windows(image, patch_shape)
     patches = numpy.ascontiguousarray(patches)
