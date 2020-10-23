@@ -7,7 +7,7 @@ from save_cluster import *
 from auxiliary_functions.get_clusterlist import *
 from auxiliary_functions.pickle_functions import *
 import time
-
+import tensorflow as tf
 
 # Manage parameters
 parser = argparse.ArgumentParser(
