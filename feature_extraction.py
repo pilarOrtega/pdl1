@@ -328,7 +328,7 @@ def feature_extraction(classifier, outpath, feature_method, level=16, da=False, 
                 j = c[1][n][2]
                 patch_name = glob.glob(os.path.join(
                     slidepath, '*#{}-level{}-{}-{}.jpg'.format(n, level, i, j)))
-                list_positive.append(patch_name)
+                list_positive.append(patch_name[0])
 
     print('[INFO] Extracting features from {} positive images'.format(
         len(list_positive)))
