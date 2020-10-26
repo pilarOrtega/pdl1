@@ -75,7 +75,7 @@ def cluster_division(features, classifiers_0, outpath, feature_method, slide_fol
         number = image_name.split('-')
         number = int(number[0])
         slide_path = os.path.dirname(im)
-        index_slide = slide_list.index(os.path.basename(slide_path))
+        index_slide = slide_list.index(slide_path)
         indices = distances[index].argsort()
         for i in range(3):
             classifiers[index_slide][1][number][4 + i] = indices[i]
