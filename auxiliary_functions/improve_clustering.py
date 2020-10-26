@@ -8,7 +8,7 @@ import os
 
 def get_preview(slidename, classifier, level, size, slide_folder, neg=0):
     result = []
-    slidename = os.path.basename(slide_name)
+    slidename = os.path.basename(slidename)
     slidepath = os.path.join(slide_folder, slidename)
     slide = OpenSlide(slidepath)
     slide_dz = deepzoom.DeepZoomGenerator(slide, tile_size=(size - 2), overlap=1)
