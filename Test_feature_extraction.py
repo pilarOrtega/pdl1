@@ -63,8 +63,8 @@ def get_features(image_list, n_words=256, learn_ratio=50):
     start = time.time()
     kmeans_dab = MiniBatchKMeans(n_clusters=n_words)
     kmeans_h = MiniBatchKMeans(n_clusters=n_words)
-    kmeans_dab.fit(p_dab)
-    kmeans_h.fit(p_h)
+    kmeans_dab.fit(p_dab_list)
+    kmeans_h.fit(p_h_list)
     end = time.time()
     print('Inertia DAB: {}'.format(kmeans_dab.inertia_))
     print('Inertia H: {}'.format(kmeans_h.inertia_))
@@ -77,8 +77,8 @@ def get_features(image_list, n_words=256, learn_ratio=50):
     start = time.time()
     kmeanstf_dab = KMeansTF(n_clusters=n_words)
     kmeanstf_h = KMeansTF(n_clusters=n_words)
-    kmeanstf_dab.fit(p_dab)
-    kmeanstf_h.fit(p_h)
+    kmeanstf_dab.fit(p_dab_list)
+    kmeanstf_h.fit(p_h_list)
     end = time.time()
     print('Inertia DAB: {}'.format(kmeanstf_dab.inertia_))
     print('Inertia H: {}'.format(kmeanstf_h.inertia_))
@@ -173,11 +173,23 @@ def get_features(image_list, n_words=256, learn_ratio=50):
     return features, kmeans_dab, kmeans_h, kmeanstf_dab, kmeanstf_h
 
 
+def image_descriptors(image_list, kmeans):
+
+    print('****')
+    print('Method 1: CPU parallelization')
+
+    print('****')
+    print('Method 2: Keras Conv2D')
+
+    print('****')
+    print('Method 3: SOM')
+
+
 if __name__ == "__main__":
 
     print('##################################################################')
     print('#')
-    print('# TEST FEATURE EXTRACTION')
+    print('# TEST FEATURE EXTRACTION (FITTING)')
     print('#')
     print('##################################################################')
 
@@ -253,3 +265,9 @@ if __name__ == "__main__":
     plt.show()
     name = os.path.join(outpath, 'Dict_features_KMeansTF_H.jpg')
     fig.savefig(name, bbox_inches='tight', dpi=fig.dpi)
+
+    print('##################################################################')
+    print('#')
+    print('# TEST IMAGE DESCRIPTORS EXTRACTION')
+    print('#')
+    print('##################################################################')
